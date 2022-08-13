@@ -54,18 +54,21 @@ async def update_profit_week():
 async def check_update(rSession):
     session = await rSession.get_session()
 
-    response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
-    soup_parse = BeautifulSoup(await response.read(), "html.parser")
-    get_bot_update = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^")
+    try:
+        response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
+        soup_parse = BeautifulSoup(await response.read(), "html.parser")
+        get_bot_update = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^")
 
-    if float(get_bot_update[0]) > float(BOT_VERSION):
-        update_description = get_bot_update[2].replace("***", "\n")
+        if float(get_bot_update[0]) > float(BOT_VERSION):
+            update_description = get_bot_update[2].replace("***", "\n")
 
-        await send_admins(f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
-                          f"➖➖➖➖➖➖➖➖➖➖\n"
-                          f"{update_description}\n"
-                          f"➖➖➖➖➖➖➖➖➖➖\n"
-                          f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
+            await send_admins(f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
+                              f"➖➖➖➖➖➖➖➖➖➖\n"
+                              f"{update_description}\n"
+                              f"➖➖➖➖➖➖➖➖➖➖\n"
+                              f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
+    except Exception as ex:
+        print(f"Error check update: {ex}")
 
 
 # Получение faq
