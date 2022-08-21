@@ -1,4 +1,4 @@
-### [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/downloads/)  [![Aiogram](https://img.shields.io/badge/aiogram-3.0.0b4-blue)](https://pypi.org/project/aiogram/) 
+### [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/downloads/release/python-399/)  [![Aiogram](https://img.shields.io/badge/aiogram-3.0.0b4-blue)](https://pypi.org/project/aiogram/) 
 
 # Telegram Autoshop Bot by Djimbo
 
