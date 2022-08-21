@@ -30,7 +30,7 @@ async def main_errors(update: Update, exception):
                                                                   reply_markup=products_item_category_swipe_fp(0))
                     await update.callback_query.answer("❗ Категория была изменена или удалена")
                 else:
-                    await update.callback_query.message.edit_text("<b>🎁 Товары в данное время отсутствуют.</b>")
+                    await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
                     await update.callback_query.answer("❗ Категория была изменена или удалена")
         elif split_data[0] in ['buy_position_open']:
             get_position = get_positionx(position_id=split_data[1])
@@ -44,21 +44,19 @@ async def main_errors(update: Update, exception):
                                                                       int(split_data[2]), split_data[3]))
                     await update.callback_query.answer("❗ Позиция была изменена или удалена")
                 else:
-                    await update.callback_query.message.edit_text("<b>🎁 Товары в данное время отсутствуют.</b>")
+                    await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
                     await update.callback_query.answer("❗ Позиция была изменена или удалена")
-        elif split_data[0] in ['buy_item_select']:
+        elif split_data[0] in ['buy_item_open']:
             get_position = get_positionx(position_id=split_data[1])
 
             if get_position is None:
-                await update.callback_query.message.edit_text("<b>🎁 Товары в данное время отсутствуют.</b>")
+                await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
                 await update.callback_query.answer("❗ Позиция была изменена или удалена")
-    else:
-        pass
 
-        # Логгирование ошибок в ЛС бота
-        # await send_admins(f"<b>❌ Ошибка\n\n"
-        #                   f"Exception: <code>{exception}</code>\n\n"
-        #                   f"Update: <code>{update}</code></b>")
+    # Логгирование ошибок в ЛС бота
+    # await send_admins(f"<b>❌ Ошибка\n\n"
+    #                   f"Exception: <code>{exception}</code>\n\n"
+    #                   f"Update: <code>{update}</code></b>")
 
     print(f"-Exception | {exception}")
     bot_logger.exception(

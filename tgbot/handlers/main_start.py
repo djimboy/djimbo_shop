@@ -10,7 +10,7 @@ from tgbot.utils.misc.bot_filters import IsBuy, IsRefill, IsWork
 
 # Игнор-колбэки покупок
 prohibit_buy = ['buy_category_open', 'buy_category_swipe', 'buy_position_open', 'buy_position_swipe',
-                'buy_item_select', 'here_item_count', 'xbuy_item']
+                'buy_item_open', 'buy_item_confirm']
 
 # Игнор-колбэки пополнений
 prohibit_refill = ['user_refill', 'refill_choice', 'Pay:', 'Pay:Form', 'Pay:Number', 'Pay:Nickname']
@@ -47,7 +47,7 @@ async def filter_work_callback(call: CallbackQuery, state: FSMContext):
 ########################################### СТАТУС ПОКУПОК #########################################
 # Фильтр на доступность покупок - сообщение
 @dp.message_handler(IsBuy(), text="🎁 Купить", state="*")
-@dp.message_handler(IsBuy(), state="here_purchase_count")
+@dp.message_handler(IsBuy(), state="here_item_count")
 async def filter_buy_message(message: Message, state: FSMContext):
     await state.finish()
 

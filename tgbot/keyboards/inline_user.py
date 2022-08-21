@@ -50,7 +50,7 @@ def refill_bill_finl(send_requests, get_receipt, get_way):
 def products_open_finl(position_id, category_id, remover):
     keyboard = InlineKeyboardMarkup(
     ).add(
-        InlineKeyboardButton("💰 Купить товар", callback_data=f"buy_item_select:{position_id}:{remover}")
+        InlineKeyboardButton("💰 Купить товар", callback_data=f"buy_item_open:{position_id}:{remover}")
     ).add(
         InlineKeyboardButton("⬅ Вернуться ↩", callback_data=f"buy_category_open:{category_id}:{remover}")
     )
@@ -62,8 +62,8 @@ def products_open_finl(position_id, category_id, remover):
 def products_confirm_finl(position_id, get_count):
     keyboard = InlineKeyboardMarkup(
     ).add(
-        InlineKeyboardButton("✅ Подтвердить", callback_data=f"xbuy_item:yes:{position_id}:{get_count}"),
-        InlineKeyboardButton("❌ Отменить", callback_data=f"xbuy_item:not:{position_id}:{get_count}")
+        InlineKeyboardButton("✅ Подтвердить", callback_data=f"buy_item_confirm:yes:{position_id}:{get_count}"),
+        InlineKeyboardButton("❌ Отменить", callback_data=f"buy_item_confirm:not:{position_id}:{get_count}")
     )
 
     return keyboard

@@ -15,7 +15,6 @@ from tgbot.utils.misc_functions import get_statisctics
 async def admin_payment(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.edit_media()
     await message.answer("<b>🔑 Настройка платежных системы.</b>", reply_markup=payments_frep())
 
 

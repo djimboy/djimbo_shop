@@ -28,8 +28,8 @@ async def settings_turn_edit(message: Message, state: FSMContext):
 
 ######################################## ВЫКЛЮЧАТЕЛИ ########################################
 # Включение/выключение тех работ
-@dp.callback_query_handler(IsAdmin(), text_startswith="turn_twork", state="*")
-async def settings_turn_twork(call: CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(IsAdmin(), text_startswith="turn_work", state="*")
+async def settings_turn_work(call: CallbackQuery, state: FSMContext):
     get_status = call.data.split(":")[1]
 
     get_user = get_userx(user_id=call.from_user.id)

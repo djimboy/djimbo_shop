@@ -9,12 +9,12 @@ from tgbot.data.config import get_admins
 from tgbot.data.loader import scheduler
 from tgbot.handlers import dp
 from tgbot.middlewares import setup_middlewares
-from tgbot.services.api_session import RequestsSession
+from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import create_dbx
 from tgbot.utils.misc.bot_commands import set_commands
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.utils.misc_functions import check_update, check_bot_data, on_startup_notify, update_profit_day, \
-    update_profit_week
+    update_profit_week, autobackup_admin, check_mail
 
 colorama.init()
 
@@ -24,11 +24,13 @@ async def scheduler_start(rSession):
     scheduler.add_job(update_profit_week, "cron", day_of_week="mon", hour=00, minute=1)
     scheduler.add_job(update_profit_day, "cron", hour=00)
     scheduler.add_job(check_update, "cron", hour=00, args=(rSession,))
+    scheduler.add_job(check_mail, "cron", hour=12, args=(rSession,))
+    scheduler.add_job(autobackup_admin, "cron", hour=00)
 
 
 # Выполнение функции после запуска бота
 async def on_startup(dp: Dispatcher):
-    rSession = RequestsSession()
+    rSession = AsyncSession()
 
     dp.bot['rSession'] = rSession
     await dp.bot.delete_webhook()
@@ -49,7 +51,7 @@ async def on_startup(dp: Dispatcher):
 
 # Выполнение функции после выключения бота
 async def on_shutdown(dp: Dispatcher):
-    rSession: RequestsSession = dp.bot['rSession']
+    rSession: AsyncSession = dp.bot['rSession']
     await rSession.close()
 
     await dp.storage.close()

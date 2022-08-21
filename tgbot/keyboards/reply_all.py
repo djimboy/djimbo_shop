@@ -7,8 +7,8 @@ from tgbot.data.config import get_admins
 # Кнопки главного меню
 def menu_frep(user_id):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.row("🎁 Купить", "👤 Профиль", "ℹ FAQ")
-    keyboard.row("☎ Поддержка")
+    keyboard.row("🎁 Купить", "👤 Профиль", "🧮 Наличие товаров")
+    keyboard.row("☎ Поддержка", "ℹ FAQ")
 
     if user_id in get_admins():
         keyboard.row("🎁 Управление товарами", "📊 Статистика")
@@ -21,7 +21,7 @@ def menu_frep(user_id):
 def payments_frep():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.row("🥝 Изменить QIWI 🖍", "🥝 Проверить QIWI ♻", "🥝 Баланс QIWI 👁")
-    keyboard.row("⬅ Главное меню", "🖲 Способы пополнения")
+    keyboard.row("⬅ Главное меню", "🖲 Способы пополнений")
 
     return keyboard
 

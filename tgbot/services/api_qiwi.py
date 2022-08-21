@@ -7,9 +7,10 @@ from aiohttp import ClientConnectorCertificateError
 from async_class import AsyncClass
 
 from tgbot.services.api_qiwip2p import QiwiAPIp2p
-from tgbot.services.api_session import RequestsSession
+from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import update_paymentx, get_paymentx
 from tgbot.utils.misc_functions import send_admins
+from tgbot.utils.const_functions import ded
 
 
 # Апи работы с QIWI
@@ -157,29 +158,41 @@ class QiwiAPI(AsyncClass):
                 if status_secret:
                     return True, "<b>🥝 QIWI кошелёк был успешно изменён ✅</b>"
                 else:
-                    return_message = "<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                     "▶ Код ошибки: <code>Неверный приватный ключ</code>\n" \
-                                     "❕ Указывайте ПРИВАТНЫЙ КЛЮЧ, а не публичный. " \
-                                     "Приватный ключ заканчивается на ="
+                    return_message = ded(f"""
+                                     <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
+                                     ▶ Код ошибки: <code>Неверный приватный ключ</code>
+                                     ❕ Указывайте ПРИВАТНЫЙ КЛЮЧ, а не публичный.
+                                     Приватный ключ заканчивается на =
+                                     """)
             else:
                 return True, "<b>🥝 QIWI кошелёк был успешно изменён ✅</b>"
         else:
             if 400 in [code_history, code_balance]:
-                return_message = f"<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                 f"▶ Код ошибки: <code>Номер телефона указан в неверном формате</code>"
+                return_message = ded(f"""
+                                 <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
+                                 ▶ Код ошибки: <code>Номер телефона указан в неверном формате</code>
+                                 """)
             elif 401 in [code_history, code_balance]:
-                return_message = f"<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                 f"▶ Код ошибки: <code>Неверный токен или истек срок действия токена API</code>"
+                return_message = ded(f"""
+                                 <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
+                                 ▶ Код ошибки: <code>Неверный токен или истек срок действия токена API</code>
+                                 """)
             elif 403 in [code_history, code_balance]:
-                return_message = f"<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                 f"▶ <code>Ошибка: Нет прав на данный запрос (недостаточно разрешений у токена API)</code>"
+                return_message = ded(f"""
+                                 <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
+                                 ▶ <code>Ошибка: Нет прав на данный запрос (недостаточно разрешений у токена API)</code>
+                                 """)
             elif "CERTIFICATE_VERIFY_FAILED" == code_history:
-                return_message = "<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                 f"▶ Код ошибки: <code>CERTIFICATE_VERIFY_FAILED certificate verify failed: self signed certificate in certificate chain</code>\n" \
-                                 f"❗ Ваш сервер/дедик/устройство блокирует запросы к QIWI. Отключите антивирус или другие блокирующие ПО."
+                return_message = ded(f"""
+                                 <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
+                                 ▶ Код ошибки: <code>CERTIFICATE_VERIFY_FAILED certificate verify failed: self signed certificate in certificate chain</code>
+                                 ❗ Ваш сервер/дедик/устройство блокирует запросы к QIWI. Отключите антивирус или другие блокирующие ПО.
+                                 """)
             else:
-                return_message = "<b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n" \
-                                 f"▶ Код ошибки: <code>{code_history}/{code_balance}</code>"
+                return_message = ded(f"""
+                                 <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n
+                                 ▶ Код ошибки: <code>{code_history}/{code_balance}</code>
+                                 """)
 
         return False, return_message
 
@@ -220,43 +233,45 @@ class QiwiAPI(AsyncClass):
                 qiwi_p2p = await QiwiAPIp2p(self.dp, self.secret)
                 bill_id, bill_url = await qiwi_p2p.bill(get_amount, bill_id=bill_receipt, lifetime=60)
 
-                bill_message = f"<b>💰 Пополнение баланса</b>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🥝 Для пополнения баланса, нажмите на кнопку ниже \n" \
-                               f"<code>Перейти к оплате</code> и оплатите выставленный вам счёт\n" \
-                               f"❗ У вас имеется 60 минут на оплату счета.\n" \
-                               f"💰 Сумма пополнения: <code>{get_amount}₽</code>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🔄 После оплаты, нажмите на <code>Проверить оплату</code>"
+                bill_message = ded(f"""
+                               <b>💰 Пополнение баланса</b>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🥝 Для пополнения баланса, нажмите на кнопку ниже 
+                               <code>Перейти к оплате</code> и оплатите выставленный вам счёт
+                               ❗ У вас имеется 60 минут на оплату счета.
+                               💰 Сумма пополнения: <code>{get_amount}₽</code>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🔄 После оплаты, нажмите на <code>Проверить оплату</code>
+                               """)
             elif get_way == "Number":
-                bill_url = f"https://qiwi.com/payment/form/99?extra%5B%27account%27%5D={self.login}&amountInteger=" \
-                           f"{get_amount}&amountFraction=0&extra%5B%27comment%27%5D={bill_receipt}&currency=" \
-                           f"643&blocked%5B0%5D=sum&blocked%5B1%5D=comment&blocked%5B2%5D=account"
+                bill_url = f"https://qiwi.com/payment/form/99?extra%5B%27account%27%5D={self.login}&amountInteger={get_amount}&amountFraction=0&extra%5B%27comment%27%5D={bill_receipt}&currency=643&blocked%5B0%5D=sum&blocked%5B1%5D=comment&blocked%5B2%5D=account"
 
-                bill_message = f"<b>💰 Пополнение баланса</b>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🥝 Для пополнения баланса, нажмите на кнопку ниже \n" \
-                               f"<code>Перейти к оплате</code> и оплатите выставленный вам счёт\n" \
-                               f"📞 QIWI кошелёк: <code>{self.login}</code>\n" \
-                               f"🏷 Комментарий: <code>{bill_receipt}</code>\n" \
-                               f"💰 Сумма пополнения: <code>{get_amount}₽</code>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🔄 После оплаты, нажмите на <code>Проверить оплату</code>"
+                bill_message = ded(f"""
+                               <b>💰 Пополнение баланса</b>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🥝 Для пополнения баланса, нажмите на кнопку ниже 
+                               <code>Перейти к оплате</code> и оплатите выставленный вам счёт
+                               📞 QIWI кошелёк: <code>{self.login}</code>
+                               🏷 Комментарий: <code>{bill_receipt}</code>
+                               💰 Сумма пополнения: <code>{get_amount}₽</code>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🔄 После оплаты, нажмите на <code>Проверить оплату</code>
+                               """)
             elif get_way == "Nickname":
-                bill_url = f"https://qiwi.com/payment/form/99999?amountInteger={get_amount}&amountFraction=0&currency=643" \
-                           f"&extra%5B%27comment%27%5D={bill_receipt}&extra%5B%27account%27%5D={self.nickname}&blocked%5B0%5D=" \
-                           f"comment&blocked%5B1%5D=account&blocked%5B2%5D=sum&0%5Bextra%5B%27accountType%27%5D%5D=nickname"
+                bill_url = f"https://qiwi.com/payment/form/99999?amountInteger={get_amount}&amountFraction=0&currency=643&extra%5B%27comment%27%5D={bill_receipt}&extra%5B%27account%27%5D={self.nickname}&blocked%5B0%5D=comment&blocked%5B1%5D=account&blocked%5B2%5D=sum&0%5Bextra%5B%27accountType%27%5D%5D=nickname"
 
-                bill_message = f"<b>💰 Пополнение баланса</b>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🥝 Для пополнения баланса, нажмите на кнопку ниже \n" \
-                               f"<code>Перейти к оплате</code> и оплатите выставленный вам счёт\n" \
-                               f"❗ Не забудьте указать <u>КОММЕНТАРИЙ</u> к платежу\n" \
-                               f"Ⓜ QIWI Никнейм: <code>{self.nickname}</code>\n" \
-                               f"🏷 Комментарий: <code>{bill_receipt}</code>\n" \
-                               f"💰 Сумма пополнения: <code>{get_amount}₽</code>\n" \
-                               f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                               f"🔄 После оплаты, нажмите на <code>Проверить оплату</code>"
+                bill_message = ded(f"""
+                               <b>💰 Пополнение баланса</b>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🥝 Для пополнения баланса, нажмите на кнопку ниже 
+                               <code>Перейти к оплате</code> и оплатите выставленный вам счёт
+                               ❗ Не забудьте указать <u>КОММЕНТАРИЙ</u> к платежу
+                               Ⓜ QIWI Никнейм: <code>{self.nickname}</code>
+                               🏷 Комментарий: <code>{bill_receipt}</code>
+                               💰 Сумма пополнения: <code>{get_amount}₽</code>
+                               ➖➖➖➖➖➖➖➖➖➖
+                               🔄 После оплаты, нажмите на <code>Проверить оплату</code>
+                               """)
 
             return bill_message, bill_url, bill_receipt
         return False, False, False
@@ -304,7 +319,7 @@ class QiwiAPI(AsyncClass):
     async def _request(self, action, version, get_way, params=None):
         url = self.base_url.format(action, version, self.login, get_way)
 
-        rSession: RequestsSession = self.dp.bot['rSession']
+        rSession: AsyncSession = self.dp.bot['rSession']
         session = await rSession.get_session()
 
         try:

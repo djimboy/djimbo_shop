@@ -20,7 +20,7 @@ def category_edit_swipe_fp(remover):
     for count, a in enumerate(range(remover, len(get_categories))):
         if count < 10:
             keyboard.add(ikb(get_categories[a]['category_name'],
-                             callback_data=f"category_edit_here:{get_categories[a]['category_id']}:{remover}"))
+                             callback_data=f"category_edit_open:{get_categories[a]['category_id']}:{remover}"))
 
     if len(get_categories) <= 10:
         pass
@@ -56,7 +56,7 @@ def position_create_swipe_fp(remover):
     for count, a in enumerate(range(remover, len(get_categories))):
         if count < 10:
             keyboard.add(ikb(get_categories[a]['category_name'],
-                             callback_data=f"position_create_here:{get_categories[a]['category_id']}"))
+                             callback_data=f"position_create_open:{get_categories[a]['category_id']}"))
 
     if len(get_categories) <= 10:
         pass

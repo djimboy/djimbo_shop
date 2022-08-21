@@ -1,6 +1,9 @@
 # - *- coding: utf- 8 - *-
+from contextlib import suppress
+
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
+from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from tgbot.data.loader import dp
 from tgbot.keyboards.reply_all import menu_frep
@@ -9,7 +12,8 @@ from tgbot.keyboards.reply_all import menu_frep
 # Колбэк с удалением сообщения
 @dp.callback_query_handler(text="close_this", state="*")
 async def main_missed_callback_close(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
+    with suppress(MessageCantBeDeleted):
+        await call.message.delete()
 
 
 # Колбэк с обработкой кнопки
@@ -21,13 +25,11 @@ async def main_missed_callback_answer(call: CallbackQuery, state: FSMContext):
 # Обработка всех колбэков которые потеряли стейты после перезапуска скрипта
 @dp.callback_query_handler(state="*")
 async def main_missed_callback(call: CallbackQuery, state: FSMContext):
-    try:
+    with suppress(MessageCantBeDeleted):
         await call.message.delete()
-    except:
-        pass
 
-    await call.message.answer("<b>❌ Данные не были найдены из-за перезапуска скрипта.\n"
-                              "♻ Выполните действие заново.</b>",
+    await call.message.answer("❌ Данные не были найдены из-за перезапуска скрипта.\n"
+                              "♻ Выполните действие заново.",
                               reply_markup=menu_frep(call.from_user.id))
 
 

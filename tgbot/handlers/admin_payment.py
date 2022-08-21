@@ -14,7 +14,7 @@ from tgbot.utils.misc.bot_filters import IsAdmin
 ###################################################################################
 ############################# ВЫБОР СПОСОБА ПОПОЛНЕНИЯ ############################
 # Открытие способов пополнения
-@dp.message_handler(IsAdmin(), text="🖲 Способы пополнения", state="*")
+@dp.message_handler(IsAdmin(), text="🖲 Способы пополнений", state="*")
 async def payment_systems(message: Message, state: FSMContext):
     await state.finish()
 
@@ -37,6 +37,7 @@ async def payment_systems_edit(call: CallbackQuery):
                 await call.answer(
                     "❗ Приватный ключ отсутствует. Измените киви и добавьте приватный ключ для включения оплаты по Форме",
                     True)
+                return
         elif way_pay == "Number":
             update_paymentx(way_number=way_status)
         elif way_pay == "Nickname":
@@ -46,11 +47,12 @@ async def payment_systems_edit(call: CallbackQuery):
                 update_paymentx(way_nickname=way_status, qiwi_nickname=response)
             else:
                 await call.answer(response, True)
+                return
     else:
         await call.answer("❗ Добавьте киви кошелёк перед включением Способов пополнений", True)
         return
 
-    await call.message.edit_text("<b>🖲 Выберите способ пополнения</b>", reply_markup=payment_choice_finl())
+    await call.message.edit_text("<b>🖲 Выберите способы пополнений</b>", reply_markup=payment_choice_finl())
 
 
 ###################################################################################

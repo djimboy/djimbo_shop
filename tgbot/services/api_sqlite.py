@@ -178,11 +178,11 @@ def get_all_refillx():
 
 
 # Добавление категории
-def add_categoryx(category_name):
+def add_categoryx(category_id, category_name):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         con.execute("INSERT INTO storage_category (category_id, category_name) VALUES (?, ?)",
-                    [random.randint(1000000000, 9999999999), category_name])
+                    [category_id, category_name])
         con.commit()
 
 
@@ -243,12 +243,12 @@ def remove_categoryx(**kwargs):
 
 
 # Добавление категории
-def add_positionx(position_name, position_price, position_description, position_photo, category_id):
+def add_positionx(position_id, position_name, position_price, position_description, position_photo, category_id):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         con.execute("INSERT INTO storage_position "
                     "(position_id, position_name, position_price, position_description, position_photo, position_date, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [random.randint(1000000000, 9999999999), position_name, position_price, position_description,
+                    [position_id, position_name, position_price, position_description,
                      position_photo, get_date(), category_id])
         con.commit()
 

@@ -5,23 +5,26 @@ import json
 from aiogram import Dispatcher
 from bs4 import BeautifulSoup
 
-from tgbot.data.config import get_admins, BOT_VERSION, BOT_DESCRIPTION
+from tgbot.data.config import get_admins, BOT_VERSION, BOT_DESCRIPTION, PATH_DATABASE
 from tgbot.data.loader import bot
 from tgbot.keyboards.reply_all import menu_frep
+from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import get_settingsx, update_settingsx, get_userx, get_purchasesx, get_all_positionsx, \
     update_positionx, get_all_categoriesx, get_all_purchasesx, get_all_refillx, get_all_usersx, get_all_itemsx, \
     get_itemsx, get_positionx, get_categoryx
-from tgbot.utils.const_functions import get_unix, convert_day
+from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
 
 
 # Уведомление и проверка обновления при запуске бота
-async def on_startup_notify(dp: Dispatcher, rSession):
+async def on_startup_notify(dp: Dispatcher, rSession: AsyncSession):
     if len(get_admins()) >= 1:
-        await send_admins(f"<b>✅ Бот был успешно запущен</b>\n"
-                          f"➖➖➖➖➖➖➖➖➖➖\n"
-                          f"{BOT_DESCRIPTION}\n"
-                          f"➖➖➖➖➖➖➖➖➖➖\n"
-                          f"<code>❗ Данное сообщение видят только администраторы бота.</code>",
+        await send_admins(ded(f"""
+                          <b>✅ Бот был успешно запущен</b>
+                          ➖➖➖➖➖➖➖➖➖➖
+                          {BOT_DESCRIPTION}
+                          ➖➖➖➖➖➖➖➖➖➖
+                          <code>❗ Данное сообщение видят только администраторы бота.</code>
+                          """),
                           markup="default")
         await check_update(rSession)
 
@@ -34,7 +37,7 @@ async def send_admins(message, markup=None, not_me=0):
         try:
             if str(admin) != str(not_me):
                 await bot.send_message(admin, message, reply_markup=markup, disable_web_page_preview=True)
-        except ZeroDivisionError:
+        except:
             pass
 
 
@@ -50,25 +53,59 @@ async def update_profit_week():
     update_settingsx(misc_profit_week=get_unix())
 
 
+# Автобэкапы БД для админов
+async def autobackup_admin():
+    for admin in get_admins():
+        with open(PATH_DATABASE, "rb") as document:
+            try:
+                await bot.send_document(admin,
+                                        document,
+                                        caption=f"<b>📦 AUTOBACKUP</b>\n"
+                                                f"🕰 <code>{get_date()}</code>")
+            except:
+                pass
+
+
 # Автоматическая проверка обновления каждые 24 часа
-async def check_update(rSession):
+async def check_update(rSession: AsyncSession):
     session = await rSession.get_session()
 
     try:
         response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
         soup_parse = BeautifulSoup(await response.read(), "html.parser")
-        get_bot_update = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^")
+        get_bot_update = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^^^")
 
         if float(get_bot_update[0]) > float(BOT_VERSION):
-            update_description = get_bot_update[2].replace("***", "\n")
+            if "*****" in get_bot_update[2]:
+                get_bot_update[2] = get_bot_update[2].replace("*****", "\n")
 
             await send_admins(f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
                               f"➖➖➖➖➖➖➖➖➖➖\n"
-                              f"{update_description}\n"
+                              f"{get_bot_update[2]}\n"
                               f"➖➖➖➖➖➖➖➖➖➖\n"
                               f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
     except Exception as ex:
         print(f"Error check update: {ex}")
+
+
+# Расссылка админам об критических ошибках и обновлениях
+async def check_mail(rSession: AsyncSession):
+    session = await rSession.get_session()
+
+    try:
+        response = await session.get("https://sites.google.com/view/check-mail-autoshop/main-page", ssl=False)
+        soup_parse = BeautifulSoup(await response.read(), "html.parser")
+        response = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^^^")
+
+        if response[0] == "True":
+            if "*****" in response[1]:
+                response[1] = response[1].replace("*****", "\n")
+
+            await send_admins(f"{response[1]}\n"
+                              f"➖➖➖➖➖➖➖➖➖➖\n"
+                              f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
+    except Exception as ex:
+        print(f"Error check mail: {ex}")
 
 
 # Получение faq
@@ -87,7 +124,8 @@ def get_faq(user_id, send_message):
 
 # Загрузка текста на текстовый хостинг
 async def upload_text(dp, get_text):
-    session = await (dp.bot['rSession']).get_session()
+    rSession: AsyncSession = dp.bot['rSession']
+    session = await rSession.get_session()
 
     spare_pass = False
     await asyncio.sleep(0.5)
@@ -126,10 +164,14 @@ async def check_bot_data():
 
 # Получить информацию о позиции для админа
 def get_position_admin(position_id):
+    get_settings = get_settingsx()
     get_items = get_itemsx(position_id=position_id)
     get_position = get_positionx(position_id=position_id)
+    get_purchases = get_purchasesx(purchase_position_id=position_id)
     get_category = get_categoryx(category_id=get_position['category_id'])
 
+    show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0
+    show_profit_count_all, show_profit_count_day, show_profit_count_week = 0, 0, 0
     text_description = "<code>Отсутствует ❌</code>"
     photo_text = "<code>Отсутствует ❌</code>"
     get_photo = None
@@ -141,67 +183,81 @@ def get_position_admin(position_id):
     if get_position['position_description'] != "0":
         text_description = f"\n{get_position['position_description']}"
 
-    get_message = f"<b>📁 Позиция: <code>{get_position['position_name']}</code></b>\n" \
-                  f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-                  f"🗃 Категория: <code>{get_category['category_name']}</code>\n" \
-                  f"💰 Стоимость: <code>{get_position['position_price']}₽</code>\n" \
-                  f"📦 Количество: <code>{len(get_items)}шт</code>\n" \
-                  f"📸 Изображение: {photo_text}\n" \
-                  f"📜 Описание: {text_description}"
+    for purchase in get_purchases:
+        show_profit_amount_all += purchase['purchase_price']
+        show_profit_count_all += purchase['purchase_count']
+
+        if purchase['purchase_unix'] - get_settings['misc_profit_day'] >= 0:
+            show_profit_amount_day += purchase['purchase_price']
+            show_profit_count_day += purchase['purchase_count']
+        if purchase['purchase_unix'] - get_settings['misc_profit_week'] >= 0:
+            show_profit_amount_week += purchase['purchase_price']
+            show_profit_count_week += purchase['purchase_count']
+
+    get_message = ded(f"""
+                  <b>📁 Позиция: <code>{get_position['position_name']}</code></b>
+                  ➖➖➖➖➖➖➖➖➖➖
+                  🗃 Категория: <code>{get_category['category_name']}</code>
+                  💰 Стоимость: <code>{get_position['position_price']}₽</code>
+                  📦 Количество: <code>{len(get_items)}шт</code>
+                  📸 Изображение: {photo_text}
+                  📜 Описание: {text_description}
+
+                  💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
+                  💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
+                  💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
+                  """)
 
     return get_message, get_photo
 
 
 # Открытие своего профиля
-def open_profile_my(user_id):
+def open_profile_user(user_id):
     get_purchases = get_purchasesx(user_id=user_id)
     get_user = get_userx(user_id=user_id)
-    count_items = 0
 
     how_days = int(get_unix() - get_user['user_unix']) // 60 // 60 // 24
+    count_items = sum([items['purchase_count'] for items in get_purchases])
 
-    if len(get_purchases) >= 1:
-        for items in get_purchases:
-            count_items += int(items['purchase_count'])
-
-    return f"<b>👤 Ваш профиль:</b>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖\n" \
-           f"🆔 ID: <code>{get_user['user_id']}</code>\n" \
-           f"💰 Баланс: <code>{get_user['user_balance']}₽</code>\n" \
-           f"🎁 Куплено товаров: <code>{count_items}шт</code>\n" \
-           f"🕰 Регистрация: <code>{get_user['user_date'].split(' ')[0]} ({convert_day(how_days)})</code>"
+    return ded(f"""
+           <b>👤 Ваш профиль:</b>
+           ➖➖➖➖➖➖➖➖➖➖
+           🆔 ID: <code>{get_user['user_id']}</code>
+           💰 Баланс: <code>{get_user['user_balance']}₽</code>
+           🎁 Куплено товаров: <code>{count_items}шт</code>
+           🕰 Регистрация: <code>{get_user['user_date'].split(' ')[0]} ({convert_day(how_days)})</code>
+           """)
 
 
 # Открытие профиля при поиске
-def open_profile_search(user_id):
+def open_profile_admin(user_id):
     get_purchases = get_purchasesx(user_id=user_id)
     get_user = get_userx(user_id=user_id)
-    count_items = 0
 
     how_days = int(get_unix() - get_user['user_unix']) // 60 // 60 // 24
+    count_items = sum([items['purchase_count'] for items in get_purchases])
 
-    if len(get_purchases) >= 1:
-        for items in get_purchases:
-            count_items += items['purchase_count']
-
-    return f"<b>👤 Профиль пользователя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a></b>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖\n" \
-           f"🆔 ID: <code>{get_user['user_id']}</code>\n" \
-           f"👤 Логин: <b>@{get_user['user_login']}</b>\n" \
-           f"Ⓜ Имя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>\n" \
-           f"🕰 Регистрация: <code>{get_user['user_date']} ({convert_day(how_days)})</code>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-           f"💰 Баланс: <code>{get_user['user_balance']}₽</code>\n" \
-           f"💰 Всего пополнено: <code>{get_user['user_refill']}₽</code>\n" \
-           f"🎁 Куплено товаров: <code>{count_items}шт</code>"
+    return ded(f"""
+           <b>👤 Профиль пользователя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a></b>
+           ➖➖➖➖➖➖➖➖➖➖
+           🆔 ID: <code>{get_user['user_id']}</code>
+           👤 Логин: <b>@{get_user['user_login']}</b>
+           Ⓜ Имя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>
+           🕰 Регистрация: <code>{get_user['user_date']} ({convert_day(how_days)})</code>
+            
+           💰 Баланс: <code>{get_user['user_balance']}₽</code>
+           💰 Всего пополнено: <code>{get_user['user_refill']}₽</code>
+           🎁 Куплено товаров: <code>{count_items}шт</code>
+           """)
 
 
 # Статистика бота
 def get_statisctics():
-    show_profit_all, show_profit_day, show_profit_week = 0, 0, 0
-    show_refill_all, show_refill_day, show_refill_week = 0, 0, 0
-    show_users_all, show_users_day, show_users_week = 0, 0, 0
-    show_money_users, show_buy_items = 0, 0
+    show_refill_amount_all, show_refill_amount_day, show_refill_amount_week = 0, 0, 0
+    show_refill_count_all, show_refill_count_day, show_refill_count_week = 0, 0, 0
+    show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0
+    show_profit_count_all, show_profit_count_day, show_profit_count_week = 0, 0, 0
+    show_users_all, show_users_day, show_users_week, show_users_money = 0, 0, 0, 0
 
     get_categories = get_all_categoriesx()
     get_positions = get_all_positionsx()
@@ -212,24 +268,29 @@ def get_statisctics():
     get_users = get_all_usersx()
 
     for purchase in get_purchases:
-        show_profit_all += purchase['purchase_price']
-        show_buy_items += purchase['purchase_count']
+        show_profit_amount_all += purchase['purchase_price']
+        show_profit_count_all += purchase['purchase_count']
 
         if purchase['purchase_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_profit_day += purchase['purchase_price']
+            show_profit_amount_day += purchase['purchase_price']
+            show_profit_count_day += purchase['purchase_count']
         if purchase['purchase_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_profit_week += purchase['purchase_price']
+            show_profit_amount_week += purchase['purchase_price']
+            show_profit_count_week += purchase['purchase_count']
 
     for refill in get_refill:
-        show_refill_all += refill['refill_amount']
+        show_refill_amount_all += refill['refill_amount']
+        show_refill_count_all += 1
 
         if refill['refill_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_refill_day += refill['refill_amount']
+            show_refill_amount_day += refill['refill_amount']
+            show_refill_count_day += 1
         if refill['refill_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_refill_week += refill['refill_amount']
+            show_refill_amount_week += refill['refill_amount']
+            show_refill_count_week += 1
 
     for user in get_users:
-        show_money_users += user['user_balance']
+        show_users_money += user['user_balance']
         show_users_all += 1
 
         if user['user_unix'] - get_settings['misc_profit_day'] >= 0:
@@ -237,24 +298,25 @@ def get_statisctics():
         if user['user_unix'] - get_settings['misc_profit_week'] >= 0:
             show_users_week += 1
 
-    return "<b>📊 СТАТИСТИКА БОТА</b>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-           f"<b>🔶 Пользователи 🔶</b>\n" \
-           f"👤 Юзеров за День: <code>{show_users_day}</code>\n" \
-           f"👤 Юзеров за Неделю: <code>{show_users_week}</code>\n" \
-           f"👤 Юзеров за Всё время: <code>{show_users_all}</code>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-           f"<b>🔶 Средства 🔶</b>\n" \
-           f"💸 Продаж за День: <code>{show_profit_day}₽</code>\n" \
-           f"💸 Продаж за Неделю: <code>{show_profit_week}₽</code>\n" \
-           f"💸 Продаж за Всё время: <code>{show_profit_all}₽</code>\n" \
-           f"💳 Средств в системе: <code>{show_money_users}₽</code>\n" \
-           f"💰 Пополнений за День: <code>{show_refill_day}₽</code>\n" \
-           f"💰 Пополнений за Неделю: <code>{show_refill_week}₽</code>\n" \
-           f"💰 Пополнений за Всё время: <code>{show_refill_all}₽</code>\n" \
-           f"➖➖➖➖➖➖➖➖➖➖➖➖➖\n" \
-           f"<b>🔶 Прочее 🔶</b>\n" \
-           f"🎁 Товаров: <code>{len(get_items)}шт</code>\n" \
-           f"📁 Позиций: <code>{len(get_positions)}шт</code>\n" \
-           f"🗃 Категорий: <code>{len(get_categories)}шт</code>\n" \
-           f"🎁 Продано товаров: <code>{show_buy_items}шт</code>\n"
+    return ded(f"""
+           <b>📊 СТАТИСТИКА БОТА</b>
+           ➖➖➖➖➖➖➖➖➖➖
+           <b>🔶 Пользователи 🔶</b>
+           👤 Юзеров за День: <code>{show_users_day}</code>
+           👤 Юзеров за Неделю: <code>{show_users_week}</code>
+           👤 Юзеров за Всё время: <code>{show_users_all}</code>
+            
+           <b>🔶 Средства 🔶</b>
+           💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
+           💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
+           💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
+           💳 Средств в системе: <code>{show_users_money}₽</code>
+           💰 Пополнений за День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
+           💰 Пополнений за Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
+           💰 Пополнений за Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
+            
+           <b>🔶 Прочее 🔶</b>
+           🎁 Товаров: <code>{len(get_items)}шт</code>
+           📁 Позиций: <code>{len(get_positions)}шт</code>
+           🗃 Категорий: <code>{len(get_categories)}шт</code>
+           """)

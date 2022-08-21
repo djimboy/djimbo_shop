@@ -5,7 +5,7 @@ from time import strftime, localtime, time
 
 from async_class import AsyncClass
 
-from tgbot.services.api_session import RequestsSession
+from tgbot.services.api_session import AsyncSession
 from tgbot.utils.const_functions import get_unix
 
 
@@ -24,8 +24,10 @@ class QiwiAPIp2p(AsyncClass):
         try:
             key_decoded = b64decode(privkey).decode()
             key_decoded = json.loads(key_decoded)
+
             if "version" in key_decoded and "data" in key_decoded:
                 key_data = key_decoded["data"]
+
                 if "payin_merchant_site_uid" in key_data and "user_id" in key_data and "secret" in key_data:
                     return key_decoded["version"] == "P2P"
         except:
@@ -70,7 +72,7 @@ class QiwiAPIp2p(AsyncClass):
 
     # Сам запрос
     async def _request(self, bill_method, bill_url, bill_json=None):
-        rSession: RequestsSession = self.dp.bot['rSession']
+        rSession: AsyncSession = self.dp.bot['rSession']
         session = await rSession.get_session()
 
         try:
