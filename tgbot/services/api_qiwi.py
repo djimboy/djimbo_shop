@@ -319,8 +319,8 @@ class QiwiAPI(AsyncClass):
     async def _request(self, action, version, get_way, params=None):
         url = self.base_url.format(action, version, self.login, get_way)
 
-        rSession: AsyncSession = self.dp.bot['rSession']
-        session = await rSession.get_session()
+        aSession: AsyncSession = self.dp.bot['aSession']
+        session = await aSession.get_session()
 
         try:
             response = await session.get(url, params=params, headers=self.headers, ssl=False)

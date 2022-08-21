@@ -20,26 +20,26 @@ colorama.init()
 
 
 # Запуск шедулеров
-async def scheduler_start(rSession):
+async def scheduler_start(aSession):
     scheduler.add_job(update_profit_week, "cron", day_of_week="mon", hour=00, minute=1)
     scheduler.add_job(update_profit_day, "cron", hour=00)
-    scheduler.add_job(check_update, "cron", hour=00, args=(rSession,))
-    scheduler.add_job(check_mail, "cron", hour=12, args=(rSession,))
+    scheduler.add_job(check_update, "cron", hour=00, args=(aSession,))
+    scheduler.add_job(check_mail, "cron", hour=12, args=(aSession,))
     scheduler.add_job(autobackup_admin, "cron", hour=00)
 
 
 # Выполнение функции после запуска бота
 async def on_startup(dp: Dispatcher):
-    rSession = AsyncSession()
+    aSession = AsyncSession()
 
-    dp.bot['rSession'] = rSession
+    dp.bot['aSession'] = aSession
     await dp.bot.delete_webhook()
     await dp.bot.get_updates(offset=-1)
 
     await set_commands(dp)
     await check_bot_data()
-    await scheduler_start(rSession)
-    await on_startup_notify(dp, rSession)
+    await scheduler_start(aSession)
+    await on_startup_notify(dp, aSession)
 
     bot_logger.warning("BOT WAS STARTED")
     print(colorama.Fore.LIGHTYELLOW_EX + "~~~~~ Bot was started ~~~~~")
@@ -51,8 +51,8 @@ async def on_startup(dp: Dispatcher):
 
 # Выполнение функции после выключения бота
 async def on_shutdown(dp: Dispatcher):
-    rSession: AsyncSession = dp.bot['rSession']
-    await rSession.close()
+    aSession: AsyncSession = dp.bot['aSession']
+    await aSession.close()
 
     await dp.storage.close()
     await dp.storage.wait_closed()

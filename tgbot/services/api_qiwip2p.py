@@ -72,8 +72,8 @@ class QiwiAPIp2p(AsyncClass):
 
     # Сам запрос
     async def _request(self, bill_method, bill_url, bill_json=None):
-        rSession: AsyncSession = self.dp.bot['rSession']
-        session = await rSession.get_session()
+        aSession: AsyncSession = self.dp.bot['aSession']
+        session = await aSession.get_session()
 
         try:
             response = await session.request(bill_method, bill_url, json=bill_json, headers=self.headers, ssl=False)

@@ -16,7 +16,7 @@ from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
 
 
 # Уведомление и проверка обновления при запуске бота
-async def on_startup_notify(dp: Dispatcher, rSession: AsyncSession):
+async def on_startup_notify(dp: Dispatcher, aSession: AsyncSession):
     if len(get_admins()) >= 1:
         await send_admins(ded(f"""
                           <b>✅ Бот был успешно запущен</b>
@@ -26,7 +26,7 @@ async def on_startup_notify(dp: Dispatcher, rSession: AsyncSession):
                           <code>❗ Данное сообщение видят только администраторы бота.</code>
                           """),
                           markup="default")
-        await check_update(rSession)
+        await check_update(aSession)
 
 
 # Рассылка сообщения всем администраторам
@@ -67,8 +67,8 @@ async def autobackup_admin():
 
 
 # Автоматическая проверка обновления каждые 24 часа
-async def check_update(rSession: AsyncSession):
-    session = await rSession.get_session()
+async def check_update(aSession: AsyncSession):
+    session = await aSession.get_session()
 
     try:
         response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
@@ -89,8 +89,8 @@ async def check_update(rSession: AsyncSession):
 
 
 # Расссылка админам об критических ошибках и обновлениях
-async def check_mail(rSession: AsyncSession):
-    session = await rSession.get_session()
+async def check_mail(aSession: AsyncSession):
+    session = await aSession.get_session()
 
     try:
         response = await session.get("https://sites.google.com/view/check-mail-autoshop/main-page", ssl=False)
@@ -124,8 +124,8 @@ def get_faq(user_id, send_message):
 
 # Загрузка текста на текстовый хостинг
 async def upload_text(dp, get_text):
-    rSession: AsyncSession = dp.bot['rSession']
-    session = await rSession.get_session()
+    aSession: AsyncSession = dp.bot['aSession']
+    session = await aSession.get_session()
 
     spare_pass = False
     await asyncio.sleep(0.5)
