@@ -108,7 +108,7 @@ async def payment_qiwi_edit_token(message: Message, state: FSMContext):
 
     await state.set_state("here_qiwi_secret")
     await message.answer(
-        "<b>🥝 Введите <code>Секретный ключ 🖍</code></b>\n"
+        "<b>🥝 Введите <code>Приватный ключ 🖍</code></b>\n"
         "❕ Получить можно тут 👉 <a href='https://qiwi.com/p2p-admin/transfers/api'><b>Нажми на меня</b></a>\n"
         "❕ Вы можете пропустить добавление оплаты по Форме, отправив: <code>0</code>",
         disable_web_page_preview=True
