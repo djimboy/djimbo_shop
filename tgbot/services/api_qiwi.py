@@ -9,8 +9,8 @@ from async_class import AsyncClass
 from tgbot.services.api_qiwip2p import QiwiAPIp2p
 from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import update_paymentx, get_paymentx
-from tgbot.utils.misc_functions import send_admins
 from tgbot.utils.const_functions import ded
+from tgbot.utils.misc_functions import send_admins
 
 
 # Апи работы с QIWI
@@ -217,7 +217,7 @@ class QiwiAPI(AsyncClass):
     async def check_secret(self):
         try:
             qiwi_p2p = await QiwiAPIp2p(self.dp, self.secret)
-            bill_id, bill_url = await qiwi_p2p.bill(3, lifetime=3)
+            bill_id, bill_url = await qiwi_p2p.bill(3, lifetime=1)
             status = await qiwi_p2p.reject(bill_id=bill_id)
             return True
         except:
