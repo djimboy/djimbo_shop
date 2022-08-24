@@ -1,13 +1,13 @@
 # - *- coding: utf- 8 - *-
 import json
 from base64 import b64decode
+from datetime import datetime, timedelta, timezone
 from time import strftime, localtime, time
 
 from async_class import AsyncClass
 
 from tgbot.services.api_session import AsyncSession
 from tgbot.utils.const_functions import get_unix
-
 
 # Апи работы с QIWI P2P
 class QiwiAPIp2p(AsyncClass):
@@ -35,9 +35,18 @@ class QiwiAPIp2p(AsyncClass):
 
         raise ValueError("Invalid private key")
 
+    # Конвертация времени
+    @staticmethod
+    async def convert_date(lifetime):
+        datetime_new: datetime = datetime.now(timezone(timedelta(hours=3))).replace(microsecond=0)
+        datetime_new = datetime_new + timedelta(minutes=lifetime)
+
+        return datetime_new.astimezone(timezone(timedelta(hours=3))).replace(microsecond=0).isoformat()
+
     # Создание P2P формы
     async def bill(self, bill_amount, bill_id=None, lifetime=10):
         if bill_id is None: bill_id = get_unix(True)
+        await self.convert_date(lifetime)
 
         bill_amount = str(round(float(bill_amount), 2))
         lifetime = strftime("%Y-%m-%dT%H:%M:%S+03:00", localtime(time() + lifetime * 60))
