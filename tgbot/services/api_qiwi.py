@@ -223,7 +223,7 @@ class QiwiAPI(AsyncClass):
         except:
             return False
 
-    # Создание платежа
+    # Генерация платежа
     async def bill_pay(self, get_amount, get_way):
         response = await self.pre_checker()
         if response:
