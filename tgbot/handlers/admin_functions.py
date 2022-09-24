@@ -54,9 +54,8 @@ async def functions_profile_get(message: Message, state: FSMContext):
         if len(find_user) > 1:
             find_user = find_user[1]
         else:
-            await message.answer("<b>❌ Вы не указали логин или айди пользователя.</b>\n"
-                                 "👤 Введите логин или айди пользователя.")
-            return
+            return await message.answer("<b>❌ Вы не указали логин или айди пользователя.</b>\n"
+                                        "👤 Введите логин или айди пользователя.")
 
     if find_user.isdigit():
         get_user = get_userx(user_id=find_user)
@@ -84,9 +83,8 @@ async def functions_receipt_get(message: Message, state: FSMContext):
         if len(find_receipt) > 1:
             find_receipt = find_receipt[1]
         else:
-            await message.answer("<b>❌ Вы не указали номер чека.</b>\n"
-                                 "🧾 Введите номер чека")
-            return
+            return await message.answer("<b>❌ Вы не указали номер чека.</b>\n"
+                                        "🧾 Введите номер чека")
 
     if find_receipt.startswith("#"): find_receipt = find_receipt[1:]
 
@@ -114,7 +112,6 @@ async def functions_receipt_get(message: Message, state: FSMContext):
             f"🏷 Комментарий: <code>{get_refill['refill_comment']}</code>\n"
             f"🕰 Дата пополнения: <code>{get_refill['refill_date']}</code>"
         )
-        return
     elif get_purchase is not None:
         await state.finish()
 
@@ -132,7 +129,6 @@ async def functions_receipt_get(message: Message, state: FSMContext):
             f"🔺 Баланс после покупки: <code>{get_purchase['balance_after']}₽</code>\n"
             f"🕰 Дата покупки: <code>{get_purchase['purchase_date']}</code>"
         )
-        return
     else:
         await message.answer("<b>❌ Чек не был найден.</b>\n"
                              "🧾 Введите номер чека")
@@ -272,15 +268,13 @@ async def functions_profile_balance_add_get(message: Message, state: FSMContext)
     user_id = (await state.get_data())['here_profile']
 
     if not message.text.isdigit():
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                             "💰 Введите сумму для выдачи баланса",
-                             reply_markup=profile_search_return_finl(user_id))
-        return
+        return await message.answer("<b>❌ Данные были введены неверно.</b>\n"
+                                    "💰 Введите сумму для выдачи баланса",
+                                    reply_markup=profile_search_return_finl(user_id))
 
     if int(message.text) <= 0 or int(message.text) > 1000000000:
-        await message.answer("<b>❌ Сумма выдачи не может быть меньше 1 и больше 1 000 000 000</b>\n"
-                             "💰 Введите сумму для выдачи баланса")
-        return
+        return await message.answer("<b>❌ Сумма выдачи не может быть меньше 1 и больше 1 000 000 000</b>\n"
+                                    "💰 Введите сумму для выдачи баланса")
 
     await state.finish()
     get_user = get_userx(user_id=user_id)
@@ -300,16 +294,14 @@ async def functions_profile_balance_set_get(message: Message, state: FSMContext)
     user_id = (await state.get_data())['here_profile']
 
     if is_number(message.text):
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                             "💰 Введите сумму для изменения баланса",
-                             reply_markup=profile_search_return_finl(user_id))
-        return
+        return await message.answer("<b>❌ Данные были введены неверно.</b>\n"
+                                    "💰 Введите сумму для изменения баланса",
+                                    reply_markup=profile_search_return_finl(user_id))
 
     if int(message.text) < -1000000000 or int(message.text) > 1000000000:
-        await message.answer("<b>❌ Сумма изменения не может быть больше или меньше (-)1 000 000 000</b>\n"
-                             "💰 Введите сумму для изменения баланса",
-                             reply_markup=profile_search_return_finl(user_id))
-        return
+        return await message.answer("<b>❌ Сумма изменения не может быть больше или меньше (-)1 000 000 000</b>\n"
+                                    "💰 Введите сумму для изменения баланса",
+                                    reply_markup=profile_search_return_finl(user_id))
 
     await state.finish()
     get_user = get_userx(user_id=user_id)

@@ -4,7 +4,6 @@ import json
 import time
 
 from aiohttp import ClientConnectorCertificateError
-from async_class import AsyncClass
 
 from tgbot.services.api_qiwip2p import QiwiAPIp2p
 from tgbot.services.api_session import AsyncSession
@@ -14,9 +13,9 @@ from tgbot.utils.misc_functions import send_admins
 
 
 # Апи работы с QIWI
-class QiwiAPI(AsyncClass):
-    async def __ainit__(self, dp, login=None, token=None, secret=None, add_pass=False,
-                        check_pass=False, user_bill_pass=False, user_check_pass=False):
+class QiwiAPI:
+    def __init__(self, dp, login=None, token=None, secret=None, add_pass=False,
+                 check_pass=False, user_bill_pass=False, user_check_pass=False):
         if login is not None:
             self.login = login
             self.token = token
@@ -216,7 +215,7 @@ class QiwiAPI(AsyncClass):
     # Проверка п2п ключа
     async def check_secret(self):
         try:
-            qiwi_p2p = await QiwiAPIp2p(self.dp, self.secret)
+            qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
             bill_id, bill_url = await qiwi_p2p.bill(3, lifetime=1)
             status = await qiwi_p2p.reject(bill_id=bill_id)
             return True
@@ -230,7 +229,7 @@ class QiwiAPI(AsyncClass):
             bill_receipt = str(int(time.time() * 100))
 
             if get_way == "Form":
-                qiwi_p2p = await QiwiAPIp2p(self.dp, self.secret)
+                qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
                 bill_id, bill_url = await qiwi_p2p.bill(get_amount, bill_id=bill_receipt, lifetime=60)
 
                 bill_message = ded(f"""
@@ -278,7 +277,7 @@ class QiwiAPI(AsyncClass):
 
     # Проверка платежа по форме
     async def check_form(self, receipt):
-        qiwi_p2p = await QiwiAPIp2p(self.dp, self.secret)
+        qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
         bill_status, bill_amount = await qiwi_p2p.check(receipt)
 
         return bill_status, bill_amount

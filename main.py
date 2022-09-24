@@ -22,9 +22,9 @@ colorama.init()
 # Запуск шедулеров
 async def scheduler_start(aSession):
     scheduler.add_job(update_profit_week, "cron", day_of_week="mon", hour=00, minute=1)
-    scheduler.add_job(update_profit_day, "cron", hour=00)
-    scheduler.add_job(check_update, "cron", hour=00, args=(aSession,))
     scheduler.add_job(check_mail, "cron", hour=12, args=(aSession,))
+    scheduler.add_job(check_update, "cron", hour=00, args=(aSession,))
+    scheduler.add_job(update_profit_day, "cron", hour=00)
     scheduler.add_job(autobackup_admin, "cron", hour=00)
 
 
@@ -33,6 +33,8 @@ async def on_startup(dp: Dispatcher):
     aSession = AsyncSession()
 
     dp.bot['aSession'] = aSession
+    bot_info = await dp.bot.get_me()
+
     await dp.bot.delete_webhook()
     await dp.bot.get_updates(offset=-1)
 
@@ -42,7 +44,7 @@ async def on_startup(dp: Dispatcher):
     await on_startup_notify(dp, aSession)
 
     bot_logger.warning("BOT WAS STARTED")
-    print(colorama.Fore.LIGHTYELLOW_EX + "~~~~~ Bot was started ~~~~~")
+    print(colorama.Fore.LIGHTYELLOW_EX + f"~~~~~ Bot was started - @{bot_info.username} ~~~~~")
     print(colorama.Fore.LIGHTBLUE_EX + "~~~~~ TG developer: @djimbox ~~~~~")
     print(colorama.Fore.RESET)
 

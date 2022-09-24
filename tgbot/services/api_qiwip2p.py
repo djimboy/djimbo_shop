@@ -3,24 +3,22 @@ import json
 from base64 import b64decode
 from datetime import datetime, timedelta, timezone
 
-from async_class import AsyncClass
-
 from tgbot.services.api_session import AsyncSession
 from tgbot.utils.const_functions import get_unix
 
 
 # Апи работы с QIWI P2P
-class QiwiAPIp2p(AsyncClass):
-    async def __ainit__(self, dp, secret, skip_key_validation=False):
+class QiwiAPIp2p:
+    def __init__(self, dp, secret, skip_key_validation=False):
         if not skip_key_validation:
-            await self.validate_privkey(secret)
+            self.validate_privkey(secret)
 
         self.headers = {"Content-Type": "application/json", "Authorization": f"Bearer {secret}"}
         self.secret = secret
         self.dp = dp
 
     @staticmethod
-    async def validate_privkey(privkey):
+    def validate_privkey(privkey):
         try:
             key_decoded = b64decode(privkey).decode()
             key_decoded = json.loads(key_decoded)

@@ -34,23 +34,20 @@ async def payment_systems_edit(call: CallbackQuery):
             if get_payment['qiwi_secret'] != "None" or way_status == "False":
                 update_paymentx(way_form=way_status)
             else:
-                await call.answer(
+                return await call.answer(
                     "❗ Приватный ключ отсутствует. Измените киви и добавьте приватный ключ для включения оплаты по Форме",
                     True)
-                return
         elif way_pay == "Number":
             update_paymentx(way_number=way_status)
         elif way_pay == "Nickname":
-            status, response = await (await QiwiAPI(call)).get_nickname()
+            status, response = await QiwiAPI(call).get_nickname()
 
             if status:
                 update_paymentx(way_nickname=way_status, qiwi_nickname=response)
             else:
-                await call.answer(response, True)
-                return
+                return await call.answer(response, True)
     else:
-        await call.answer("❗ Добавьте киви кошелёк перед включением Способов пополнений", True)
-        return
+        return await call.answer("❗ Добавьте киви кошелёк перед включением Способов пополнений", True)
 
     await call.message.edit_text("<b>🖲 Выберите способы пополнений</b>", reply_markup=payment_choice_finl())
 
@@ -71,7 +68,7 @@ async def payment_qiwi_edit(message: Message, state: FSMContext):
 async def payment_qiwi_check(message: Message, state: FSMContext):
     await state.finish()
 
-    await (await QiwiAPI(message, check_pass=True)).pre_checker()
+    await QiwiAPI(message, check_pass=True).pre_checker()
 
 
 # Баланс QIWI
@@ -79,7 +76,7 @@ async def payment_qiwi_check(message: Message, state: FSMContext):
 async def payment_qiwi_balance(message: Message, state: FSMContext):
     await state.finish()
 
-    await (await QiwiAPI(message)).get_balance()
+    await QiwiAPI(message).get_balance()
 
 
 ######################################## ПРИНЯТИЕ QIWI ########################################
@@ -130,4 +127,4 @@ async def payment_qiwi_edit_secret(message: Message, state: FSMContext):
     cache_message = await message.answer("<b>🥝 Проверка введённых QIWI данных... 🔄</b>")
     await asyncio.sleep(0.5)
 
-    await (await QiwiAPI(cache_message, qiwi_login, qiwi_token, qiwi_secret, True)).pre_checker()
+    await QiwiAPI(cache_message, qiwi_login, qiwi_token, qiwi_secret, True).pre_checker()

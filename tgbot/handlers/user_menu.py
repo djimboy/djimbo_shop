@@ -116,8 +116,7 @@ async def user_history(call: CallbackQuery, state: FSMContext):
 
     if len(last_purchases) >= 1:
         await call.answer("🎁 Последние 5 покупок")
-        with suppress(MessageCantBeDeleted):
-            await call.message.delete()
+        await call.message.delete()
 
         for purchases in last_purchases:
             link_items = await upload_text(call, purchases['purchase_item'])
@@ -161,8 +160,7 @@ async def user_purchase_category_open(call: CallbackQuery, state: FSMContext):
     get_positions = get_positionsx(category_id=category_id)
 
     if len(get_positions) >= 1:
-        with suppress(MessageCantBeDeleted):
-            await call.message.delete()
+        await call.message.delete()
 
         await call.message.answer(f"<b>🎁 Текущая категория: <code>{get_category['category_name']}</code></b>",
                                   reply_markup=products_item_position_swipe_fp(remover, category_id))
@@ -201,8 +199,8 @@ async def user_purchase_position_open(call: CallbackQuery, state: FSMContext):
                """)
 
     if len(get_position['position_photo']) >= 5:
-        with suppress(MessageCantBeDeleted):
-            await call.message.delete()
+        await call.message.delete()
+
         await call.message.answer_photo(get_position['position_photo'],
                                         send_msg, reply_markup=products_open_finl(position_id, category_id, remover))
     else:
@@ -338,6 +336,7 @@ async def user_purchase_confirm(call: CallbackQuery, state: FSMContext):
         get_user = get_userx(user_id=call.from_user.id)
 
         amount_pay = int(get_position['position_price'] * get_count)
+        receipt, buy_time = get_unix(), get_date()
 
         if 1 <= int(get_count) <= len(get_items):
             if int(get_user['user_balance']) >= amount_pay:
@@ -346,9 +345,6 @@ async def user_purchase_confirm(call: CallbackQuery, state: FSMContext):
                 if get_count != send_count:
                     amount_pay = int(get_position['position_price'] * send_count)
                     get_count = send_count
-
-                receipt = get_unix()
-                buy_time = get_date()
 
                 with suppress(MessageCantBeDeleted):
                     await call.message.delete()

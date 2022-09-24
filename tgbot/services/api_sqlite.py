@@ -52,7 +52,6 @@ def add_userx(user_id, user_login, user_name):
                     "(user_id, user_login, user_name, user_balance, user_refill, user_date, user_unix) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?)",
                     [user_id, user_login, user_name, 0, 0, get_date(), get_unix()])
-        con.commit()
 
 
 # Получение пользователя
@@ -89,7 +88,6 @@ def update_userx(user_id, **kwargs):
         sql, parameters = update_format(sql, kwargs)
         parameters.append(user_id)
         con.execute(sql + "WHERE user_id = ?", parameters)
-        con.commit()
 
 
 # Удаление пользователя
@@ -99,7 +97,6 @@ def delete_userx(**kwargs):
         sql = "DELETE FROM storage_users"
         sql, parameters = update_format_args(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Получение платежных систем
@@ -117,7 +114,6 @@ def update_paymentx(**kwargs):
         sql = "UPDATE storage_payment SET"
         sql, parameters = update_format(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Получение настроек
@@ -135,7 +131,6 @@ def update_settingsx(**kwargs):
         sql = "UPDATE storage_settings SET"
         sql, parameters = update_format(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Добавление пополнения
@@ -148,7 +143,6 @@ def add_refillx(user_id, user_login, user_name, refill_comment, refill_amount, r
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [user_id, user_login, user_name, refill_comment, refill_amount, refill_receipt, refill_way,
                      refill_date, refill_unix])
-        con.commit()
 
 
 # Получение пополнения
@@ -183,7 +177,6 @@ def add_categoryx(category_id, category_name):
         con.row_factory = dict_factory
         con.execute("INSERT INTO storage_category (category_id, category_name) VALUES (?, ?)",
                     [category_id, category_name])
-        con.commit()
 
 
 # Изменение категории
@@ -194,7 +187,6 @@ def update_categoryx(category_id, **kwargs):
         sql, parameters = update_format(sql, kwargs)
         parameters.append(category_id)
         con.execute(sql + "WHERE category_id = ?", parameters)
-        con.commit()
 
 
 # Получение категории
@@ -229,7 +221,6 @@ def clear_categoryx():
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_category"
         con.execute(sql)
-        con.commit()
 
 
 # Удаление категории
@@ -239,7 +230,6 @@ def remove_categoryx(**kwargs):
         sql = "DELETE FROM storage_category"
         sql, parameters = update_format_args(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Добавление категории
@@ -250,7 +240,6 @@ def add_positionx(position_id, position_name, position_price, position_descripti
                     "(position_id, position_name, position_price, position_description, position_photo, position_date, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     [position_id, position_name, position_price, position_description,
                      position_photo, get_date(), category_id])
-        con.commit()
 
 
 # Изменение позиции
@@ -261,7 +250,6 @@ def update_positionx(position_id, **kwargs):
         sql, parameters = update_format(sql, kwargs)
         parameters.append(position_id)
         con.execute(sql + "WHERE position_id = ?", parameters)
-        con.commit()
 
 
 # Получение категории
@@ -296,7 +284,6 @@ def clear_positionx():
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_position"
         con.execute(sql)
-        con.commit()
 
 
 # Удаление позиции
@@ -306,7 +293,6 @@ def remove_positionx(**kwargs):
         sql = "DELETE FROM storage_position"
         sql, parameters = update_format_args(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Добавление товара
@@ -322,7 +308,6 @@ def add_itemx(category_id, position_id, get_all_items, user_id, user_name):
                             [random.randint(1000000000, 9999999999), clear_html(item_data.strip()), position_id,
                              category_id,
                              user_id, user_name, get_date()])
-        con.commit()
 
 
 # Изменение товара
@@ -333,7 +318,6 @@ def update_itemx(item_id, **kwargs):
         sql, parameters = update_format(sql, kwargs)
         parameters.append(item_id)
         con.execute(sql + "WHERE item_id = ?", parameters)
-        con.commit()
 
 
 # Получение товара
@@ -368,7 +352,6 @@ def clear_itemx():
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_item"
         con.execute(sql)
-        con.commit()
 
 
 # Удаление товаров
@@ -378,7 +361,6 @@ def remove_itemx(**kwargs):
         sql = "DELETE FROM storage_item"
         sql, parameters = update_format_args(sql, kwargs)
         con.execute(sql, parameters)
-        con.commit()
 
 
 # Покупка товаров
@@ -403,7 +385,6 @@ def buy_itemx(get_items, get_count):
                 if len(select_data) >= split_len: split_len = len(select_data)
             else:
                 break
-        con.commit()
 
         split_len += 1
         get_len = math.ceil(3500 / split_len)
@@ -424,7 +405,6 @@ def add_purchasex(user_id, user_login, user_name, purchase_receipt, purchase_cou
                     [user_id, user_login, user_name, purchase_receipt, purchase_count, purchase_price,
                      purchase_price_one, purchase_position_id, purchase_position_name, purchase_item, purchase_date,
                      purchase_unix, balance_before, balance_after])
-        con.commit()
 
 
 # Получение покупки
@@ -600,5 +580,3 @@ def create_dbx():
                         "balance_before INTEGER,"
                         "balance_after INTEGER)")
             print("DB was not found(8/8) | Creating...")
-
-        con.commit()
