@@ -98,13 +98,12 @@ async def user_support(message: Message, state: FSMContext):
         get_user = get_userx(user_id=user_support)
 
         if len(get_user['user_login']) >= 1:
-            await message.answer("<b>☎ Нажмите кнопку ниже для связи с Администратором.</b>",
+            return await message.answer("<b>☎ Нажмите кнопку ниже для связи с Администратором.</b>",
                                  reply_markup=user_support_finl(get_user['user_login']))
-            return
         else:
             update_settingsx(misc_support="None")
 
-    await message.answer(f"☎ Поддержка. Измените их в настройках бота.\n➖➖➖➖➖➖➖➖➖➖\n{BOT_DESCRIPTION}",
+    await message.answer(f"☎ Поддержка. Измените её в настройках бота.\n➖➖➖➖➖➖➖➖➖➖\n{BOT_DESCRIPTION}",
                          disable_web_page_preview=True)
 
 
