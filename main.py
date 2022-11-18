@@ -13,7 +13,7 @@ from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import create_dbx
 from tgbot.utils.misc.bot_commands import set_commands
 from tgbot.utils.misc.bot_logging import bot_logger
-from tgbot.utils.misc_functions import check_update, check_bot_data, on_startup_notify, update_profit_day, \
+from tgbot.utils.misc_functions import check_update, check_bot_data, startup_notify, update_profit_day, \
     update_profit_week, autobackup_admin, check_mail
 
 colorama.init()
@@ -21,11 +21,11 @@ colorama.init()
 
 # Запуск шедулеров
 async def scheduler_start(aSession):
-    scheduler.add_job(update_profit_week, "cron", day_of_week="mon", hour=00, minute=1)
-    scheduler.add_job(check_mail, "cron", hour=12, args=(aSession,))
-    scheduler.add_job(check_update, "cron", hour=00, args=(aSession,))
-    scheduler.add_job(update_profit_day, "cron", hour=00)
-    scheduler.add_job(autobackup_admin, "cron", hour=00)
+    scheduler.add_job(update_profit_day, trigger="cron", hour=00)
+    scheduler.add_job(update_profit_week, trigger="cron", day_of_week="mon", hour=00, minute=1)
+    scheduler.add_job(autobackup_admin, trigger="cron", hour=00)
+    scheduler.add_job(check_update, trigger="cron", hour=00, args=(aSession,))
+    scheduler.add_job(check_mail, trigger="cron", hour=12, args=(aSession,))
 
 
 # Выполнение функции после запуска бота
@@ -41,11 +41,11 @@ async def on_startup(dp: Dispatcher):
     await set_commands(dp)
     await check_bot_data()
     await scheduler_start(aSession)
-    await on_startup_notify(dp, aSession)
+    await startup_notify(dp, aSession)
 
     bot_logger.warning("BOT WAS STARTED")
     print(colorama.Fore.LIGHTYELLOW_EX + f"~~~~~ Bot was started - @{bot_info.username} ~~~~~")
-    print(colorama.Fore.LIGHTBLUE_EX + "~~~~~ TG developer: @djimbox ~~~~~")
+    print(colorama.Fore.LIGHTBLUE_EX + "~~~~~ TG developer - @djimbox ~~~~~")
     print(colorama.Fore.RESET)
 
     if len(get_admins()) == 0: print("***** ENTER ADMIN ID IN settings.ini *****")

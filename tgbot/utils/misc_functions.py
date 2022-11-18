@@ -1,13 +1,14 @@
 # - *- coding: utf- 8 - *-
 import asyncio
 import json
+from typing import Union
 
 from aiogram import Dispatcher
 from bs4 import BeautifulSoup
 
 from tgbot.data.config import get_admins, BOT_VERSION, BOT_DESCRIPTION, PATH_DATABASE
 from tgbot.data.loader import bot
-from tgbot.keyboards.reply_all import menu_frep
+from tgbot.keyboards.reply_main import menu_frep
 from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import get_settingsx, update_settingsx, get_userx, get_purchasesx, get_all_positionsx, \
     update_positionx, get_all_categoriesx, get_all_purchasesx, get_all_refillx, get_all_usersx, get_all_itemsx, \
@@ -16,7 +17,7 @@ from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
 
 
 # Уведомление и проверка обновления при запуске бота
-async def on_startup_notify(dp: Dispatcher, aSession: AsyncSession):
+async def startup_notify(dp: Dispatcher, aSession: AsyncSession):
     if len(get_admins()) >= 1:
         await send_admins(ded(f"""
                           <b>✅ Бот был успешно запущен</b>
@@ -109,7 +110,7 @@ async def check_mail(aSession: AsyncSession):
 
 
 # Получение faq
-def get_faq(user_id, send_message):
+def get_faq(user_id: Union[int, str], send_message: str) -> str:
     get_user = get_userx(user_id=user_id)
 
     if "{user_id}" in send_message:
@@ -123,7 +124,7 @@ def get_faq(user_id, send_message):
 
 
 # Загрузка текста на текстовый хостинг
-async def upload_text(dp, get_text):
+async def upload_text(dp, get_text) -> str:
     aSession: AsyncSession = dp.bot['aSession']
     session = await aSession.get_session()
 
@@ -212,7 +213,7 @@ def get_position_admin(position_id):
 
 
 # Открытие своего профиля
-def open_profile_user(user_id):
+def open_profile_user(user_id: Union[int, str]) -> str:
     get_purchases = get_purchasesx(user_id=user_id)
     get_user = get_userx(user_id=user_id)
 
@@ -230,7 +231,7 @@ def open_profile_user(user_id):
 
 
 # Открытие профиля при поиске
-def open_profile_admin(user_id):
+def open_profile_admin(user_id: Union[int, str]) -> str:
     get_purchases = get_purchasesx(user_id=user_id)
     get_user = get_userx(user_id=user_id)
 
@@ -252,7 +253,7 @@ def open_profile_admin(user_id):
 
 
 # Статистика бота
-def get_statisctics():
+def get_statisctics() -> str:
     show_refill_amount_all, show_refill_amount_day, show_refill_amount_week = 0, 0, 0
     show_refill_count_all, show_refill_count_day, show_refill_count_week = 0, 0, 0
     show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0

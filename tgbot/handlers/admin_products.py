@@ -8,10 +8,10 @@ from aiogram.utils.exceptions import CantParseEntities, MessageCantBeDeleted
 from tgbot.data.loader import dp
 from tgbot.keyboards.inline_admin import category_edit_open_finl, position_edit_open_finl, category_edit_delete_finl, \
     position_edit_clear_finl, position_edit_delete_finl, position_edit_cancel_finl, category_edit_cancel_finl
-from tgbot.keyboards.inline_all import category_remove_confirm_inl, position_remove_confirm_inl, \
+from tgbot.keyboards.inline_main import category_remove_confirm_inl, position_remove_confirm_inl, \
     item_remove_confirm_inl, close_inl
 from tgbot.keyboards.inline_page import *
-from tgbot.keyboards.reply_all import finish_load_rep, items_frep
+from tgbot.keyboards.reply_main import finish_load_rep, items_frep
 from tgbot.middlewares.throttling import rate_limit
 from tgbot.services.api_sqlite import *
 from tgbot.utils.const_functions import clear_list
@@ -744,7 +744,7 @@ async def product_position_edit_clear_confirm(call: CallbackQuery, state: FSMCon
                                         reply_markup=position_edit_open_finl(position_id, category_id, remover))
     else:
         await call.message.answer(get_message,
-                                     reply_markup=position_edit_open_finl(position_id, category_id, remover))
+                                  reply_markup=position_edit_open_finl(position_id, category_id, remover))
 
 
 ################################################################################################

@@ -1,10 +1,10 @@
 # - *- coding: utf- 8 - *-
-import asyncio
 import json
 import time
 
 from aiohttp import ClientConnectorCertificateError
 
+from tgbot.keyboards.inline_main import close_inl
 from tgbot.services.api_qiwip2p import QiwiAPIp2p
 from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import update_paymentx, get_paymentx
@@ -14,8 +14,16 @@ from tgbot.utils.misc_functions import send_admins
 
 # Апи работы с QIWI
 class QiwiAPI:
-    def __init__(self, dp, login=None, token=None, secret=None, add_pass=False,
-                 check_pass=False, user_bill_pass=False, user_check_pass=False):
+    def __init__(
+            self,
+            dp,
+            login=None,
+            token=None,
+            secret=None,
+            pass_add=False,
+            pass_check=False,
+            pass_user=False,
+    ):
         if login is not None:
             self.login = login
             self.token = token
@@ -28,69 +36,63 @@ class QiwiAPI:
         self.base_url = "https://edge.qiwi.com/{}/{}/persons/{}/{}"
         self.headers = {"authorization": f"Bearer {self.token}"}
         self.nickname = get_paymentx()['qiwi_nickname']
-        self.user_check_pass = user_check_pass
-        self.user_bill_pass = user_bill_pass
-        self.check_pass = check_pass
-        self.add_pass = add_pass
+        self.pass_check = pass_check
+        self.pass_user = pass_user
+        self.pass_add = pass_add
         self.dp = dp
 
     # Рассылка админам о нерабочем киви
     @staticmethod
     async def error_wallet():
         await send_admins("<b>🥝 Qiwi кошелёк недоступен ❌</b>\n"
-                          "❗ Как можно быстрее его замените ❗")
+                          "❗ Как можно быстрее его замените")
 
     # Обязательная проверка перед каждым запросом
     async def pre_checker(self):
         if self.login != "None":
-            if self.add_pass:
+            if self.pass_add:
                 status, response = await self.check_account()
             else:
                 status, response, code = await self.check_logpass()
-            await asyncio.sleep(0.5)
 
-            if self.add_pass:
-                await self.dp.edit_text(response)
+            if self.pass_add:
                 if status:
-                    update_paymentx(qiwi_login=self.login, qiwi_token=self.token, qiwi_secret=self.secret)
-                else:
-                    return False
-            elif self.check_pass:
+                    update_paymentx(
+                        qiwi_login=self.login,
+                        qiwi_token=self.token,
+                        qiwi_secret=self.secret
+                    )
+
+                await self.dp.edit_text(response)
+            elif self.pass_check:
                 if status:
                     if self.secret == "None":
                         text_secret = "Отсутствует"
                     else:
                         text_secret = self.secret
 
-                    await self.dp.answer(f"<b>🥝 Qiwi кошелёк полностью функционирует ✅</b>\n"
-                                         f"◾ Номер: <code>{self.login}</code>\n"
-                                         f"◾ Токен: <code>{self.token}</code>\n"
-                                         f"◾ Приватный ключ: <code>{text_secret}</code>")
+                    await self.dp.message.answer(f"<b>🥝 Qiwi кошелёк полностью функционирует ✅</b>\n"
+                                                 f"◾ Номер: <code>{self.login}</code>\n"
+                                                 f"◾ Токен: <code>{self.token}</code>\n"
+                                                 f"◾ Приватный ключ: <code>{text_secret}</code>",
+                                                 reply_markup=close_inl)
+                    await self.dp.answer()
                 else:
                     await self.error_wallet()
-                    return False
-            elif self.user_bill_pass:
+            elif self.pass_user:
                 if not status:
                     await self.dp.edit_text(
                         "<b>❗ Извиняемся за доставленные неудобства, пополнение временно недоступно.\n"
                         "⌛ Попробуйте чуть позже.</b>")
                     await self.error_wallet()
                     return False
-            elif self.user_check_pass:
-                if not status:
-                    await self.dp.answer(
-                        "❗ Извиняемся за доставленные неудобства, проверка временно недоступна.\n"
-                        "⌛ Попробуйте чуть позже.", True)
-                    await self.error_wallet()
-                    return False
             elif not status:
-                if not self.add_pass:
+                if not self.pass_add:
                     await self.error_wallet()
                     return False
-
             return True
         else:
-            if self.user_bill_pass:
+            if self.pass_user:
                 await self.dp.edit_text(
                     "<b>❗ Извиняемся за доставленные неудобства, пополнение временно недоступно.\n"
                     "⌛ Попробуйте чуть позже.</b>")
@@ -98,7 +100,7 @@ class QiwiAPI:
             return False
 
     # Проверка баланса
-    async def get_balance(self):
+    async def balance(self):
         response = await self.pre_checker()
         if response:
             status, response, code = await self._request(
@@ -122,8 +124,10 @@ class QiwiAPI:
                     save_balance.append(f"🇰🇿 Тенге: <code>{balance['balance']['amount']}₸</code>")
 
             save_balance = "\n".join(save_balance)
-            await self.dp.answer(f"<b>🥝 Баланс кошелька <code>{self.login}</code> составляет:</b>\n"
-                                 f"{save_balance}")
+            await self.dp.message.answer(f"<b>🥝 Баланс кошелька <code>{self.login}</code> составляет:</b>\n"
+                                         f"{save_balance}",
+                                         reply_markup=close_inl)
+            await self.dp.answer()
 
     # Получение никнейма аккаунта
     async def get_nickname(self):
@@ -223,7 +227,7 @@ class QiwiAPI:
             return False
 
     # Генерация платежа
-    async def bill_pay(self, get_amount, get_way):
+    async def bill(self, get_amount, get_way):
         response = await self.pre_checker()
         if response:
             bill_receipt = str(int(time.time() * 100))

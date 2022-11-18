@@ -1,5 +1,4 @@
 # - *- coding: utf- 8 - *-
-import asyncio
 
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
@@ -68,7 +67,7 @@ async def payment_qiwi_edit(message: Message, state: FSMContext):
 async def payment_qiwi_check(message: Message, state: FSMContext):
     await state.finish()
 
-    await QiwiAPI(message, check_pass=True).pre_checker()
+    await QiwiAPI(message, pass_check=True).pre_checker()
 
 
 # Баланс QIWI
@@ -76,7 +75,7 @@ async def payment_qiwi_check(message: Message, state: FSMContext):
 async def payment_qiwi_balance(message: Message, state: FSMContext):
     await state.finish()
 
-    await QiwiAPI(message).get_balance()
+    await QiwiAPI(message).balance()
 
 
 ######################################## ПРИНЯТИЕ QIWI ########################################
@@ -125,6 +124,4 @@ async def payment_qiwi_edit_secret(message: Message, state: FSMContext):
     await state.finish()
 
     cache_message = await message.answer("<b>🥝 Проверка введённых QIWI данных... 🔄</b>")
-    await asyncio.sleep(0.5)
-
     await QiwiAPI(cache_message, qiwi_login, qiwi_token, qiwi_secret, True).pre_checker()

@@ -458,7 +458,8 @@ def create_dbx():
                         "user_balance INTEGER,"
                         "user_refill INTEGER,"
                         "user_date TIMESTAMP,"
-                        "user_unix INTEGER)")
+                        "user_unix INTEGER"
+                        ")")
             print("DB was not found(1/8) | Creating...")
 
         # Создание БД с хранением данных платежных систем
@@ -472,7 +473,8 @@ def create_dbx():
                         "qiwi_nickname TEXT,"
                         "way_form TEXT,"
                         "way_number TEXT,"
-                        "way_nickname TEXT)")
+                        "way_nickname TEXT"
+                        ")")
 
             con.execute("INSERT INTO storage_payment("
                         "qiwi_login, qiwi_token, qiwi_secret, qiwi_nickname, way_form, way_number, way_nickname) "
@@ -493,7 +495,8 @@ def create_dbx():
                         "misc_bot TEXT,"
                         "misc_update TEXT,"
                         "misc_profit_day INTEGER,"
-                        "misc_profit_week INTEGER)")
+                        "misc_profit_week INTEGER"
+                        ")")
 
             con.execute("INSERT INTO storage_settings("
                         "status_work, status_refill, status_buy, misc_faq, misc_support,"
@@ -516,7 +519,8 @@ def create_dbx():
                         "refill_receipt TEXT,"
                         "refill_way TEXT,"
                         "refill_date TIMESTAMP,"
-                        "refill_unix INTEGER)")
+                        "refill_unix INTEGER"
+                        ")")
             print("DB was not found(4/8) | Creating...")
 
         # Создание БД с хранением категорий
@@ -526,7 +530,8 @@ def create_dbx():
             con.execute("CREATE TABLE storage_category("
                         "increment INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "category_id INTEGER,"
-                        "category_name TEXT)")
+                        "category_name TEXT"
+                        ")")
             print("DB was not found(5/8) | Creating...")
 
         # Создание БД с хранением позиций
@@ -541,7 +546,8 @@ def create_dbx():
                         "position_description TEXT,"
                         "position_photo TEXT,"
                         "position_date TIMESTAMP,"
-                        "category_id INTEGER)")
+                        "category_id INTEGER"
+                        ")")
             print("DB was not found(6/8) | Creating...")
 
         # Создание БД с хранением товаров
@@ -556,7 +562,8 @@ def create_dbx():
                         "category_id INTEGER,"
                         "creator_id INTEGER,"
                         "creator_name TEXT,"
-                        "add_date TIMESTAMP)")
+                        "add_date TIMESTAMP"
+                        ")")
             print("DB was not found(7/8) | Creating...")
 
         # # Создание БД с хранением покупок
@@ -578,5 +585,6 @@ def create_dbx():
                         "purchase_date TIMESTAMP,"
                         "purchase_unix INTEGER,"
                         "balance_before INTEGER,"
-                        "balance_after INTEGER)")
+                        "balance_after INTEGER"
+                        ")")
             print("DB was not found(8/8) | Creating...")

@@ -8,10 +8,10 @@ from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from tgbot.data.config import BOT_DESCRIPTION
 from tgbot.data.loader import dp
-from tgbot.keyboards.inline_all import profile_open_inl
+from tgbot.keyboards.inline_main import profile_open_inl
 from tgbot.keyboards.inline_page import *
 from tgbot.keyboards.inline_user import user_support_finl, products_open_finl, products_confirm_finl
-from tgbot.keyboards.reply_all import menu_frep
+from tgbot.keyboards.reply_main import menu_frep
 from tgbot.services.api_sqlite import *
 from tgbot.utils.const_functions import get_date, split_messages, get_unix, ded
 from tgbot.utils.misc_functions import open_profile_user, upload_text, get_faq
@@ -99,7 +99,7 @@ async def user_support(message: Message, state: FSMContext):
 
         if len(get_user['user_login']) >= 1:
             return await message.answer("<b>☎ Нажмите кнопку ниже для связи с Администратором.</b>",
-                                 reply_markup=user_support_finl(get_user['user_login']))
+                                        reply_markup=user_support_finl(get_user['user_login']))
         else:
             update_settingsx(misc_support="None")
 

@@ -1,5 +1,5 @@
-aiogram==2.22.1
-APScheduler==3.8.0
+aiogram==2.23.1
+APScheduler==3.9.1
 colorlog==6.6.0
 bs4==0.0.1
 beautifulsoup4==4.10.0
