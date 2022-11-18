@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery
 
 from tgbot.data.loader import dp
 from tgbot.keyboards.inline_user import user_support_finl
-from tgbot.keyboards.reply_all import menu_frep
+from tgbot.keyboards.reply_main import menu_frep
 from tgbot.services.api_sqlite import get_settingsx, get_userx
 from tgbot.utils.misc.bot_filters import IsBuy, IsRefill, IsWork
 
@@ -28,9 +28,8 @@ async def filter_work_message(message: Message, state: FSMContext):
         get_user = get_userx(user_id=user_support)
 
         if len(get_user['user_login']) >= 1:
-            await message.answer("<b>⛔ Бот находится на технических работах.</b>",
-                                 reply_markup=user_support_finl(get_user['user_login']))
-            return
+            return await message.answer("<b>⛔ Бот находится на технических работах.</b>",
+                                        reply_markup=user_support_finl(get_user['user_login']))
 
     await message.answer("<b>⛔ Бот находится на технических работах.</b>")
 

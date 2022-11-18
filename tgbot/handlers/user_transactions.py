@@ -48,8 +48,8 @@ async def refill_get(message: Message, state: FSMContext):
             await state.finish()
 
             get_message, get_link, receipt = await (
-                await QiwiAPI(cache_message, user_bill_pass=True)
-            ).bill_pay(pay_amount, get_way)
+                QiwiAPI(cache_message, pass_user=True)
+            ).bill(pay_amount, get_way)
 
             if get_message:
                 await cache_message.edit_text(get_message, reply_markup=refill_bill_finl(get_link, receipt, get_way))
@@ -70,7 +70,7 @@ async def refill_check_form(call: CallbackQuery):
     receipt = call.data.split(":")[2]
 
     pay_status, pay_amount = await (
-        await QiwiAPI(call, user_check_pass=True)
+        QiwiAPI(call, pass_user=True)
     ).check_form(receipt)
 
     if pay_status == "PAID":
@@ -95,7 +95,7 @@ async def refill_check_send(call: CallbackQuery):
     receipt = call.data.split(":")[2]
 
     pay_status, pay_amount = await (
-        await QiwiAPI(call, user_check_pass=True)
+        QiwiAPI(call, pass_user=True)
     ).check_send(receipt)
 
     if pay_status == 1:

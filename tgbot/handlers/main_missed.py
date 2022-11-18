@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from tgbot.data.loader import dp
-from tgbot.keyboards.reply_all import menu_frep
+from tgbot.keyboards.reply_main import menu_frep
 
 
 # Колбэк с удалением сообщения

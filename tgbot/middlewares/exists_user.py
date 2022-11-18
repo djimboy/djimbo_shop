@@ -15,34 +15,32 @@ class ExistsUserMiddleware(BaseMiddleware):
 
     async def on_process_update(self, update: Update, data: dict):
         if "message" in update:
-            this_user = update.message.from_user
+            get_update = update.message
         elif "callback_query" in update:
-            this_user = update.callback_query.from_user
+            get_update = update.callback_query
         else:
-            this_user = None
+            get_update = None
 
-        if this_user is not None:
-            get_settings = get_settingsx()
+        if get_update is not None and not get_update.from_user.is_bot:
+            this_user = get_update.from_user
             get_prefix = self.prefix
 
+            get_settings = get_settingsx()
+
             if get_settings['status_work'] == "False" or this_user.id in get_admins():
-                if not this_user.is_bot:
-                    get_user = get_userx(user_id=this_user.id)
+                get_user = get_userx(user_id=this_user.id)
 
-                    user_id = this_user.id
-                    user_login = this_user.username
-                    user_name = clear_html(this_user.first_name)
+                user_id = this_user.id
+                user_login = this_user.username
+                user_name = clear_html(this_user.first_name)
 
-                    if user_login is None: user_login = ""
+                if user_login is None: user_login = ""
 
-                    if get_user is None:
-                        add_userx(user_id, user_login.lower(), user_name)
-                    else:
-                        if user_name != get_user['user_name']:
-                            update_userx(get_user['user_id'], user_name=user_name)
+                if get_user is None:
+                    add_userx(user_id, user_login.lower(), user_name)
+                else:
+                    if user_name != get_user['user_name']:
+                        update_userx(get_user['user_id'], user_name=user_name)
 
-                        if len(user_login) >= 1:
-                            if user_login.lower() != get_user['user_login']:
-                                update_userx(get_user['user_id'], user_login=user_login.lower())
-                        else:
-                            update_userx(get_user['user_id'], user_login="")
+                    if user_login.lower() != get_user['user_login']:
+                        update_userx(get_user['user_id'], user_login=user_login.lower())

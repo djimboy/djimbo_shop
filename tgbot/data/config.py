@@ -1,18 +1,19 @@
 # - *- coding: utf- 8 - *-
 import configparser
 
-read_config = configparser.ConfigParser()
-read_config.read("settings.ini")
+# Токен бота
+BOT_TOKEN = configparser.ConfigParser()
+BOT_TOKEN.read("settings.ini")
+BOT_TOKEN = BOT_TOKEN['settings']['token'].strip().replace(' ', '')
 
-BOT_TOKEN = read_config['settings']['token'].strip().replace(" ", "")  # Токен бота
-BOT_VERSION = "3.3"  # Версия бота
-
+# Пути к файлам
 PATH_DATABASE = "tgbot/data/database.db"  # Путь к БД
 PATH_LOGS = "tgbot/data/logs.log"  # Путь к Логам
+BOT_VERSION = "3.3"  # Версия бота
 
 
 # Получение администраторов бота
-def get_admins():
+def get_admins() -> list[int]:
     read_admins = configparser.ConfigParser()
     read_admins.read("settings.ini")
 

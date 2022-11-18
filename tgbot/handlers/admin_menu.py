@@ -4,7 +4,7 @@ from aiogram.types import Message
 
 from tgbot.data.config import BOT_VERSION, PATH_LOGS, PATH_DATABASE
 from tgbot.data.loader import dp
-from tgbot.keyboards.reply_all import payments_frep, settings_frep, functions_frep, items_frep
+from tgbot.keyboards.reply_main import payments_frep, settings_frep, functions_frep, items_frep
 from tgbot.utils.const_functions import get_date
 from tgbot.utils.misc.bot_filters import IsAdmin
 from tgbot.utils.misc_functions import get_statisctics
@@ -73,7 +73,7 @@ async def admin_log(message: Message, state: FSMContext):
 
 
 # Получение версии бота
-@dp.message_handler(commands=['version', 'log'], state="*")
+@dp.message_handler(commands=['version'], state="*")
 async def admin_version(message: Message, state: FSMContext):
     await state.finish()
 

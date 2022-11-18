@@ -7,7 +7,7 @@ from aiogram.utils.exceptions import CantParseEntities
 
 from tgbot.data.loader import dp, bot
 from tgbot.keyboards.inline_admin import profile_search_finl, profile_search_return_finl
-from tgbot.keyboards.inline_all import mail_confirm_inl
+from tgbot.keyboards.inline_main import mail_confirm_inl
 from tgbot.services.api_sqlite import *
 from tgbot.utils.const_functions import is_number
 from tgbot.utils.misc.bot_filters import IsAdmin

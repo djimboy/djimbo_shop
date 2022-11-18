@@ -2,6 +2,7 @@
 import json
 from base64 import b64decode
 from datetime import datetime, timedelta, timezone
+from typing import Tuple
 
 from tgbot.services.api_session import AsyncSession
 from tgbot.utils.const_functions import get_unix
@@ -18,7 +19,7 @@ class QiwiAPIp2p:
         self.dp = dp
 
     @staticmethod
-    def validate_privkey(privkey):
+    def validate_privkey(privkey) -> bool:
         try:
             key_decoded = b64decode(privkey).decode()
             key_decoded = json.loads(key_decoded)
@@ -35,14 +36,14 @@ class QiwiAPIp2p:
 
     # Конвертация времени
     @staticmethod
-    async def convert_date(lifetime: int):
+    async def convert_date(lifetime: int) -> str:
         datetime_new: datetime = datetime.now(timezone(timedelta(hours=3))).replace(microsecond=0)
         datetime_new = datetime_new + timedelta(minutes=lifetime)
 
         return datetime_new.astimezone(timezone(timedelta(hours=3))).replace(microsecond=0).isoformat()
 
     # Создание P2P формы
-    async def bill(self, bill_amount, bill_id=None, lifetime=10):
+    async def bill(self, bill_amount, bill_id=None, lifetime=10) -> Tuple[str, str]:
         if bill_id is None: bill_id = get_unix(True)
 
         bill_amount = str(round(float(bill_amount), 2))
@@ -62,14 +63,14 @@ class QiwiAPIp2p:
         return response['billId'], f"https://phoenix-bot.pw/api/v1/qiwi/create_bill/{response['payUrl'].split('=')[1]}"
 
     # Проверка P2P формы
-    async def check(self, bill_id):
+    async def check(self, bill_id) -> Tuple[str, int]:
         status, response = await self._request(
             "get", f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}")
 
         return response['status']['value'], int(float(response['amount']['value']))
 
     # Отмена P2P формы
-    async def reject(self, bill_id):
+    async def reject(self, bill_id) -> bool:
         status, response = await self._request(
             "post", f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}/reject")
 
