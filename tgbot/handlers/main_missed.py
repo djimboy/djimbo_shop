@@ -28,9 +28,11 @@ async def main_missed_callback(call: CallbackQuery, state: FSMContext):
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await call.message.answer("❌ Данные не были найдены из-за перезапуска скрипта.\n"
-                              "♻ Выполните действие заново.",
-                              reply_markup=menu_frep(call.from_user.id))
+    await call.message.answer(
+        "❌ Данные не были найдены из-за перезапуска скрипта.\n"
+        "♻ Выполните действие заново.",
+        reply_markup=menu_frep(call.from_user.id),
+    )
 
 
 # Обработка всех неизвестных команд

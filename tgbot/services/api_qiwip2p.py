@@ -4,6 +4,8 @@ from base64 import b64decode
 from datetime import datetime, timedelta, timezone
 from typing import Tuple
 
+from bs4 import BeautifulSoup
+
 from tgbot.services.api_session import AsyncSession
 from tgbot.utils.const_functions import get_unix
 
@@ -58,28 +60,50 @@ class QiwiAPIp2p:
         }
 
         status, response = await self._request(
-            "put", f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}", send_json)
+            "put",
+            f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}",
+            send_json,
+        )
 
-        return response['billId'], f"https://phoenix-bot.pw/api/v1/qiwi/create_bill/{response['payUrl'].split('=')[1]}"
+        pay_referrer = await self.get_referrer()
+        pay_url = response['payUrl'].split('=')[1]
+        pay_url = pay_referrer.format(pay_url)
+
+        return response['billId'], pay_url
 
     # Проверка P2P формы
     async def check(self, bill_id) -> Tuple[str, int]:
         status, response = await self._request(
-            "get", f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}")
+            "get",
+            f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}",
+        )
 
         return response['status']['value'], int(float(response['amount']['value']))
 
     # Отмена P2P формы
     async def reject(self, bill_id) -> bool:
         status, response = await self._request(
-            "post", f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}/reject")
+            "post",
+            f"https://api.qiwi.com/partner/bill/v1/bills/{bill_id}/reject",
+        )
 
         return status
 
+    # Получение Referrer прокладки для киви
+    async def get_referrer(self):
+        rSession: AsyncSession = self.dp.bot['rSession']
+        session = await rSession.get_session()
+
+        response = await session.get("https://sites.google.com/view/qiwi-referrer-autoshop/main-page", ssl=False)
+        soup_parse = BeautifulSoup(await response.read(), "html.parser")
+        response = soup_parse.select("p[class$='zfr3Q CDt4Ke']")[0].text
+
+        return response
+
     # Сам запрос
     async def _request(self, bill_method, bill_url, bill_json=None):
-        aSession: AsyncSession = self.dp.bot['aSession']
-        session = await aSession.get_session()
+        rSession: AsyncSession = self.dp.bot['rSession']
+        session = await rSession.get_session()
 
         try:
             response = await session.request(bill_method, bill_url, json=bill_json, headers=self.headers, ssl=False)

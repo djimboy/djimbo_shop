@@ -9,7 +9,7 @@ from tgbot.data.loader import dp, bot
 from tgbot.keyboards.inline_admin import profile_search_finl, profile_search_return_finl
 from tgbot.keyboards.inline_main import mail_confirm_inl
 from tgbot.services.api_sqlite import *
-from tgbot.utils.const_functions import is_number
+from tgbot.utils.const_functions import is_number, to_number
 from tgbot.utils.misc.bot_filters import IsAdmin
 from tgbot.utils.misc_functions import open_profile_admin, upload_text
 
@@ -42,17 +42,17 @@ async def functions_receipt(message: Message, state: FSMContext):
     await message.answer("<b>🧾 Введите номер чека</b>")
 
 
-######################################## ПРИНЯТИЕ ПОИСКОВЫХ ДАННЫХ ########################################
+################################ ПРИНЯТИЕ ПОИСКОВЫХ ДАННЫХ ###############################
 # Принятие айди или логина для поиска профиля
 @dp.message_handler(IsAdmin(), state="here_profile")
-@dp.message_handler(IsAdmin(), text_startswith=".user")
+@dp.message_handler(IsAdmin(), text_startswith=['.user', 'user', 'User'])
 async def functions_profile_get(message: Message, state: FSMContext):
-    find_user = message.text
+    find_user = message.text.lower()
 
-    if ".user" in find_user:
-        find_user = message.text.split(" ")
-        if len(find_user) > 1:
-            find_user = find_user[1]
+    if ".user" in find_user or "user" in find_user:
+        if len(find_user.split(" ")) >= 2:
+            if ".user" in find_user: find_user = message.text.split(" ")[1]
+            if "user" in find_user: find_user = message.text.split(" ")[1]
         else:
             return await message.answer("<b>❌ Вы не указали логин или айди пользователя.</b>\n"
                                         "👤 Введите логин или айди пользователя.")
@@ -65,8 +65,10 @@ async def functions_profile_get(message: Message, state: FSMContext):
 
     if get_user is not None:
         await state.finish()
-        await message.answer(open_profile_admin(get_user['user_id']),
-                             reply_markup=profile_search_finl(get_user['user_id']))
+        await message.answer(
+            open_profile_admin(get_user['user_id']),
+            reply_markup=profile_search_finl(get_user['user_id']),
+        )
     else:
         await message.answer("<b>❌ Профиль не был найден</b>\n"
                              "👤 Введите логин или айди пользователя.")
@@ -74,22 +76,22 @@ async def functions_profile_get(message: Message, state: FSMContext):
 
 # Принятие чека для поиска
 @dp.message_handler(IsAdmin(), state="here_receipt")
-@dp.message_handler(IsAdmin(), text_startswith=".rec")
+@dp.message_handler(IsAdmin(), text_startswith=['.rec', 'rec', 'Rec'])
 async def functions_receipt_get(message: Message, state: FSMContext):
-    find_receipt = message.text
+    receipt = message.text.lower()
 
-    if ".rec" in find_receipt:
-        find_receipt = message.text.split(" ")
-        if len(find_receipt) > 1:
-            find_receipt = find_receipt[1]
+    if ".rec" in receipt or "rec" in receipt:
+        if len(receipt.split(" ")) >= 2:
+            if ".rec" in receipt: receipt = receipt.split(" ")[1]
+            if "rec" in receipt: receipt = receipt.split(" ")[1]
         else:
             return await message.answer("<b>❌ Вы не указали номер чека.</b>\n"
                                         "🧾 Введите номер чека")
 
-    if find_receipt.startswith("#"): find_receipt = find_receipt[1:]
+    if receipt.startswith("#"): receipt = receipt[1:]
 
-    get_refill = get_refillx(refill_receipt=find_receipt)
-    get_purchase = get_purchasex(purchase_receipt=find_receipt)
+    get_refill = get_refillx(refill_receipt=receipt)
+    get_purchase = get_purchasex(purchase_receipt=receipt)
 
     if get_refill is not None:
         await state.finish()
@@ -228,10 +230,12 @@ async def functions_profile_purchases(call: CallbackQuery, state: FSMContext):
         for purchases in last_purchases:
             link_items = await upload_text(call, purchases['purchase_item'])
 
-            await call.message.answer(f"<b>🧾 Чек: <code>#{purchases['purchase_receipt']}</code></b>\n"
-                                      f"🎁 Товар: <code>{purchases['purchase_position_name']} | {purchases['purchase_count']}шт | {purchases['purchase_price']}₽</code>\n"
-                                      f"🕰 Дата покупки: <code>{purchases['purchase_date']}</code>\n"
-                                      f"🔗 Товары: <a href='{link_items}'>кликабельно</a>")
+            await call.message.answer(
+                f"<b>🧾 Чек: <code>#{purchases['purchase_receipt']}</code></b>\n"
+                f"🎁 Товар: <code>{purchases['purchase_position_name']} | {purchases['purchase_count']}шт | {purchases['purchase_price']}₽</code>\n"
+                f"🕰 Дата покупки: <code>{purchases['purchase_date']}</code>\n"
+                f"🔗 Товары: <a href='{link_items}'>кликабельно</a>"
+            )
 
         await call.message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
     else:
@@ -246,8 +250,44 @@ async def functions_profile_balance_add(call: CallbackQuery, state: FSMContext):
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_add")
 
-    await call.message.edit_text("<b>💰 Введите сумму для выдачи баланса</b>",
-                                 reply_markup=profile_search_return_finl(user_id))
+    await call.message.edit_text(
+        "<b>💰 Введите сумму для выдачи баланса</b>",
+        reply_markup=profile_search_return_finl(user_id),
+    )
+
+
+# Принятие суммы для выдачи баланса пользователю
+@dp.message_handler(IsAdmin(), state="here_profile_add")
+async def functions_profile_balance_add_get(message: Message, state: FSMContext):
+    user_id = (await state.get_data())['here_profile']
+
+    if not is_number(message.text):
+        return await message.answer(
+            "<b>❌ Данные были введены неверно.</b>\n"
+            "💰 Введите сумму для выдачи баланса",
+            reply_markup=profile_search_return_finl(user_id),
+        )
+
+    if to_number(message.text) <= 0 or to_number(message.text) > 1000000000:
+        return await message.answer(
+            "<b>❌ Сумма выдачи не может быть меньше 1 и больше 1 000 000 000</b>\n"
+            "💰 Введите сумму для выдачи баланса",
+        )
+
+    await state.finish()
+    get_user = get_userx(user_id=user_id)
+    update_userx(user_id, user_balance=round(get_user['user_balance'] + to_number(message.text), 2))
+
+    await message.answer(
+        f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
+        f"выдано <code>{message.text}₽</code></b>"
+    )
+
+    await message.bot.send_message(user_id, f"<b>💰 Вам было выдано <code>{message.text}₽</code></b>")
+    await message.answer(
+        open_profile_admin(user_id),
+        reply_markup=profile_search_finl(user_id),
+    )
 
 
 # Изменение баланса пользователю
@@ -258,34 +298,10 @@ async def functions_profile_balance_set(call: CallbackQuery, state: FSMContext):
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_set")
 
-    await call.message.edit_text("<b>💰 Введите сумму для изменения баланса</b>",
-                                 reply_markup=profile_search_return_finl(user_id))
-
-
-# Принятие суммы для выдачи баланса пользователю
-@dp.message_handler(IsAdmin(), state="here_profile_add")
-async def functions_profile_balance_add_get(message: Message, state: FSMContext):
-    user_id = (await state.get_data())['here_profile']
-
-    if not message.text.isdigit():
-        return await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                                    "💰 Введите сумму для выдачи баланса",
-                                    reply_markup=profile_search_return_finl(user_id))
-
-    if int(message.text) <= 0 or int(message.text) > 1000000000:
-        return await message.answer("<b>❌ Сумма выдачи не может быть меньше 1 и больше 1 000 000 000</b>\n"
-                                    "💰 Введите сумму для выдачи баланса")
-
-    await state.finish()
-    get_user = get_userx(user_id=user_id)
-    update_userx(user_id, user_balance=get_user['user_balance'] + int(message.text))
-
-    await message.answer(
-        f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
-        f"выдано <code>{message.text}₽</code></b>")
-
-    await message.bot.send_message(user_id, f"<b>💰 Вам было выдано <code>{message.text}₽</code></b>")
-    await message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
+    await call.message.edit_text(
+        "<b>💰 Введите сумму для изменения баланса</b>",
+        reply_markup=profile_search_return_finl(user_id),
+    )
 
 
 # Принятие суммы для изменения баланса пользователя
@@ -293,19 +309,23 @@ async def functions_profile_balance_add_get(message: Message, state: FSMContext)
 async def functions_profile_balance_set_get(message: Message, state: FSMContext):
     user_id = (await state.get_data())['here_profile']
 
-    if is_number(message.text):
-        return await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                                    "💰 Введите сумму для изменения баланса",
-                                    reply_markup=profile_search_return_finl(user_id))
+    if not is_number(message.text):
+        return await message.answer(
+            "<b>❌ Данные были введены неверно.</b>\n"
+            "💰 Введите сумму для изменения баланса",
+            reply_markup=profile_search_return_finl(user_id),
+        )
 
-    if int(message.text) < -1000000000 or int(message.text) > 1000000000:
-        return await message.answer("<b>❌ Сумма изменения не может быть больше или меньше (-)1 000 000 000</b>\n"
-                                    "💰 Введите сумму для изменения баланса",
-                                    reply_markup=profile_search_return_finl(user_id))
+    if to_number(message.text) < -1000000000 or to_number(message.text) > 1000000000:
+        return await message.answer(
+            "<b>❌ Сумма изменения не может быть больше или меньше (-)1 000 000 000</b>\n"
+            "💰 Введите сумму для изменения баланса",
+            reply_markup=profile_search_return_finl(user_id),
+        )
 
     await state.finish()
     get_user = get_userx(user_id=user_id)
-    update_userx(user_id, user_balance=message.text)
+    update_userx(user_id, user_balance=to_number(message.text))
 
     await message.answer(
         f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
@@ -322,9 +342,11 @@ async def functions_profile_user_message(call: CallbackQuery, state: FSMContext)
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_message")
 
-    await call.message.edit_text("<b>💌 Введите сообщение для отправки</b>\n"
-                                 "⚠ Сообщение будет сразу отправлено пользователю.",
-                                 reply_markup=profile_search_return_finl(user_id))
+    await call.message.edit_text(
+        "<b>💌 Введите сообщение для отправки</b>\n"
+        "⚠ Сообщение будет сразу отправлено пользователю.",
+        reply_markup=profile_search_return_finl(user_id),
+    )
 
 
 # Принятие сообщения для пользователя
@@ -337,8 +359,13 @@ async def functions_profile_user_message_get(message: Message, state: FSMContext
     get_user = get_userx(user_id=user_id)
 
     await message.bot.send_message(user_id, get_message)
-    await message.answer(f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
-                         f"было отправлено сообщение:</b>\n"
-                         f"{get_message}")
+    await message.answer(
+        f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
+        f"было отправлено сообщение:</b>\n"
+        f"{get_message}"
+    )
 
-    await message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
+    await message.answer(
+        open_profile_admin(user_id),
+        reply_markup=profile_search_finl(user_id),
+    )

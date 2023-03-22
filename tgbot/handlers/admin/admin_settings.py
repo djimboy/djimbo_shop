@@ -42,7 +42,9 @@ async def settings_turn_work(call: CallbackQuery, state: FSMContext):
 
     await send_admins(
         f"👤 Администратор <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>\n"
-        f"{send_text}", not_me=get_user['user_id'])
+        f"{send_text}",
+        not_me=get_user['user_id']
+    )
 
     await call.message.edit_reply_markup(reply_markup=turn_open_finl())
 
@@ -62,7 +64,9 @@ async def settings_turn_buy(call: CallbackQuery, state: FSMContext):
 
     await send_admins(
         f"👤 Администратор <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>\n"
-        f"{send_text}", not_me=get_user['user_id'])
+        f"{send_text}",
+        not_me=get_user['user_id'],
+    )
 
     await call.message.edit_reply_markup(reply_markup=turn_open_finl())
 
@@ -82,7 +86,9 @@ async def settings_turn_pay(call: CallbackQuery, state: FSMContext):
 
     await send_admins(
         f"👤 Администратор <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>\n"
-        f"{send_text}", not_me=get_user['user_id'])
+        f"{send_text}",
+        not_me=get_user['user_id'],
+    )
 
     await call.message.edit_reply_markup(reply_markup=turn_open_finl())
 
@@ -100,11 +106,13 @@ async def settings_support_edit(call: CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(IsAdmin(), text_startswith="settings_edit_faq", state="*")
 async def settings_faq_edit(call: CallbackQuery, state: FSMContext):
     await state.set_state("here_settings_faq")
-    await call.message.edit_text("<b>ℹ Введите новый текст для FAQ</b>\n"
-                                 "❕ Вы можете использовать заготовленный синтаксис и HTML разметку:\n"
-                                 "▶ <code>{username}</code>  - логин пользоваля\n"
-                                 "▶ <code>{user_id}</code>   - айди пользователя\n"
-                                 "▶ <code>{firstname}</code> - имя пользователя")
+    await call.message.edit_text(
+        "<b>ℹ Введите новый текст для FAQ</b>\n"
+        "❕ Вы можете использовать заготовленный синтаксис и HTML разметку:\n"
+        "▶ <code>{username}</code>  - логин пользоваля\n"
+        "▶ <code>{user_id}</code>   - айди пользователя\n"
+        "▶ <code>{firstname}</code> - имя пользователя",
+    )
 
 
 # Принятие нового текста для FAQ

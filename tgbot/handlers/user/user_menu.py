@@ -22,9 +22,13 @@ from tgbot.utils.misc_functions import open_profile_user, upload_text, get_faq
 async def user_shop(message: Message, state: FSMContext):
     await state.finish()
 
-    if len(get_all_categoriesx()) >= 1:
-        await message.answer("<b>🎁 Выберите нужный вам товар:</b>",
-                             reply_markup=products_item_category_swipe_fp(0))
+    get_categories = get_all_categoriesx()
+
+    if len(get_categories) >= 1:
+        await message.answer(
+            "<b>🎁 Выберите нужный вам товар:</b>",
+            reply_markup=products_item_category_swipe_fp(0),
+        )
     else:
         await message.answer("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
 
@@ -34,7 +38,10 @@ async def user_shop(message: Message, state: FSMContext):
 async def user_profile(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer(open_profile_user(message.from_user.id), reply_markup=profile_open_inl)
+    await message.answer(
+        open_profile_user(message.from_user.id),
+        reply_markup=profile_open_inl,
+    )
 
 
 # Проверка товаров в наличии
@@ -57,7 +64,8 @@ async def user_available(message: Message, state: FSMContext):
 
                 if len(get_items) >= 1:
                     this_items.append(
-                        f"{position['position_name']} | {position['position_price']}₽ | В наличии {len(get_items)} шт")
+                        f"{position['position_name']} | {position['position_price']}₽ | В наличии {len(get_items)} шт",
+                    )
 
         if len(this_items) >= 2:
             save_items.append(this_items)
@@ -83,7 +91,11 @@ async def user_faq(message: Message, state: FSMContext):
 
     send_message = get_settingsx()['misc_faq']
     if send_message == "None":
-        send_message = f"ℹ Информация. Измените её в настройках бота.\n➖➖➖➖➖➖➖➖➖➖\n{BOT_DESCRIPTION}"
+        send_message = ded(f"""
+        ℹ Информация. Измените её в настройках бота.
+        ➖➖➖➖➖➖➖➖➖➖
+        {BOT_DESCRIPTION}
+    """)
 
     await message.answer(get_faq(message.from_user.id, send_message), disable_web_page_preview=True)
 
@@ -93,18 +105,27 @@ async def user_faq(message: Message, state: FSMContext):
 async def user_support(message: Message, state: FSMContext):
     await state.finish()
 
-    user_support = get_settingsx()['misc_support']
-    if str(user_support).isdigit():
-        get_user = get_userx(user_id=user_support)
+    get_settings = get_settingsx()
+
+    if str(get_settings['misc_support']).isdigit():
+        get_user = get_userx(user_id=get_settings['misc_support'])
 
         if len(get_user['user_login']) >= 1:
-            return await message.answer("<b>☎ Нажмите кнопку ниже для связи с Администратором.</b>",
-                                        reply_markup=user_support_finl(get_user['user_login']))
+            return await message.answer(
+                "<b>☎ Нажмите кнопку ниже для связи с Администратором.</b>",
+                reply_markup=user_support_finl(get_user['user_login']),
+            )
         else:
             update_settingsx(misc_support="None")
 
-    await message.answer(f"☎ Поддержка. Измените её в настройках бота.\n➖➖➖➖➖➖➖➖➖➖\n{BOT_DESCRIPTION}",
-                         disable_web_page_preview=True)
+    await message.answer(
+        ded(f"""
+            ☎ Поддержка. Измените её в настройках бота.
+            ➖➖➖➖➖➖➖➖➖➖
+            {BOT_DESCRIPTION}
+        """),
+        disable_web_page_preview=True,
+    )
 
 
 ################################################################################################
@@ -115,17 +136,20 @@ async def user_history(call: CallbackQuery, state: FSMContext):
 
     if len(last_purchases) >= 1:
         await call.answer("🎁 Последние 5 покупок")
-        await call.message.delete()
+        with suppress(MessageCantBeDeleted):
+            await call.message.delete()
 
         for purchases in last_purchases:
             link_items = await upload_text(call, purchases['purchase_item'])
 
-            await call.message.answer(ded(f"""
-                                      <b>🧾 Чек: <code>#{purchases['purchase_receipt']}</code></b>
-                                      🎁 Товар: <code>{purchases['purchase_position_name']} | {purchases['purchase_count']}шт | {purchases['purchase_price']}₽</code>
-                                      🕰 Дата покупки: <code>{purchases['purchase_date']}</code>
-                                      🔗 Товары: <a href='{link_items}'>кликабельно</a>
-                                      """))
+            await call.message.answer(
+                ded(f"""
+                    <b>🧾 Чек: <code>#{purchases['purchase_receipt']}</code></b>
+                    🎁 Товар: <code>{purchases['purchase_position_name']} | {purchases['purchase_count']}шт | {purchases['purchase_price']}₽</code>
+                    🕰 Дата покупки: <code>{purchases['purchase_date']}</code>
+                    🔗 Товары: <a href='{link_items}'>кликабельно</a>
+                """)
+            )
 
         await call.message.answer(open_profile_user(call.from_user.id), reply_markup=profile_open_inl)
     else:
@@ -135,7 +159,10 @@ async def user_history(call: CallbackQuery, state: FSMContext):
 # Возвращение к профилю
 @dp.callback_query_handler(text="user_profile", state="*")
 async def user_profile_return(call: CallbackQuery, state: FSMContext):
-    await call.message.edit_text(open_profile_user(call.from_user.id), reply_markup=profile_open_inl)
+    await call.message.edit_text(
+        open_profile_user(call.from_user.id),
+        reply_markup=profile_open_inl,
+    )
 
 
 ################################################################################################
@@ -145,8 +172,10 @@ async def user_profile_return(call: CallbackQuery, state: FSMContext):
 async def user_purchase_category_next_page(call: CallbackQuery, state: FSMContext):
     remover = int(call.data.split(":")[1])
 
-    await call.message.edit_text("<b>🎁 Выберите нужный вам товар:</b>",
-                                 reply_markup=products_item_category_swipe_fp(remover))
+    await call.message.edit_text(
+        "<b>🎁 Выберите нужный вам товар:</b>",
+        reply_markup=products_item_category_swipe_fp(remover),
+    )
 
 
 # Открытие категории для покупки
@@ -159,16 +188,23 @@ async def user_purchase_category_open(call: CallbackQuery, state: FSMContext):
     get_positions = get_positionsx(category_id=category_id)
 
     if len(get_positions) >= 1:
-        await call.message.delete()
+        with suppress(MessageCantBeDeleted):
+            await call.message.delete()
 
-        await call.message.answer(f"<b>🎁 Текущая категория: <code>{get_category['category_name']}</code></b>",
-                                  reply_markup=products_item_position_swipe_fp(remover, category_id))
+        await call.message.answer(
+            f"<b>🎁 Текущая категория: <code>{get_category['category_name']}</code></b>",
+            reply_markup=products_item_position_swipe_fp(remover, category_id),
+        )
     else:
         if remover == "0":
             await call.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
             await call.answer("❗ Позиции были изменены или удалены")
         else:
-            await call.answer(f"❕ Товары в категории {get_category['category_name']} отсутствуют")
+            await call.answer(
+                f"❕ Товары в категории {get_category['category_name']} отсутствуют",
+                True,
+                cache_time=5,
+            )
 
 
 # Открытие позиции для покупки
@@ -188,23 +224,29 @@ async def user_purchase_position_open(call: CallbackQuery, state: FSMContext):
         text_description = f"\n📜 Описание:\n{get_position['position_description']}"
 
     send_msg = ded(f"""
-               <b>🎁 Покупка товара:</b>
-               ➖➖➖➖➖➖➖➖➖➖
-               🏷 Название: <code>{get_position['position_name']}</code>
-               🗃 Категория: <code>{get_category['category_name']}</code>
-               💰 Стоимость: <code>{get_position['position_price']}₽</code>
-               📦 Количество: <code>{len(get_items)}шт</code>
-               {text_description}
-               """)
+        <b>🎁 Покупка товара:</b>
+        ➖➖➖➖➖➖➖➖➖➖
+        🏷 Название: <code>{get_position['position_name']}</code>
+        🗃 Категория: <code>{get_category['category_name']}</code>
+        💰 Стоимость: <code>{get_position['position_price']}₽</code>
+        📦 Количество: <code>{len(get_items)}шт</code>
+        {text_description}
+    """)
 
-    if len(get_position['position_photo']) >= 5:
+    with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-        await call.message.answer_photo(get_position['position_photo'],
-                                        send_msg, reply_markup=products_open_finl(position_id, category_id, remover))
+    if len(get_position['position_photo']) >= 5:
+        await call.message.answer_photo(
+            get_position['position_photo'],
+            send_msg,
+            reply_markup=products_open_finl(position_id, category_id, remover),
+        )
     else:
-        await call.message.edit_text(send_msg,
-                                     reply_markup=products_open_finl(position_id, category_id, remover))
+        await call.message.answer(
+            send_msg,
+            reply_markup=products_open_finl(position_id, category_id, remover),
+        )
 
 
 # Переключение страницы позиций для покупки
@@ -215,8 +257,12 @@ async def user_purchase_position_next_page(call: CallbackQuery, state: FSMContex
 
     get_category = get_categoryx(category_id=category_id)
 
-    await call.message.edit_text(f"<b>🎁 Текущая категория: <code>{get_category['category_name']}</code></b>",
-                                 reply_markup=products_item_position_swipe_fp(remover, category_id))
+    with suppress(MessageCantBeDeleted):
+        await call.message.delete()
+    await call.message.answer(
+        f"<b>🎁 Текущая категория: <code>{get_category['category_name']}</code></b>",
+        reply_markup=products_item_position_swipe_fp(remover, category_id),
+    )
 
 
 ########################################### ПОКУПКА ##########################################
@@ -243,26 +289,32 @@ async def user_purchase_select(call: CallbackQuery, state: FSMContext):
 
             with suppress(MessageCantBeDeleted):
                 await call.message.delete()
-            await call.message.answer(ded(f"""
-                                      <b>🎁 Вы действительно хотите купить товар(ы)?</b>
-                                      ➖➖➖➖➖➖➖➖➖➖
-                                      🎁 Товар: <code>{get_position['position_name']}</code>
-                                      📦 Количество: <code>1шт</code>
-                                      💰 Сумма к покупке: <code>{get_position['position_price']}₽</code>"""),
-                                      reply_markup=products_confirm_finl(position_id, 1))
+            await call.message.answer(
+                ded(f"""
+                    <b>🎁 Вы действительно хотите купить товар(ы)?</b>
+                    ➖➖➖➖➖➖➖➖➖➖
+                    🎁 Товар: <code>{get_position['position_name']}</code>
+                    📦 Количество: <code>1шт</code>
+                    💰 Сумма к покупке: <code>{get_position['position_price']}₽</code>
+                """),
+                reply_markup=products_confirm_finl(position_id, 1),
+            )
         elif get_count >= 1:
             await state.update_data(here_cache_position_id=position_id)
             await state.set_state("here_item_count")
 
             with suppress(MessageCantBeDeleted):
                 await call.message.delete()
-            await call.message.answer(ded(f"""
-                                      <b>🎁 Введите количество товаров для покупки</b>
-                                      ▶ От <code>1</code> до <code>{get_count}</code>
-                                      ➖➖➖➖➖➖➖➖➖➖
-                                      🎁 Товар: <code>{get_position['position_name']}</code> - <code>{get_position['position_price']}₽</code>
-                                      💰 Ваш баланс: <code>{get_user['user_balance']}₽</code>
-                                      """))
+
+            await call.message.answer(
+                ded(f"""
+                    <b>🎁 Введите количество товаров для покупки</b>
+                    ▶ От <code>1</code> до <code>{get_count}</code>
+                    ➖➖➖➖➖➖➖➖➖➖
+                    🎁 Товар: <code>{get_position['position_name']}</code> - <code>{get_position['position_price']}₽</code>
+                    💰 Ваш баланс: <code>{get_user['user_balance']}₽</code>
+                """)
+            )
         else:
             await call.answer("🎁 Товаров нет в наличии")
     else:
@@ -280,35 +332,39 @@ async def user_purchase_select_count(message: Message, state: FSMContext):
 
     if get_position['position_price'] != 0:
         get_count = int(get_user['user_balance'] / get_position['position_price'])
-        if get_count > len(get_items): get_count = len(get_items)
+
+        if get_count > len(get_items):
+            get_count = len(get_items)
     else:
         get_count = len(get_items)
 
     send_message = ded(f"""
-                   ➖➖➖➖➖➖➖➖➖➖
-                   🎁 Введите количество товаров для покупки
-                   ▶ От <code>1</code> до <code>{get_count}</code>
-                   ➖➖➖➖➖➖➖➖➖➖
-                   🎁 Товар: <code>{get_position['position_name']}</code> - <code>{get_position['position_price']}₽</code>
-                   💰 Ваш баланс: <code>{get_user['user_balance']}₽</code>
-                   """)
+        ➖➖➖➖➖➖➖➖➖➖
+        🎁 Введите количество товаров для покупки
+        ▶ От <code>1</code> до <code>{get_count}</code>
+        ➖➖➖➖➖➖➖➖➖➖
+        🎁 Товар: <code>{get_position['position_name']}</code> - <code>{get_position['position_price']}₽</code>
+        💰 Ваш баланс: <code>{get_user['user_balance']}₽</code>
+    """)
 
     if message.text.isdigit():
         get_count = int(message.text)
-        amount_pay = int(get_position['position_price']) * get_count
+        amount_pay = round(get_position['position_price'] * get_count, 2)
 
         if len(get_items) >= 1:
             if 1 <= get_count <= len(get_items):
                 if int(get_user['user_balance']) >= amount_pay:
                     await state.finish()
-                    await message.answer(ded(f"""
-                                         <b>🎁 Вы действительно хотите купить товар(ы)?</b>
-                                         ➖➖➖➖➖➖➖➖➖➖
-                                         🎁 Товар: <code>{get_position['position_name']}</code>
-                                         📦 Количество: <code>{get_count}шт</code>
-                                         💰 Сумма к покупке: <code>{amount_pay}₽</code>
-                                         """),
-                                         reply_markup=products_confirm_finl(position_id, get_count))
+                    await message.answer(
+                        ded(f"""
+                            <b>🎁 Вы действительно хотите купить товар(ы)?</b>
+                            ➖➖➖➖➖➖➖➖➖➖
+                            🎁 Товар: <code>{get_position['position_name']}</code>
+                            📦 Количество: <code>{get_count}шт</code>
+                            💰 Сумма к покупке: <code>{amount_pay}₽</code>
+                        """),
+                        reply_markup=products_confirm_finl(position_id, get_count),
+                    )
                 else:
                     await message.answer(f"<b>❌ Недостаточно средств на счете.</b>\n" + send_message)
             else:
@@ -334,48 +390,56 @@ async def user_purchase_confirm(call: CallbackQuery, state: FSMContext):
         get_items = get_itemsx(position_id=position_id)
         get_user = get_userx(user_id=call.from_user.id)
 
-        amount_pay = int(get_position['position_price'] * get_count)
+        amount_pay = round(get_position['position_price'] * get_count, 2)
         receipt, buy_time = get_unix(), get_date()
 
         if 1 <= int(get_count) <= len(get_items):
-            if int(get_user['user_balance']) >= amount_pay:
-                save_items, send_count, split_len = buy_itemx(get_items, get_count)
+            if get_user['user_balance'] >= amount_pay:
+                save_items, save_count, save_len = buy_itemx(get_items, get_count)
 
-                if get_count != send_count:
-                    amount_pay = int(get_position['position_price'] * send_count)
-                    get_count = send_count
+                if get_count != save_count:
+                    amount_pay = round(get_position['position_price'] * save_count, 2)
+                    get_count = save_count
+
+                update_userx(get_user['user_id'], user_balance=round(get_user['user_balance'] - amount_pay, 2))
+                add_purchasex(
+                    get_user['user_id'], get_user['user_login'], get_user['user_name'], receipt, get_count,
+                    amount_pay, get_position['position_price'], get_position['position_id'],
+                    get_position['position_name'], "\n".join(save_items), buy_time, receipt,
+                    get_user['user_balance'], round(get_user['user_balance'] - amount_pay, 2),
+                )
 
                 with suppress(MessageCantBeDeleted):
                     await call.message.delete()
-                if split_len == 0:
-                    await call.message.answer("\n\n".join(save_items), parse_mode="None")
-                else:
-                    for item in split_messages(save_items, split_len):
-                        await call.message.answer("\n\n".join(item), parse_mode="None")
-                        await asyncio.sleep(0.3)
 
-                update_userx(get_user['user_id'], user_balance=get_user['user_balance'] - amount_pay)
-                add_purchasex(get_user['user_id'], get_user['user_login'], get_user['user_name'], receipt, get_count,
-                              amount_pay, get_position['position_price'], get_position['position_id'],
-                              get_position['position_name'], "\n".join(save_items), buy_time, receipt,
-                              get_user['user_balance'], int(get_user['user_balance'] - amount_pay))
+                for item in split_messages(save_items, save_len):
+                    await call.message.answer("\n\n".join(item), parse_mode="None")
+                    await asyncio.sleep(0.3)
 
-                await call.message.answer(ded(f"""
-                                          <b>✅ Вы успешно купили товар(ы)</b>
-                                          ➖➖➖➖➖➖➖➖➖➖
-                                          🧾 Чек: <code>#{receipt}</code>
-                                          🎁 Товар: <code>{get_position['position_name']} | {get_count}шт | {amount_pay}₽</code>
-                                          🕰 Дата покупки: <code>{buy_time}</code>
-                                          """),
-                                          reply_markup=menu_frep(call.from_user.id))
+                await call.message.answer(
+                    ded(f"""
+                        <b>✅ Вы успешно купили товар(ы)</b>
+                        ➖➖➖➖➖➖➖➖➖➖
+                        🧾 Чек: <code>#{receipt}</code>
+                        🎁 Товар: <code>{get_position['position_name']} | {get_count}шт | {amount_pay}₽</code>
+                        🕰 Дата покупки: <code>{buy_time}</code>
+                    """),
+                    reply_markup=menu_frep(call.from_user.id),
+                )
             else:
                 await call.message.answer("<b>❗ На вашем счёте недостаточно средств</b>")
         else:
-            await call.message.answer("<b>🎁 Товар который вы хотели купить закончился или изменился.</b>",
-                                      reply_markup=menu_frep(call.from_user.id))
+            await call.message.answer(
+                "<b>🎁 Товар который вы хотели купить закончился или изменился.</b>",
+                reply_markup=menu_frep(call.from_user.id),
+            )
     else:
-        if len(get_all_categoriesx()) >= 1:
-            await call.message.edit_text("<b>🎁 Выберите нужный вам товар:</b>",
-                                         reply_markup=products_item_category_swipe_fp(0))
+        get_categories = get_all_categoriesx()
+
+        if len(get_categories) >= 1:
+            await call.message.edit_text(
+                "<b>🎁 Выберите нужный вам товар:</b>",
+                reply_markup=products_item_category_swipe_fp(0),
+            )
         else:
             await call.message.edit_text("<b>✅ Вы отменили покупку товаров.</b>")

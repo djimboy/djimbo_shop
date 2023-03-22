@@ -5,8 +5,9 @@ import configparser
 BOT_TOKEN = configparser.ConfigParser()
 BOT_TOKEN.read("settings.ini")
 BOT_TOKEN = BOT_TOKEN['settings']['token'].strip().replace(' ', '')
+BOT_TIMEZONE = "Europe/Moscow"  # Временная зона бота
 
-# Пути к файлам
+
 PATH_DATABASE = "tgbot/data/database.db"  # Путь к БД
 PATH_LOGS = "tgbot/data/logs.log"  # Путь к Логам
 BOT_VERSION = "3.3"  # Версия бота

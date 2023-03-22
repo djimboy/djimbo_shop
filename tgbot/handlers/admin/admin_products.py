@@ -6,17 +6,19 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.exceptions import CantParseEntities, MessageCantBeDeleted
 
 from tgbot.data.loader import dp
-from tgbot.keyboards.inline_admin import category_edit_open_finl, position_edit_open_finl, category_edit_delete_finl, \
-    position_edit_clear_finl, position_edit_delete_finl, position_edit_cancel_finl, category_edit_cancel_finl
-from tgbot.keyboards.inline_main import category_remove_confirm_inl, position_remove_confirm_inl, \
-    item_remove_confirm_inl, close_inl
+from tgbot.keyboards.inline_admin import (category_edit_open_finl, position_edit_open_finl, category_edit_delete_finl,
+                                          position_edit_clear_finl, position_edit_delete_finl,
+                                          position_edit_cancel_finl, category_edit_cancel_finl)
+from tgbot.keyboards.inline_main import (category_remove_confirm_inl, position_remove_confirm_inl,
+                                         item_remove_confirm_inl, close_inl)
 from tgbot.keyboards.inline_page import *
 from tgbot.keyboards.reply_main import finish_load_rep, items_frep
 from tgbot.middlewares.throttling import rate_limit
+from tgbot.services.api_session import AsyncSession
 from tgbot.services.api_sqlite import *
-from tgbot.utils.const_functions import clear_list
+from tgbot.utils.const_functions import clear_list, is_number, to_number
 from tgbot.utils.misc.bot_filters import IsAdmin
-from tgbot.utils.misc_functions import get_position_admin, upload_text
+from tgbot.utils.misc_functions import get_position_admin, upload_text, upload_photo
 
 
 # Создание новой категории
@@ -33,9 +35,13 @@ async def product_category_create(message: Message, state: FSMContext):
 async def product_category_edit(message: Message, state: FSMContext):
     await state.finish()
 
-    if len(get_all_categoriesx()) >= 1:
-        await message.answer("<b>🗃 Выберите категорию для изменения 🖍</b>",
-                             reply_markup=category_edit_swipe_fp(0))
+    get_categories = get_all_categoriesx()
+
+    if len(get_categories) >= 1:
+        await message.answer(
+            "<b>🗃 Выберите категорию для изменения 🖍</b>",
+            reply_markup=category_edit_swipe_fp(0),
+        )
     else:
         await message.answer("<b>❌ Отсутствуют категории для изменения категорий</b>")
 
@@ -45,9 +51,11 @@ async def product_category_edit(message: Message, state: FSMContext):
 async def product_category_remove(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🗃 Вы действительно хотите удалить все категории? ❌</b>\n"
-                         "❗ Так же будут удалены все позиции и товары",
-                         reply_markup=category_remove_confirm_inl)
+    await message.answer(
+        "<b>🗃 Вы действительно хотите удалить все категории? ❌</b>\n"
+        "❗ Так же будут удалены все позиции и товары",
+        reply_markup=category_remove_confirm_inl,
+    )
 
 
 # Создание новой позиции
@@ -55,9 +63,13 @@ async def product_category_remove(message: Message, state: FSMContext):
 async def product_position_create(message: Message, state: FSMContext):
     await state.finish()
 
-    if len(get_all_categoriesx()) >= 1:
-        await message.answer("<b>📁 Выберите категорию для позиции</b>",
-                             reply_markup=position_create_swipe_fp(0))
+    get_categories = get_all_categoriesx()
+
+    if len(get_categories) >= 1:
+        await message.answer(
+            "<b>📁 Выберите категорию для позиции</b>",
+            reply_markup=position_create_swipe_fp(0),
+        )
     else:
         await message.answer("<b>❌ Отсутствуют категории для создания позиции</b>")
 
@@ -67,9 +79,13 @@ async def product_position_create(message: Message, state: FSMContext):
 async def product_position_edit(message: Message, state: FSMContext):
     await state.finish()
 
-    if len(get_all_categoriesx()) >= 1:
-        await message.answer("<b>📁 Выберите категорию с нужной позицией 🖍</b>",
-                             reply_markup=position_edit_category_swipe_fp(0))
+    get_categories = get_all_categoriesx()
+
+    if len(get_categories) >= 1:
+        await message.answer(
+            "<b>📁 Выберите категорию с нужной позицией 🖍</b>",
+            reply_markup=position_edit_category_swipe_fp(0),
+        )
     else:
         await message.answer("<b>❌ Отсутствуют категории для изменения позиций</b>")
 
@@ -79,9 +95,11 @@ async def product_position_edit(message: Message, state: FSMContext):
 async def product_position_remove(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>📁 Вы действительно хотите удалить все позиции? ❌</b>\n"
-                         "❗ Так же будут удалены все товары",
-                         reply_markup=position_remove_confirm_inl)
+    await message.answer(
+        "<b>📁 Вы действительно хотите удалить все позиции? ❌</b>\n"
+        "❗ Так же будут удалены все товары",
+        reply_markup=position_remove_confirm_inl,
+    )
 
 
 # Начальные категории для добавления товаров
@@ -89,9 +107,13 @@ async def product_position_remove(message: Message, state: FSMContext):
 async def product_item_create(message: Message, state: FSMContext):
     await state.finish()
 
-    if len(get_all_positionsx()) >= 1:
-        await message.answer("<b>🎁 Выберите категорию с нужной позицией</b>",
-                             reply_markup=products_add_category_swipe_fp(0))
+    get_categories = get_all_categoriesx()
+
+    if len(get_categories) >= 1:
+        await message.answer(
+            "<b>🎁 Выберите категорию с нужной позицией</b>",
+            reply_markup=products_add_category_swipe_fp(0),
+        )
     else:
         await message.answer("<b>❌ Отсутствуют позиции для добавления товара</b>")
 
@@ -102,11 +124,13 @@ async def product_item_delete(message: Message, state: FSMContext):
     await state.finish()
 
     await state.set_state("here_items_delete")
-    await message.answer("<b>🖍 Вводите айди товаров, которые нужно удалить</b>\n"
-                         "❕ Получить айди товаров можно при изменении позиции\n"
-                         "❕ Если хотите удалить несколько товаров, отправьте ID товаров через запятую или пробел. Пример:\n"
-                         "<code>▶ 123456,123456,123456</code>\n"
-                         "<code>▶ 123456 123456 123456</code>")
+    await message.answer(
+        "<b>🖍 Вводите айди товаров, которые нужно удалить</b>\n"
+        "❕ Получить айди товаров можно при изменении позиции\n"
+        "❕ Если хотите удалить несколько товаров, отправьте ID товаров через запятую или пробел. Пример:\n"
+        "<code>▶ 123456,123456,123456</code>\n"
+        "<code>▶ 123456 123456 123456</code>",
+    )
 
 
 # Кнопки с подтверждением удаления всех категорий
@@ -114,8 +138,10 @@ async def product_item_delete(message: Message, state: FSMContext):
 async def product_item_remove(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🎁 Вы действительно хотите удалить все товары? ❌</b>\n",
-                         reply_markup=item_remove_confirm_inl)
+    await message.answer(
+        "<b>🎁 Вы действительно хотите удалить все товары? ❌</b>\n",
+        reply_markup=item_remove_confirm_inl,
+    )
 
 
 ################################################################################################
@@ -132,10 +158,12 @@ async def product_category_create_name(message: Message, state: FSMContext):
         get_positions = len(get_positionsx(category_id=category_id))
         get_category = get_categoryx(category_id=category_id)
 
-        await message.answer(f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
-                             "➖➖➖➖➖➖➖➖➖➖➖➖\n"
-                             f"📁 Кол-во позиций: <code>{get_positions}шт</code>",
-                             reply_markup=category_edit_open_finl(category_id, 0))
+        await message.answer(
+            f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
+            "➖➖➖➖➖➖➖➖➖➖➖➖\n"
+            f"📁 Кол-во позиций: <code>{get_positions}шт</code>",
+            reply_markup=category_edit_open_finl(category_id, 0),
+        )
     else:
         await message.answer("<b>❌ Название не может превышать 50 символов.</b>\n"
                              "🗃 Введите название для категории 🏷")
@@ -154,10 +182,12 @@ async def product_category_edit_open(call: CallbackQuery, state: FSMContext):
     get_positions = len(get_positionsx(category_id=category_id))
     get_category = get_categoryx(category_id=category_id)
 
-    await call.message.edit_text(f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
-                                 "➖➖➖➖➖➖➖➖➖➖➖➖\n"
-                                 f"📁 Кол-во позиций: <code>{get_positions}шт</code>",
-                                 reply_markup=category_edit_open_finl(category_id, remover))
+    await call.message.edit_text(
+        f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
+        "➖➖➖➖➖➖➖➖➖➖➖➖\n"
+        f"📁 Кол-во позиций: <code>{get_positions}шт</code>",
+        reply_markup=category_edit_open_finl(category_id, remover),
+    )
 
 
 # Страница выбора категорий для редактирования
@@ -165,8 +195,10 @@ async def product_category_edit_open(call: CallbackQuery, state: FSMContext):
 async def product_category_edit_swipe(call: CallbackQuery, state: FSMContext):
     remover = int(call.data.split(":")[1])
 
-    await call.message.edit_text("<b>🗃 Выберите категорию для изменения 🖍</b>",
-                                 reply_markup=category_edit_swipe_fp(remover))
+    await call.message.edit_text(
+        "<b>🗃 Выберите категорию для изменения 🖍</b>",
+        reply_markup=category_edit_swipe_fp(remover),
+    )
 
 
 ######################################## САМО ИЗМЕНЕНИЕ КАТЕГОРИИ ########################################
@@ -182,13 +214,15 @@ async def product_category_edit_name(call: CallbackQuery, state: FSMContext):
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await state.set_state("here_change_category_name")
-    await call.message.answer("<b>🗃 Введите новое название для категории 🏷</b>",
-                              reply_markup=category_edit_cancel_finl(category_id, remover))
+    await state.set_state("here_category_edit_name")
+    await call.message.answer(
+        "<b>🗃 Введите новое название для категории 🏷</b>",
+        reply_markup=category_edit_cancel_finl(category_id, remover),
+    )
 
 
-# Принятие нового имени для категории
-@dp.message_handler(IsAdmin(), state="here_change_category_name")
+# Принятие нового названия для категории
+@dp.message_handler(IsAdmin(), state="here_category_edit_name")
 async def product_category_edit_name_get(message: Message, state: FSMContext):
     category_id = (await state.get_data())['here_cache_category_id']
     remover = (await state.get_data())['here_cache_category_remover']
@@ -201,14 +235,18 @@ async def product_category_edit_name_get(message: Message, state: FSMContext):
         get_positions = get_positionsx(category_id=category_id)
         get_category = get_categoryx(category_id=category_id)
 
-        await message.answer(f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
-                             "➖➖➖➖➖➖➖➖➖➖➖➖\n"
-                             f"📁 Кол-во позиций: <code>{len(get_positions)}шт</code>",
-                             reply_markup=category_edit_open_finl(category_id, remover))
+        await message.answer(
+            f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
+            "➖➖➖➖➖➖➖➖➖➖➖➖\n"
+            f"📁 Кол-во позиций: <code>{len(get_positions)}шт</code>",
+            reply_markup=category_edit_open_finl(category_id, remover),
+        )
     else:
-        await message.answer("<b>❌ Название не может превышать 50 символов.</b>\n"
-                             "🗃 Введите новое название для категории 🏷",
-                             reply_markup=category_edit_cancel_finl(category_id, remover))
+        await message.answer(
+            "<b>❌ Название не может превышать 50 символов.</b>\n"
+            "🗃 Введите новое название для категории 🏷",
+            reply_markup=category_edit_cancel_finl(category_id, remover),
+        )
 
 
 # Окно с уточнением удалить категорию
@@ -217,8 +255,10 @@ async def product_category_edit_delete(call: CallbackQuery, state: FSMContext):
     category_id = call.data.split(":")[1]
     remover = int(call.data.split(":")[2])
 
-    await call.message.edit_text("<b>❗ Вы действительно хотите удалить категорию и все её данные?</b>",
-                                 reply_markup=category_edit_delete_finl(category_id, remover))
+    await call.message.edit_text(
+        "<b>❗ Вы действительно хотите удалить категорию и все её данные?</b>",
+        reply_markup=category_edit_delete_finl(category_id, remover),
+    )
 
 
 # Отмена удаления категории
@@ -229,9 +269,9 @@ async def product_category_edit_delete_confirm(call: CallbackQuery, state: FSMCo
     remover = int(call.data.split(":")[3])
 
     if get_action == "yes":
-        remove_categoryx(category_id=category_id)
-        remove_positionx(category_id=category_id)
-        remove_itemx(category_id=category_id)
+        delete_categoryx(category_id=category_id)
+        delete_positionx(category_id=category_id)
+        delete_itemx(category_id=category_id)
 
         await call.answer("🗃 Категория и все её данные были успешно удалены ✅")
         if len(get_all_categoriesx()) >= 1:
@@ -244,10 +284,12 @@ async def product_category_edit_delete_confirm(call: CallbackQuery, state: FSMCo
         get_fat_count = len(get_positionsx(category_id=category_id))
         get_category = get_categoryx(category_id=category_id)
 
-        await call.message.edit_text(f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
-                                     "➖➖➖➖➖➖➖➖➖➖➖➖\n"
-                                     f"📁 Кол-во позиций: <code>{get_fat_count}шт</code>",
-                                     reply_markup=category_edit_open_finl(category_id, remover))
+        await call.message.edit_text(
+            f"<b>🗃 Категория: <code>{get_category['category_name']}</code></b>\n"
+            "➖➖➖➖➖➖➖➖➖➖➖➖\n"
+            f"📁 Кол-во позиций: <code>{get_fat_count}шт</code>",
+            reply_markup=category_edit_open_finl(category_id, remover),
+        )
 
 
 ################################################################################################
@@ -268,7 +310,8 @@ async def product_category_remove_confirm(call: CallbackQuery, state: FSMContext
 
         await call.message.edit_text(
             f"<b>🗃 Вы удалили все категории<code>({get_categories}шт)</code>, "
-            f"позиции<code>({get_positions}шт)</code> и товары<code>({get_items}шт)</code> ☑</b>")
+            f"позиции<code>({get_positions}шт)</code> и товары<code>({get_items}шт)</code> ☑</b>"
+        )
     else:
         await call.message.edit_text("<b>🗃 Вы отменили удаление всех категорий ✅</b>")
 
@@ -280,8 +323,10 @@ async def product_category_remove_confirm(call: CallbackQuery, state: FSMContext
 async def product_position_create_swipe(call: CallbackQuery, state: FSMContext):
     remover = int(call.data.split(":")[1])
 
-    await call.message.edit_text("<b>📁 Выберите категорию для позиции ➕</b>",
-                                 reply_markup=position_create_swipe_fp(remover))
+    await call.message.edit_text(
+        "<b>📁 Выберите категорию для позиции ➕</b>",
+        reply_markup=position_create_swipe_fp(remover),
+    )
 
 
 # Выбор категории для создания позиции
@@ -295,7 +340,7 @@ async def product_position_create_select_category(call: CallbackQuery, state: FS
     await call.message.edit_text("<b>📁 Введите название для позиции 🏷</b>")
 
 
-# Принятие имени для создания позиции
+# Принятие названия для создания позиции
 @dp.message_handler(IsAdmin(), state="here_position_name")
 async def product_position_create_name(message: Message, state: FSMContext):
     if len(message.text) <= 50:
@@ -311,30 +356,31 @@ async def product_position_create_name(message: Message, state: FSMContext):
 # Принятие цены позиции для её создания
 @dp.message_handler(IsAdmin(), state="here_position_price")
 async def product_position_create_price(message: Message, state: FSMContext):
-    if message.text.isdigit():
-        if 0 <= int(message.text) <= 10000000:
-            await state.update_data(here_position_price=message.text)
+    if not is_number(message.text):
+        return await message.answer("<b>❌ Данные были введены неверно.</b>\n"
+                                    "📁 Введите цену для позиции 💰")
 
-            await state.set_state("here_position_description")
-            await message.answer("<b>📁 Введите описание для позиции 📜</b>\n"
-                                 "❕ Вы можете использовать HTML разметку\n"
-                                 "❕ Отправьте <code>0</code> чтобы пропустить.")
-        else:
-            await message.answer("<b>❌ Цена не может быть меньше 0₽ или больше 10 000 000₽.</b>\n"
-                                 "📁 Введите цену для позиции 💰")
-    else:
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
+    if to_number(message.text) > 10000000 or to_number(message.text) < 0:
+        await message.answer("<b>❌ Цена не может быть меньше 0₽ или больше 10 000 000₽.</b>\n"
                              "📁 Введите цену для позиции 💰")
+
+    await state.update_data(here_position_price=to_number(message.text))
+
+    await state.set_state("here_position_description")
+    await message.answer(
+        "<b>📁 Введите описание для позиции 📜</b>\n"
+        "❕ Вы можете использовать HTML разметку\n"
+        "❕ Отправьте <code>0</code> чтобы пропустить.",
+    )
 
 
 # Принятие описания позиции для её создания
 @dp.message_handler(IsAdmin(), state="here_position_description")
 async def product_position_create_description(message: Message, state: FSMContext):
     try:
-        if len(message.text) <= 600:
+        if len(message.text) <= 400:
             if message.text != "0":
-                cache_msg = await message.answer(message.text)
-                await cache_msg.delete()
+                await (await message.answer(message.text)).delete()
 
             await state.update_data(here_position_description=message.text)
 
@@ -342,7 +388,7 @@ async def product_position_create_description(message: Message, state: FSMContex
             await message.answer("<b>📁 Отправьте изображение для позиции 📸</b>\n"
                                  "❕ Отправьте <code>0</code> чтобы пропустить.")
         else:
-            await message.answer("<b>❌ Описание не может превышать 600 символов.</b>\n"
+            await message.answer("<b>❌ Описание не может превышать 400 символов.</b>\n"
                                  "📁 Введите новое описание для позиции 📜\n"
                                  "❕ Вы можете использовать HTML разметку\n"
                                  "❕ Отправьте <code>0</code> чтобы пропустить.")
@@ -358,16 +404,21 @@ async def product_position_create_description(message: Message, state: FSMContex
 @dp.message_handler(IsAdmin(), text="0", state="here_position_photo")
 async def product_position_create_photo(message: Message, state: FSMContext):
     async with state.proxy() as data:
-        position_name = clear_html(data['here_position_name'])
-        position_price = data['here_position_price']
         category_id = data['here_cache_change_category_id']
+        position_name = clear_html(data['here_position_name'])
+        position_price = to_number(data['here_position_price'])
         position_description = data['here_position_description']
     await state.finish()
 
     position_id, position_photo = get_unix(), ""
 
     if "text" not in message:
-        position_photo = message.photo[-1].file_id
+        file_path = (await message.bot.get_file(message.photo[-1].file_id)).file_path
+        photo_path = await message.bot.download_file(file_path)
+
+        rSession: AsyncSession = message.bot['rSession']
+
+        position_photo = await upload_photo(rSession, photo_path)
 
     add_positionx(position_id, position_name, position_price, position_description, position_photo, category_id)
     get_message, get_photo = get_position_admin(position_id)
@@ -390,8 +441,10 @@ async def product_position_edit_category_open(call: CallbackQuery, state: FSMCon
     get_positions = get_positionsx(category_id=category_id)
 
     if len(get_positions) >= 1:
-        await call.message.edit_text("<b>📁 Выберите нужную вам позицию 🖍</b>",
-                                     reply_markup=position_edit_swipe_fp(0, category_id))
+        await call.message.edit_text(
+            "<b>📁 Выберите нужную вам позицию 🖍</b>",
+            reply_markup=position_edit_swipe_fp(0, category_id),
+        )
     else:
         await call.answer(f"📁 Позиции в категории {get_category['category_name']} отсутствуют")
 
@@ -401,8 +454,10 @@ async def product_position_edit_category_open(call: CallbackQuery, state: FSMCon
 async def product_position_edit_category_swipe(call: CallbackQuery, state: FSMContext):
     remover = int(call.data.split(":")[1])
 
-    await call.message.edit_text("<b>📁 Выберите категорию с нужной позицией 🖍</b>",
-                                 reply_markup=position_edit_category_swipe_fp(remover))
+    await call.message.edit_text(
+        "<b>📁 Выберите категорию с нужной позицией 🖍</b>",
+        reply_markup=position_edit_category_swipe_fp(remover),
+    )
 
 
 # Выбор позиции для редактирования
@@ -434,12 +489,14 @@ async def product_position_edit_swipe(call: CallbackQuery, state: FSMContext):
 
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
-    await call.message.answer("<b>📁 Выберите категорию с нужной позицией 🖍</b>",
-                              reply_markup=position_edit_swipe_fp(remover, category_id))
+    await call.message.answer(
+        "<b>📁 Выберите категорию с нужной позицией 🖍</b>",
+        reply_markup=position_edit_swipe_fp(remover, category_id),
+    )
 
 
 ######################################## САМО ИЗМЕНЕНИЕ ПОЗИЦИИ ########################################
-# Изменение имени позиции
+# Изменение названия позиции
 @dp.callback_query_handler(IsAdmin(), text_startswith="position_edit_name:", state="*")
 async def product_position_edit_name(call: CallbackQuery, state: FSMContext):
     position_id = call.data.split(":")[1]
@@ -453,13 +510,15 @@ async def product_position_edit_name(call: CallbackQuery, state: FSMContext):
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await state.set_state("here_change_position_name")
-    await call.message.answer("<b>📁 Введите новое название для позиции 🏷</b>",
-                              reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+    await state.set_state("here_position_edit_name")
+    await call.message.answer(
+        "<b>📁 Введите новое название для позиции 🏷</b>",
+        reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+    )
 
 
-# Принятие имени позиции для её изменения
-@dp.message_handler(IsAdmin(), state="here_change_position_name")
+# Принятие названия позиции для её изменения
+@dp.message_handler(IsAdmin(), state="here_position_edit_name")
 async def product_position_edit_name_get(message: Message, state: FSMContext):
     async with state.proxy() as data:
         position_id = data['here_cache_position_id']
@@ -478,9 +537,11 @@ async def product_position_edit_name_get(message: Message, state: FSMContext):
         else:
             await message.answer(get_message, reply_markup=position_edit_open_finl(position_id, category_id, remover))
     else:
-        await message.answer("<b>❌ Название не может превышать 50 символов.</b>\n"
-                             "📁 Введите новое название для позиции 🏷",
-                             reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+        await message.answer(
+            "<b>❌ Название не может превышать 50 символов.</b>\n"
+            "📁 Введите новое название для позиции 🏷",
+            reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+        )
 
 
 # Изменение цены позиции
@@ -497,40 +558,46 @@ async def product_position_edit_price(call: CallbackQuery, state: FSMContext):
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await state.set_state("here_change_position_price")
-    await call.message.answer("<b>📁 Введите новую цену для позиции 💰</b>",
-                              reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+    await state.set_state("here_position_edit_price")
+    await call.message.answer(
+        "<b>📁 Введите новую цену для позиции 💰</b>",
+        reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+    )
 
 
 # Принятие цены позиции для её изменения
-@dp.message_handler(IsAdmin(), state="here_change_position_price")
+@dp.message_handler(IsAdmin(), state="here_position_edit_price")
 async def product_position_edit_price_get(message: Message, state: FSMContext):
     async with state.proxy() as data:
         position_id = data['here_cache_position_id']
         category_id = data['here_cache_category_id']
         remover = data['here_cache_position_remover']
 
-    if message.text.isdigit():
-        if 0 <= int(message.text) <= 10000000:
-            await state.finish()
+    if not is_number(message.text):
+        await message.answer(
+            "<b>❌ Данные были введены неверно.</b>\n"
+            "📁 Введите цену для позиции 💰",
+            reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+        )
 
-            update_positionx(position_id, position_price=message.text)
-            get_message, get_photo = get_position_admin(position_id)
+    if to_number(message.text) > 10000000 or to_number(message.text) < 0:
+        await message.answer(
+            "<b>❌ Цена не может быть меньше 0₽ или больше 10 000 000₽.</b>\n"
+            "📁 Введите цену для позиции 💰",
+            reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+        )
 
-            if get_photo is not None:
-                await message.answer_photo(get_photo, get_message,
-                                           reply_markup=position_edit_open_finl(position_id, category_id, remover))
-            else:
-                await message.answer(get_message,
-                                     reply_markup=position_edit_open_finl(position_id, category_id, remover))
-        else:
-            await message.answer("<b>❌ Цена не может быть меньше 0₽ или больше 10 000 000₽.</b>\n"
-                                 "📁 Введите цену для позиции 💰",
-                                 reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+    await state.finish()
+
+    update_positionx(position_id, position_price=to_number(message.text))
+    get_message, get_photo = get_position_admin(position_id)
+
+    if get_photo is not None:
+        await message.answer_photo(get_photo, get_message,
+                                   reply_markup=position_edit_open_finl(position_id, category_id, remover))
     else:
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                             "📁 Введите цену для позиции 💰",
-                             reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+        await message.answer(get_message,
+                             reply_markup=position_edit_open_finl(position_id, category_id, remover))
 
 
 # Изменение описания позиции
@@ -547,15 +614,17 @@ async def product_position_edit_description(call: CallbackQuery, state: FSMConte
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await state.set_state("here_change_position_description")
-    await call.message.answer("<b>📁 Введите новое описание для позиции 📜</b>\n"
-                              "❕ Вы можете использовать HTML разметку\n"
-                              "❕ Отправьте <code>0</code> чтобы пропустить.",
-                              reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+    await state.set_state("here_position_edit_description")
+    await call.message.answer(
+        "<b>📁 Введите новое описание для позиции 📜</b>\n"
+        "❕ Вы можете использовать HTML разметку\n"
+        "❕ Отправьте <code>0</code> чтобы пропустить.",
+        reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+    )
 
 
 # Принятие описания позиции для её изменения
-@dp.message_handler(IsAdmin(), state="here_change_position_description")
+@dp.message_handler(IsAdmin(), state="here_position_edit_description")
 async def product_position_edit_description_get(message: Message, state: FSMContext):
     async with state.proxy() as data:
         category_id = data['here_cache_category_id']
@@ -563,12 +632,11 @@ async def product_position_edit_description_get(message: Message, state: FSMCont
         remover = data['here_cache_position_remover']
 
     try:
-        if len(message.text) <= 600:
+        if len(message.text) <= 400:
             await state.finish()
 
             if message.text != "0":
-                cache_msg = await message.answer(message.text)
-                await cache_msg.delete()
+                await (await message.answer(message.text)).delete()
 
             update_positionx(position_id, position_description=message.text)
             get_message, get_photo = get_position_admin(position_id)
@@ -580,17 +648,21 @@ async def product_position_edit_description_get(message: Message, state: FSMCont
                 await message.answer(get_message,
                                      reply_markup=position_edit_open_finl(position_id, category_id, remover))
         else:
-            await message.answer("<b>❌ Описание не может превышать 600 символов.</b>\n"
-                                 "📁 Введите новое описание для позиции 📜\n"
-                                 "❕ Вы можете использовать HTML разметку\n"
-                                 "❕ Отправьте <code>0</code> чтобы пропустить.",
-                                 reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+            await message.answer(
+                "<b>❌ Описание не может превышать 400 символов.</b>\n"
+                "📁 Введите новое описание для позиции 📜\n"
+                "❕ Вы можете использовать HTML разметку\n"
+                "❕ Отправьте <code>0</code> чтобы пропустить.",
+                reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+            )
     except CantParseEntities:
-        await message.answer("<b>❌ Ошибка синтаксиса HTML.</b>\n"
-                             "📁 Введите новое описание для позиции 📜\n"
-                             "❕ Вы можете использовать HTML разметку\n"
-                             "❕ Отправьте <code>0</code> чтобы пропустить.",
-                             reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+        await message.answer(
+            "<b>❌ Ошибка синтаксиса HTML.</b>\n"
+            "📁 Введите новое описание для позиции 📜\n"
+            "❕ Вы можете использовать HTML разметку\n"
+            "❕ Отправьте <code>0</code> чтобы пропустить.",
+            reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+        )
 
 
 # Изменение изображения позиции
@@ -607,15 +679,17 @@ async def product_position_edit_photo(call: CallbackQuery, state: FSMContext):
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
 
-    await state.set_state("here_change_position_photo")
-    await call.message.answer("<b>📁 Отправьте новое изображение для позиции 📸</b>\n"
-                              "❕ Отправьте <code>0</code> чтобы пропустить.",
-                              reply_markup=position_edit_cancel_finl(position_id, category_id, remover))
+    await state.set_state("here_position_edit_photo")
+    await call.message.answer(
+        "<b>📁 Отправьте новое изображение для позиции 📸</b>\n"
+        "❕ Отправьте <code>0</code> чтобы пропустить.",
+        reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
+    )
 
 
 # Принятие нового фото для позиции
-@dp.message_handler(IsAdmin(), content_types="photo", state="here_change_position_photo")
-@dp.message_handler(IsAdmin(), text="0", state="here_change_position_photo")
+@dp.message_handler(IsAdmin(), content_types="photo", state="here_position_edit_photo")
+@dp.message_handler(IsAdmin(), text="0", state="here_position_edit_photo")
 async def product_position_edit_photo_get(message: Message, state: FSMContext):
     async with state.proxy() as data:
         position_id = data['here_cache_position_id']
@@ -626,7 +700,12 @@ async def product_position_edit_photo_get(message: Message, state: FSMContext):
     if "text" in message:
         position_photo = ""
     else:
-        position_photo = message.photo[-1].file_id
+        file_path = (await message.bot.get_file(message.photo[-1].file_id)).file_path
+        photo_path = await message.bot.download_file(file_path)
+
+        rSession: AsyncSession = message.bot['rSession']
+
+        position_photo = await upload_photo(rSession, photo_path)
 
     update_positionx(position_id, position_photo=position_photo)
     get_message, get_photo = get_position_admin(position_id)
@@ -647,7 +726,7 @@ async def product_position_edit_items(call: CallbackQuery, state: FSMContext):
 
     get_position = get_positionx(position_id=position_id)
     get_items = get_itemsx(position_id=position_id)
-    save_items = ['АйдиТовара   -   Данные товара', "================================"]
+    save_items = ['Айди Товара   -   Данные товара', "================================"]
 
     if len(get_items) >= 1:
         for item in get_items: save_items.append(f"{item['item_id']} - {item['item_data']}")
@@ -671,8 +750,10 @@ async def product_position_edit_delete(call: CallbackQuery, state: FSMContext):
 
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
-    await call.message.answer("<b>📁 Вы действительно хотите удалить позицию? ❌</b>",
-                              reply_markup=position_edit_delete_finl(position_id, category_id, remover))
+    await call.message.answer(
+        "<b>📁 Вы действительно хотите удалить позицию? ❌</b>",
+        reply_markup=position_edit_delete_finl(position_id, category_id, remover),
+    )
 
 
 # Подтверждение удаления позиции
@@ -684,14 +765,16 @@ async def product_position_edit_delete_confirm(call: CallbackQuery, state: FSMCo
     remover = int(call.data.split(":")[4])
 
     if get_action == "yes":
-        remove_itemx(position_id=position_id)
-        remove_positionx(position_id=position_id)
+        delete_itemx(position_id=position_id)
+        delete_positionx(position_id=position_id)
 
         await call.answer("📁 Вы успешно удалили позицию и её товары ✅")
 
         if len(get_positionsx(category_id=category_id)) >= 1:
-            await call.message.edit_text("<b>📁 Выберите нужную вам позицию 🖍</b>",
-                                         reply_markup=position_edit_swipe_fp(remover, category_id))
+            await call.message.edit_text(
+                "<b>📁 Выберите нужную вам позицию 🖍</b>",
+                reply_markup=position_edit_swipe_fp(remover, category_id),
+            )
         else:
             with suppress(MessageCantBeDeleted):
                 await call.message.delete()
@@ -718,8 +801,10 @@ async def product_position_edit_clear(call: CallbackQuery, state: FSMContext):
 
     with suppress(MessageCantBeDeleted):
         await call.message.delete()
-    await call.message.answer("<b>📁 Вы хотите удалить все товары позиции?</b>",
-                              reply_markup=position_edit_clear_finl(position_id, category_id, remover))
+    await call.message.answer(
+        "<b>📁 Вы хотите удалить все товары позиции?</b>",
+        reply_markup=position_edit_clear_finl(position_id, category_id, remover),
+    )
 
 
 # Согласие очистики позиции
@@ -731,7 +816,7 @@ async def product_position_edit_clear_confirm(call: CallbackQuery, state: FSMCon
     remover = int(call.data.split(":")[4])
 
     if get_action == "yes":
-        remove_itemx(position_id=position_id)
+        delete_itemx(position_id=position_id)
         await call.answer("📁 Вы успешно удалили все товары позиции ✅")
 
     get_message, get_photo = get_position_admin(position_id)
@@ -762,7 +847,8 @@ async def product_position_remove(call: CallbackQuery, state: FSMContext):
         clear_itemx()
 
         await call.message.edit_text(
-            f"<b>📁 Вы удалили все позиции<code>({get_positions}шт)</code> и товары<code>({get_items}шт)</code> ☑</b>")
+            f"<b>📁 Вы удалили все позиции<code>({get_positions}шт)</code> и товары<code>({get_items}шт)</code> ☑</b>"
+        )
     else:
         await call.message.edit_text("<b>📁 Вы отменили удаление всех позиций ✅</b>")
 
@@ -782,8 +868,10 @@ async def product_item_category_open(call: CallbackQuery, state: FSMContext):
         await call.message.delete()
 
     if len(get_positions) >= 1:
-        await call.message.answer("<b>🎁 Выберите нужную вам позицию</b>",
-                                  reply_markup=products_add_position_swipe_fp(0, category_id))
+        await call.message.answer(
+            "<b>🎁 Выберите нужную вам позицию</b>",
+            reply_markup=products_add_position_swipe_fp(0, category_id),
+        )
     else:
         await call.answer(f"🎁 Позиции в категории {get_category['category_name']} отсутствуют")
 
@@ -794,8 +882,10 @@ async def product_item_category_swipe(call: CallbackQuery, state: FSMContext):
     category_id = call.data.split(":")[1]
     remover = int(call.data.split(":")[1])
 
-    await call.message.edit_text("<b>🎁 Выберите категорию с нужной позицией</b>",
-                                 reply_markup=products_add_category_swipe_fp(remover))
+    await call.message.edit_text(
+        "<b>🎁 Выберите категорию с нужной позицией</b>",
+        reply_markup=products_add_category_swipe_fp(remover),
+    )
 
 
 # Перемещение по страницам позиций для добавления товаров
@@ -804,8 +894,10 @@ async def product_item_position_swipe(call: CallbackQuery, state: FSMContext):
     category_id = call.data.split(":")[1]
     remover = int(call.data.split(":")[2])
 
-    await call.message.edit_text("<b>🎁 Выберите нужную вам позицию</b>",
-                                 reply_markup=products_add_position_swipe_fp(remover, category_id))
+    await call.message.edit_text(
+        "<b>🎁 Выберите нужную вам позицию</b>",
+        reply_markup=products_add_position_swipe_fp(remover, category_id),
+    )
 
 
 # Выбор позиции для добавления товаров
@@ -823,12 +915,14 @@ async def product_item_position_open(call: CallbackQuery, state: FSMContext):
         await call.message.delete()
 
     await state.set_state("here_add_items")
-    await call.message.answer("<b>📤 Отправьте данные товаров.</b>\n"
-                              "❗ Товары разделяются одной пустой строчкой. Пример:\n"
-                              "<code>Данные товара...\n\n"
-                              "Данные товара...\n\n"
-                              "Данные товара...</code>",
-                              reply_markup=finish_load_rep)
+    await call.message.answer(
+        "<b>📤 Отправьте данные товаров.</b>\n"
+        "❗ Товары разделяются одной пустой строчкой. Пример:\n"
+        "<code>Данные товара...\n\n"
+        "Данные товара...\n\n"
+        "Данные товара...</code>",
+        reply_markup=finish_load_rep,
+    )
 
 
 # Завершение загрузки товаров
@@ -843,9 +937,11 @@ async def product_item_load_finish(message: Message, state: FSMContext):
         pass
 
     await state.finish()
-    await message.answer("<b>📥 Загрузка товаров была успешно завершена ✅\n"
-                         f"▶ Загружено товаров: <code>{get_all_items}шт</code></b>",
-                         reply_markup=items_frep())
+    await message.answer(
+        "<b>📥 Загрузка товаров была успешно завершена ✅\n"
+        f"▶ Загружено товаров: <code>{get_all_items}шт</code></b>",
+        reply_markup=items_frep(),
+    )
 
 
 # Принятие данных товара
@@ -903,7 +999,7 @@ async def product_item_delete_get(message: Message, state: FSMContext):
     for item_id in save_ids:
         check_item = get_itemx(item_id=item_id)
         if check_item is not None:
-            remove_itemx(item_id=item_id)
+            delete_itemx(item_id=item_id)
             remove_ids.append(item_id)
         else:
             cancel_ids.append(item_id)
@@ -911,11 +1007,13 @@ async def product_item_delete_get(message: Message, state: FSMContext):
     remove_ids = ", ".join(remove_ids)
     cancel_ids = ", ".join(cancel_ids)
 
-    await message.answer(f"<b>✅ Успешно удалённые товары:\n"
-                         f"▶ <code>{remove_ids}</code>\n"
-                         f"➖➖➖➖➖➖➖➖➖➖\n"
-                         f"❌ Ненайденные товары:\n"
-                         f"▶ <code>{cancel_ids}</code></b>")
+    await message.answer(
+        f"<b>✅ Успешно удалённые товары:\n"
+        f"▶ <code>{remove_ids}</code>\n"
+        f"➖➖➖➖➖➖➖➖➖➖\n"
+        f"❌ Ненайденные товары:\n"
+        f"▶ <code>{cancel_ids}</code></b>",
+    )
 
 
 ################################################################################################

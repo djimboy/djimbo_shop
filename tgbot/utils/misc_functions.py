@@ -10,14 +10,15 @@ from tgbot.data.config import get_admins, BOT_VERSION, BOT_DESCRIPTION, PATH_DAT
 from tgbot.data.loader import bot
 from tgbot.keyboards.reply_main import menu_frep
 from tgbot.services.api_session import AsyncSession
-from tgbot.services.api_sqlite import get_settingsx, update_settingsx, get_userx, get_purchasesx, get_all_positionsx, \
-    update_positionx, get_all_categoriesx, get_all_purchasesx, get_all_refillx, get_all_usersx, get_all_itemsx, \
-    get_itemsx, get_positionx, get_categoryx
+from tgbot.services.api_sqlite import (get_settingsx, update_settingsx, get_userx, get_purchasesx, get_all_positionsx,
+                                       get_all_categoriesx, get_all_purchasesx, get_all_refillx,
+                                       get_all_usersx, get_all_itemsx,
+                                       get_itemsx, get_positionx, get_categoryx)
 from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
 
 
 # Уведомление и проверка обновления при запуске бота
-async def startup_notify(dp: Dispatcher, aSession: AsyncSession):
+async def startup_notify(dp: Dispatcher, rSession: AsyncSession):
     if len(get_admins()) >= 1:
         await send_admins(ded(f"""
                           <b>✅ Бот был успешно запущен</b>
@@ -27,7 +28,7 @@ async def startup_notify(dp: Dispatcher, aSession: AsyncSession):
                           <code>❗ Данное сообщение видят только администраторы бота.</code>
                           """),
                           markup="default")
-        await check_update(aSession)
+        await check_update(rSession)
 
 
 # Рассылка сообщения всем администраторам
@@ -44,7 +45,7 @@ async def send_admins(message, markup=None, not_me=0):
 
 # Автоматическая очистка ежедневной статистики после 00:00
 async def update_profit_day():
-    await send_admins(get_statisctics())
+    await send_admins(get_statistics())
 
     update_settingsx(misc_profit_day=get_unix())
 
@@ -59,17 +60,19 @@ async def autobackup_admin():
     for admin in get_admins():
         with open(PATH_DATABASE, "rb") as document:
             try:
-                await bot.send_document(admin,
-                                        document,
-                                        caption=f"<b>📦 AUTOBACKUP</b>\n"
-                                                f"🕰 <code>{get_date()}</code>")
+                await bot.send_document(
+                    admin,
+                    document,
+                    caption=f"<b>📦 AUTOBACKUP</b>\n"
+                            f"🕰 <code>{get_date()}</code>",
+                )
             except:
                 pass
 
 
 # Автоматическая проверка обновления каждые 24 часа
-async def check_update(aSession: AsyncSession):
-    session = await aSession.get_session()
+async def check_update(rSession: AsyncSession):
+    session = await rSession.get_session()
 
     try:
         response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
@@ -80,18 +83,20 @@ async def check_update(aSession: AsyncSession):
             if "*****" in get_bot_update[2]:
                 get_bot_update[2] = get_bot_update[2].replace("*****", "\n")
 
-            await send_admins(f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
-                              f"➖➖➖➖➖➖➖➖➖➖\n"
-                              f"{get_bot_update[2]}\n"
-                              f"➖➖➖➖➖➖➖➖➖➖\n"
-                              f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
+            await send_admins(
+                f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
+                f"➖➖➖➖➖➖➖➖➖➖\n"
+                f"{get_bot_update[2]}\n"
+                f"➖➖➖➖➖➖➖➖➖➖\n"
+                f"<code>❗ Данное сообщение видят только администраторы бота.</code>",
+            )
     except Exception as ex:
-        print(f"Error check update: {ex}")
+        print(f"myError check update: {ex}")
 
 
 # Расссылка админам об критических ошибках и обновлениях
-async def check_mail(aSession: AsyncSession):
-    session = await aSession.get_session()
+async def check_mail(rSession: AsyncSession):
+    session = await rSession.get_session()
 
     try:
         response = await session.get("https://sites.google.com/view/check-mail-autoshop/main-page", ssl=False)
@@ -102,11 +107,13 @@ async def check_mail(aSession: AsyncSession):
             if "*****" in response[1]:
                 response[1] = response[1].replace("*****", "\n")
 
-            await send_admins(f"{response[1]}\n"
-                              f"➖➖➖➖➖➖➖➖➖➖\n"
-                              f"<code>❗ Данное сообщение видят только администраторы бота.</code>")
+            await send_admins(
+                f"{response[1]}\n"
+                f"➖➖➖➖➖➖➖➖➖➖\n"
+                f"<code>❗ Данное сообщение видят только администраторы бота.</code>",
+            )
     except Exception as ex:
-        print(f"Error check mail: {ex}")
+        print(f"myError check mail: {ex}")
 
 
 # Получение faq
@@ -125,15 +132,17 @@ def get_faq(user_id: Union[int, str], send_message: str) -> str:
 
 # Загрузка текста на текстовый хостинг
 async def upload_text(dp, get_text) -> str:
-    aSession: AsyncSession = dp.bot['aSession']
-    session = await aSession.get_session()
+    rSession: AsyncSession = dp.bot['rSession']
+    session = await rSession.get_session()
 
     spare_pass = False
     await asyncio.sleep(0.5)
 
     try:
-        response = await session.post("http://pastie.org/pastes/create",
-                                      data={"language": "plaintext", "content": get_text})
+        response = await session.post(
+            "http://pastie.org/pastes/create",
+            data={"language": "plaintext", "content": get_text},
+        )
 
         get_link = response.url
         if "create" in str(get_link): spare_pass = True
@@ -141,12 +150,29 @@ async def upload_text(dp, get_text) -> str:
         spare_pass = True
 
     if spare_pass:
-        response = await session.post("https://www.friendpaste.com",
-                                      json={"language": "text", "title": "", "snippet": get_text})
+        response = await session.post(
+            "https://www.friendpaste.com",
+            json={"language": "text", "title": "", "snippet": get_text},
+        )
 
         get_link = json.loads((await response.read()).decode())['url']
 
     return get_link
+
+
+# Загрузка изображения на хостинг телеграфа
+async def upload_photo(rSession: AsyncSession, this_photo):
+    session = await rSession.get_session()
+
+    send_data = {
+        "name": "file",
+        "value": this_photo,
+    }
+
+    async with session.post("https://telegra.ph/upload", data=send_data, ssl=False) as response:
+        img_src = await response.json()
+
+    return "http://telegra.ph" + img_src[0]['src']
 
 
 # Проверка на перенесение БД из старого бота в нового или указание токена нового бота
@@ -155,12 +181,7 @@ async def check_bot_data():
     get_bot = await bot.get_me()
 
     if get_login not in [get_bot.username, "None"]:
-        get_positions = get_all_positionsx()
-
-        for position in get_positions:
-            update_positionx(position['position_id'], position_photo="")
-
-    update_settingsx(misc_bot=get_bot.username)
+        update_settingsx(misc_bot=get_bot.username)
 
 
 # Получить информацию о позиции для админа
@@ -253,7 +274,7 @@ def open_profile_admin(user_id: Union[int, str]) -> str:
 
 
 # Статистика бота
-def get_statisctics() -> str:
+def get_statistics() -> str:
     show_refill_amount_all, show_refill_amount_day, show_refill_amount_week = 0, 0, 0
     show_refill_count_all, show_refill_count_day, show_refill_count_week = 0, 0, 0
     show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0
@@ -300,24 +321,29 @@ def get_statisctics() -> str:
             show_users_week += 1
 
     return ded(f"""
-           <b>📊 СТАТИСТИКА БОТА</b>
-           ➖➖➖➖➖➖➖➖➖➖
-           <b>🔶 Пользователи 🔶</b>
-           👤 Юзеров за День: <code>{show_users_day}</code>
-           👤 Юзеров за Неделю: <code>{show_users_week}</code>
-           👤 Юзеров за Всё время: <code>{show_users_all}</code>
-            
-           <b>🔶 Средства 🔶</b>
-           💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
-           💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
-           💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
-           💳 Средств в системе: <code>{show_users_money}₽</code>
-           💰 Пополнений за День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
-           💰 Пополнений за Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
-           💰 Пополнений за Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
-            
-           <b>🔶 Прочее 🔶</b>
-           🎁 Товаров: <code>{len(get_items)}шт</code>
-           📁 Позиций: <code>{len(get_positions)}шт</code>
-           🗃 Категорий: <code>{len(get_categories)}шт</code>
-           """)
+    <b>📊 СТАТИСТИКА БОТА</b>
+    ➖➖➖➖➖➖➖➖➖➖
+    <b>👤 Пользователи</b>
+    ┣ Юзеров за День: <code>{show_users_day}</code>
+    ┣ Юзеров за Неделю: <code>{show_users_week}</code>
+    ┗ Юзеров за Всё время: <code>{show_users_all}</code>
+
+    <b>💰 Средства</b>
+    ┣‒ Продажи (кол-во, сумма)
+    ┣ За День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
+    ┣ За Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
+    ┣ За Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
+    ┃
+    ┣‒ Пополнения (кол-во, сумма)
+    ┣ За День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
+    ┣ За Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
+    ┣ За Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
+    ┃
+    ┣‒ Прочее
+    ┗ Средств в системе: <code>{show_users_money}₽</code>
+
+    <b>🎁 Товары</b>
+    ┣ Товаров: <code>{len(get_items)}шт</code>
+    ┣ Позиций: <code>{len(get_positions)}шт</code>
+    ┗ Категорий: <code>{len(get_categories)}шт</code>
+   """)

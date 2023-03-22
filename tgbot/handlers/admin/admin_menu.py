@@ -7,7 +7,7 @@ from tgbot.data.loader import dp
 from tgbot.keyboards.reply_main import payments_frep, settings_frep, functions_frep, items_frep
 from tgbot.utils.const_functions import get_date
 from tgbot.utils.misc.bot_filters import IsAdmin
-from tgbot.utils.misc_functions import get_statisctics
+from tgbot.utils.misc_functions import get_statistics
 
 
 # Платежные системы
@@ -47,7 +47,7 @@ async def admin_products(message: Message, state: FSMContext):
 async def admin_statistics(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer(get_statisctics())
+    await message.answer(get_statistics())
 
 
 # Получение БД
@@ -56,9 +56,11 @@ async def admin_database(message: Message, state: FSMContext):
     await state.finish()
 
     with open(PATH_DATABASE, "rb") as document:
-        await message.answer_document(document,
-                                      caption=f"<b>📦 BACKUP\n"
-                                              f"🕰 <code>{get_date()}</code></b>")
+        await message.answer_document(
+            document,
+            caption=f"<b>📦 BACKUP\n"
+                    f"🕰 <code>{get_date()}</code></b>",
+        )
 
 
 # Получение Логов
@@ -67,9 +69,11 @@ async def admin_log(message: Message, state: FSMContext):
     await state.finish()
 
     with open(PATH_LOGS, "rb") as document:
-        await message.answer_document(document,
-                                      caption=f"<b>🖨 LOGS\n"
-                                              f"🕰 <code>{get_date()}</code></b>")
+        await message.answer_document(
+            document,
+            caption=f"<b>🖨 LOGS\n"
+                    f"🕰 <code>{get_date()}</code></b>",
+        )
 
 
 # Получение версии бота

@@ -26,8 +26,10 @@ async def main_errors(update: Update, exception):
                 get_categories = get_all_categoriesx()
 
                 if len(get_categories) >= 1:
-                    await update.callback_query.message.edit_text("<b>🎁 Выберите нужный вам товар:</b>",
-                                                                  reply_markup=products_item_category_swipe_fp(0))
+                    await update.callback_query.message.edit_text(
+                        "<b>🎁 Выберите нужный вам товар:</b>",
+                        reply_markup=products_item_category_swipe_fp(0),
+                    )
                     await update.callback_query.answer("❗ Категория была изменена или удалена")
                 else:
                     await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
@@ -39,9 +41,10 @@ async def main_errors(update: Update, exception):
                 get_positions = get_positionsx(category_id=split_data[3])
 
                 if len(get_positions) >= 1:
-                    await update.callback_query.message.edit_text("<b>🎁 Выберите нужный вам товар:</b>",
-                                                                  reply_markup=products_item_position_swipe_fp(
-                                                                      int(split_data[2]), split_data[3]))
+                    await update.callback_query.message.edit_text(
+                        "<b>🎁 Выберите нужный вам товар:</b>",
+                        reply_markup=products_item_position_swipe_fp(int(split_data[2]), split_data[3]),
+                    )
                     await update.callback_query.answer("❗ Позиция была изменена или удалена")
                 else:
                     await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")

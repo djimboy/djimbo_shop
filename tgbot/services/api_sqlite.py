@@ -21,19 +21,17 @@ def dict_factory(cursor, row):
 ##################################### ФОРМАТИРОВАНИЕ ЗАПРОСА #######################################
 # Форматирование запроса без аргументов
 def update_format(sql, parameters: dict):
-    if "XXX" not in sql: sql += " XXX "
-
     values = ", ".join([
         f"{item} = ?" for item in parameters
     ])
-    sql = sql.replace("XXX", values)
+    sql += f" {values}"
 
     return sql, list(parameters.values())
 
 
 # Форматирование запроса с аргументами
-def update_format_args(sql, parameters: dict):
-    sql = f"{sql} WHERE "
+def update_format_where(sql, parameters: dict):
+    sql += " WHERE "
 
     sql += " AND ".join([
         f"{item} = ?" for item in parameters
@@ -59,7 +57,7 @@ def get_userx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_users"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -68,7 +66,7 @@ def get_usersx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_users"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 
@@ -84,7 +82,7 @@ def get_all_usersx():
 def update_userx(user_id, **kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"UPDATE storage_users SET"
+        sql = "UPDATE storage_users SET"
         sql, parameters = update_format(sql, kwargs)
         parameters.append(user_id)
         con.execute(sql + "WHERE user_id = ?", parameters)
@@ -95,7 +93,7 @@ def delete_userx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_users"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         con.execute(sql, parameters)
 
 
@@ -149,8 +147,8 @@ def add_refillx(user_id, user_login, user_name, refill_comment, refill_amount, r
 def get_refillx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_refill"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_refill"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -158,8 +156,8 @@ def get_refillx(**kwargs):
 def get_refillsx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_refill"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_refill"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 
@@ -179,22 +177,12 @@ def add_categoryx(category_id, category_name):
                     [category_id, category_name])
 
 
-# Изменение категории
-def update_categoryx(category_id, **kwargs):
-    with sqlite3.connect(PATH_DATABASE) as con:
-        con.row_factory = dict_factory
-        sql = f"UPDATE storage_category SET"
-        sql, parameters = update_format(sql, kwargs)
-        parameters.append(category_id)
-        con.execute(sql + "WHERE category_id = ?", parameters)
-
-
 # Получение категории
 def get_categoryx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_category"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_category"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -202,8 +190,8 @@ def get_categoryx(**kwargs):
 def get_categoriesx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_category"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_category"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 
@@ -215,6 +203,16 @@ def get_all_categoriesx():
         return con.execute(sql).fetchall()
 
 
+# Изменение категории
+def update_categoryx(category_id, **kwargs):
+    with sqlite3.connect(PATH_DATABASE) as con:
+        con.row_factory = dict_factory
+        sql = "UPDATE storage_category SET"
+        sql, parameters = update_format(sql, kwargs)
+        parameters.append(category_id)
+        con.execute(sql + "WHERE category_id = ?", parameters)
+
+
 # Удаление всех категорий
 def clear_categoryx():
     with sqlite3.connect(PATH_DATABASE) as con:
@@ -224,11 +222,11 @@ def clear_categoryx():
 
 
 # Удаление категории
-def remove_categoryx(**kwargs):
+def delete_categoryx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_category"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         con.execute(sql, parameters)
 
 
@@ -242,22 +240,12 @@ def add_positionx(position_id, position_name, position_price, position_descripti
                      position_photo, get_date(), category_id])
 
 
-# Изменение позиции
-def update_positionx(position_id, **kwargs):
-    with sqlite3.connect(PATH_DATABASE) as con:
-        con.row_factory = dict_factory
-        sql = f"UPDATE storage_position SET"
-        sql, parameters = update_format(sql, kwargs)
-        parameters.append(position_id)
-        con.execute(sql + "WHERE position_id = ?", parameters)
-
-
 # Получение категории
 def get_positionx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_position"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_position"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -265,8 +253,8 @@ def get_positionx(**kwargs):
 def get_positionsx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_position"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_position"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 
@@ -278,6 +266,16 @@ def get_all_positionsx():
         return con.execute(sql).fetchall()
 
 
+# Изменение позиции
+def update_positionx(position_id, **kwargs):
+    with sqlite3.connect(PATH_DATABASE) as con:
+        con.row_factory = dict_factory
+        sql = "UPDATE storage_position SET"
+        sql, parameters = update_format(sql, kwargs)
+        parameters.append(position_id)
+        con.execute(sql + "WHERE position_id = ?", parameters)
+
+
 # Удаление всех позиций
 def clear_positionx():
     with sqlite3.connect(PATH_DATABASE) as con:
@@ -287,11 +285,11 @@ def clear_positionx():
 
 
 # Удаление позиции
-def remove_positionx(**kwargs):
+def delete_positionx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_position"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         con.execute(sql, parameters)
 
 
@@ -310,22 +308,12 @@ def add_itemx(category_id, position_id, get_all_items, user_id, user_name):
                              user_id, user_name, get_date()])
 
 
-# Изменение товара
-def update_itemx(item_id, **kwargs):
-    with sqlite3.connect(PATH_DATABASE) as con:
-        con.row_factory = dict_factory
-        sql = f"UPDATE storage_item SET"
-        sql, parameters = update_format(sql, kwargs)
-        parameters.append(item_id)
-        con.execute(sql + "WHERE item_id = ?", parameters)
-
-
 # Получение товара
 def get_itemx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_item"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_item"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -333,8 +321,8 @@ def get_itemx(**kwargs):
 def get_itemsx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_item"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_item"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 
@@ -346,6 +334,16 @@ def get_all_itemsx():
         return con.execute(sql).fetchall()
 
 
+# Изменение товара
+def update_itemx(item_id, **kwargs):
+    with sqlite3.connect(PATH_DATABASE) as con:
+        con.row_factory = dict_factory
+        sql = "UPDATE storage_item SET"
+        sql, parameters = update_format(sql, kwargs)
+        parameters.append(item_id)
+        con.execute(sql + "WHERE item_id = ?", parameters)
+
+
 # Очистка товаров
 def clear_itemx():
     with sqlite3.connect(PATH_DATABASE) as con:
@@ -355,11 +353,11 @@ def clear_itemx():
 
 
 # Удаление товаров
-def remove_itemx(**kwargs):
+def delete_itemx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "DELETE FROM storage_item"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql, parameters = update_format_where(sql, kwargs)
         con.execute(sql, parameters)
 
 
@@ -367,29 +365,31 @@ def remove_itemx(**kwargs):
 def buy_itemx(get_items, get_count):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        split_len, send_count, save_items = 0, 0, []
+        save_len, save_count, save_items = 0, 0, []
 
         for select_send_item in get_items:
-            if send_count != get_count:
-                send_count += 1
-                if get_count >= 2:
-                    select_data = f"{send_count}. {select_send_item['item_data']}"
+            if save_count != get_count:
+                save_count += 1
+
+                if get_count > 1:
+                    select_data = f"{save_count}. {select_send_item['item_data']}"
                 else:
                     select_data = select_send_item['item_data']
 
                 save_items.append(select_data)
-                sql, parameters = update_format_args("DELETE FROM storage_item",
-                                                     {"item_id": select_send_item['item_id']})
+                sql, parameters = update_format_where(
+                    "DELETE FROM storage_item",
+                    {"item_id": select_send_item['item_id']},
+                )
                 con.execute(sql, parameters)
 
-                if len(select_data) >= split_len: split_len = len(select_data)
+                if len(select_data) >= save_len: save_len = len(select_data)
             else:
                 break
 
-        split_len += 1
-        get_len = math.ceil(3500 / split_len)
+        save_len = math.ceil(3500 / (save_len + 1))
 
-    return save_items, send_count, get_len
+    return save_items, save_count, save_len
 
 
 # Добавление покупки
@@ -411,8 +411,8 @@ def add_purchasex(user_id, user_login, user_name, purchase_receipt, purchase_cou
 def get_purchasex(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_purchases"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_purchases"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchone()
 
 
@@ -420,8 +420,8 @@ def get_purchasex(**kwargs):
 def get_purchasesx(**kwargs):
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
-        sql = f"SELECT * FROM storage_purchases"
-        sql, parameters = update_format_args(sql, kwargs)
+        sql = "SELECT * FROM storage_purchases"
+        sql, parameters = update_format_where(sql, kwargs)
         return con.execute(sql, parameters).fetchall()
 
 

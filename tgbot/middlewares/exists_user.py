@@ -33,14 +33,20 @@ class ExistsUserMiddleware(BaseMiddleware):
                 user_id = this_user.id
                 user_login = this_user.username
                 user_name = clear_html(this_user.first_name)
+                user_surname = clear_html(this_user.last_name)
+                user_fullname = clear_html(this_user.first_name)
 
                 if user_login is None: user_login = ""
+                if user_name is None: user_name = ""
+                if user_surname is None: user_surname = ""
+                if user_fullname is None: user_fullname = ""
+                if len(user_surname) >= 1: user_fullname += f" {user_surname}"
 
                 if get_user is None:
                     add_userx(user_id, user_login.lower(), user_name)
                 else:
-                    if user_name != get_user['user_name']:
-                        update_userx(get_user['user_id'], user_name=user_name)
+                    if user_fullname != get_user['user_name']:
+                        update_userx(get_user['user_id'], user_name=user_fullname)
 
                     if user_login.lower() != get_user['user_login']:
                         update_userx(get_user['user_id'], user_login=user_login.lower())

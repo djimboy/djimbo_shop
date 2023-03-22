@@ -1,5 +1,4 @@
 # - *- coding: utf- 8 - *-
-
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
