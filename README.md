@@ -12,5 +12,5 @@ Database: [SQLite](https://www.sqlite.org)
 3. Install modules `python3.9 -m pip install -r requirements.txt`
 4. Configuring the `settings.ini` file
     * Specify in `token`, the bot token that can be obtained here => [@BotFather](https://t.me/BOTFATHER)
-    * Specify in `admin_id`, id of admins that can be obtained here => [@my_id_bot](https://t.me/MY_ID_BOT)
+    * Specify in `admin_id`, id of admins that can be obtained here => [@MyIDBot](https://t.me/myidbot)
 5. Launch bot `python3.9 main.py`
