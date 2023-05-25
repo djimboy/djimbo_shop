@@ -10,15 +10,28 @@ from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_filters import IsBuy, IsRefill, IsWork
 
 # Игнор-колбэки покупок
-prohibit_buy = ['buy_category_open', 'buy_category_swipe', 'buy_position_open', 'buy_position_swipe',
-                'buy_item_open', 'buy_item_confirm']
+prohibit_buy = [
+    'buy_category_open',
+    'buy_category_swipe',
+    'buy_position_open',
+    'buy_position_swipe',
+    'buy_item_open',
+    'buy_item_confirm',
+]
 
 # Игнор-колбэки пополнений
-prohibit_refill = ['user_refill', 'refill_select', 'Pay:', 'Pay:Form', 'Pay:Number', 'Pay:Nickname']
+prohibit_refill = [
+    'user_refill',
+    'refill_select',
+    'Pay:',
+    'Pay:Form',
+    'Pay:Number',
+    'Pay:Nickname',
+]
 
 
 ####################################################################################################
-#################################### СТАТУС ТЕХНИЧЕСКИЕ РАБОТЫ #####################################
+##################################### СТАТУС ТЕХНИЧЕСКИХ РАБОТ #####################################
 # Фильтр на технические работы - сообщение
 @dp.message_handler(IsWork(), state="*")
 async def filter_work_message(message: Message, state: FSMContext):
@@ -91,9 +104,9 @@ async def main_start(message: Message, state: FSMContext):
 
     await message.answer(
         ded("""
-        🔸 Бот готов к использованию.
-        🔸 Если не появились вспомогательные кнопки
-        🔸 Введите /start
+            🔸 Бот готов к использованию.
+            🔸 Если не появились вспомогательные кнопки
+            🔸 Введите /start
         """),
         reply_markup=menu_frep(message.from_user.id),
     )

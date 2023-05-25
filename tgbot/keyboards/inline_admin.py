@@ -5,7 +5,7 @@ from tgbot.services.api_sqlite import get_paymentx, get_settingsx, get_userx, up
 
 
 # Поиск профиля
-def profile_search_finl(user_id):
+def profile_search_finl(user_id) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -22,7 +22,7 @@ def profile_search_finl(user_id):
 
 
 # Возвращение к профилю
-def profile_search_return_finl(user_id):
+def profile_search_return_finl(user_id) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -31,8 +31,9 @@ def profile_search_return_finl(user_id):
 
     return keyboard
 
+
 # Способы пополнения
-def payment_choice_finl():
+def payment_choice_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
     get_payments = get_paymentx()
 
@@ -59,7 +60,7 @@ def payment_choice_finl():
 
 
 # Кнопки с настройками
-def settings_open_finl():
+def settings_open_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     get_settings = get_settingsx()
@@ -81,7 +82,7 @@ def settings_open_finl():
         faq_kb = ikb(f"{get_settings['misc_faq'][:15]}... ✅", callback_data="settings_edit_faq")
 
     keyboard.add(
-        ikb("ℹ FAQ", callback_data="..."), faq_kb
+        ikb("❔ FAQ", callback_data="..."), faq_kb
     ).add(
         ikb("☎ Поддержка", callback_data="..."), support_kb
     )
@@ -90,7 +91,7 @@ def settings_open_finl():
 
 
 # Выключатели
-def turn_open_finl():
+def turn_open_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     get_settings = get_settingsx()
@@ -119,7 +120,7 @@ def turn_open_finl():
 
 ######################################## ТОВАРЫ ########################################
 # Изменение категории
-def category_edit_open_finl(category_id, remover):
+def category_edit_open_finl(category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -134,7 +135,7 @@ def category_edit_open_finl(category_id, remover):
 
 
 # Кнопки с удалением категории
-def category_edit_delete_finl(category_id, remover):
+def category_edit_delete_finl(category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -146,7 +147,7 @@ def category_edit_delete_finl(category_id, remover):
 
 
 # Отмена изменения категории и возвращение
-def category_edit_cancel_finl(category_id, remover):
+def category_edit_cancel_finl(category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -157,7 +158,7 @@ def category_edit_cancel_finl(category_id, remover):
 
 
 # Кнопки при открытии позиции для изменения
-def position_edit_open_finl(position_id, category_id, remover):
+def position_edit_open_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -180,7 +181,7 @@ def position_edit_open_finl(position_id, category_id, remover):
 
 
 # Подтверждение удаления позиции
-def position_edit_delete_finl(position_id, category_id, remover):
+def position_edit_delete_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -192,7 +193,7 @@ def position_edit_delete_finl(position_id, category_id, remover):
 
 
 # Подтверждение очистики позиции
-def position_edit_clear_finl(position_id, category_id, remover):
+def position_edit_clear_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
@@ -204,7 +205,7 @@ def position_edit_clear_finl(position_id, category_id, remover):
 
 
 # Отмена изменения позиции и возвращение
-def position_edit_cancel_finl(position_id, category_id, remover):
+def position_edit_cancel_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(

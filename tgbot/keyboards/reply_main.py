@@ -5,11 +5,11 @@ from tgbot.data.config import get_admins
 
 
 # Кнопки главного меню
-def menu_frep(user_id):
+def menu_frep(user_id) -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("🎁 Купить", "👤 Профиль", "🧮 Наличие товаров")
-    keyboard.row("☎ Поддержка", "ℹ FAQ")
+    keyboard.row("☎ Поддержка", "❔ FAQ")
 
     if user_id in get_admins():
         keyboard.row("🎁 Управление товарами", "📊 Статистика")
@@ -19,7 +19,7 @@ def menu_frep(user_id):
 
 
 # Кнопки платежных систем
-def payments_frep():
+def payments_frep() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("🥝 Изменить QIWI 🖍", "🥝 Проверить QIWI ♻", "🥝 Баланс QIWI 👁")
@@ -29,7 +29,7 @@ def payments_frep():
 
 
 # Кнопки общих функций
-def functions_frep(user_id):
+def functions_frep(user_id) -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("👤 Поиск профиля 🔍", "📢 Рассылка", "🧾 Поиск чеков 🔍")
@@ -39,7 +39,7 @@ def functions_frep(user_id):
 
 
 # Кнопки настроек
-def settings_frep():
+def settings_frep() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("🖍 Изменить данные", "🕹 Выключатели")
@@ -49,7 +49,7 @@ def settings_frep():
 
 
 # Кнопки изменения товаров
-def items_frep():
+def items_frep() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("🎁 Добавить товары ➕", "🎁 Удалить товары 🖍", "🎁 Удалить все товары ❌")

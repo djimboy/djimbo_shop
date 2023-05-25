@@ -85,17 +85,17 @@ async def user_available(message: Message, state: FSMContext):
 
 
 # Открытие FAQ
-@dp.message_handler(text=["ℹ FAQ", "/faq"], state="*")
+@dp.message_handler(text=["❔ FAQ", "/faq"], state="*")
 async def user_faq(message: Message, state: FSMContext):
     await state.finish()
 
     send_message = get_settingsx()['misc_faq']
     if send_message == "None":
         send_message = ded(f"""
-        ℹ Информация. Измените её в настройках бота.
-        ➖➖➖➖➖➖➖➖➖➖
-        {BOT_DESCRIPTION}
-    """)
+            ❔ Информация. Измените её в настройках бота.
+            ➖➖➖➖➖➖➖➖➖➖
+            {BOT_DESCRIPTION}
+        """)
 
     await message.answer(get_faq(message.from_user.id, send_message), disable_web_page_preview=True)
 

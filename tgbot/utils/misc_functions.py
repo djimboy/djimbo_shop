@@ -20,14 +20,16 @@ from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
 # Уведомление и проверка обновления при запуске бота
 async def startup_notify(dp: Dispatcher, rSession: AsyncSession):
     if len(get_admins()) >= 1:
-        await send_admins(ded(f"""
-                          <b>✅ Бот был успешно запущен</b>
-                          ➖➖➖➖➖➖➖➖➖➖
-                          {BOT_DESCRIPTION}
-                          ➖➖➖➖➖➖➖➖➖➖
-                          <code>❗ Данное сообщение видят только администраторы бота.</code>
-                          """),
-                          markup="default")
+        await send_admins(
+            ded(f"""
+                <b>✅ Бот был успешно запущен</b>
+                ➖➖➖➖➖➖➖➖➖➖
+                {BOT_DESCRIPTION}
+                ➖➖➖➖➖➖➖➖➖➖
+                <code>❗ Данное сообщение видят только администраторы бота.</code>
+            """),
+            markup="default",
+        )
         await check_update(rSession)
 
 
@@ -185,7 +187,7 @@ async def check_bot_data():
 
 
 # Получить информацию о позиции для админа
-def get_position_admin(position_id):
+def get_position_admin(position_id) -> tuple[str, Union[None, str]]:
     get_settings = get_settingsx()
     get_items = get_itemsx(position_id=position_id)
     get_position = get_positionx(position_id=position_id)
@@ -217,18 +219,18 @@ def get_position_admin(position_id):
             show_profit_count_week += purchase['purchase_count']
 
     get_message = ded(f"""
-                  <b>📁 Позиция: <code>{get_position['position_name']}</code></b>
-                  ➖➖➖➖➖➖➖➖➖➖
-                  🗃 Категория: <code>{get_category['category_name']}</code>
-                  💰 Стоимость: <code>{get_position['position_price']}₽</code>
-                  📦 Количество: <code>{len(get_items)}шт</code>
-                  📸 Изображение: {photo_text}
-                  📜 Описание: {text_description}
-
-                  💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
-                  💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
-                  💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
-                  """)
+        <b>📁 Позиция: <code>{get_position['position_name']}</code></b>
+        ➖➖➖➖➖➖➖➖➖➖
+        🗃 Категория: <code>{get_category['category_name']}</code>
+        💰 Стоимость: <code>{get_position['position_price']}₽</code>
+        📦 Количество: <code>{len(get_items)}шт</code>
+        📸 Изображение: {photo_text}
+        📜 Описание: {text_description}
+        
+        💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
+        💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
+        💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
+    """)
 
     return get_message, get_photo
 
@@ -242,13 +244,13 @@ def open_profile_user(user_id: Union[int, str]) -> str:
     count_items = sum([items['purchase_count'] for items in get_purchases])
 
     return ded(f"""
-           <b>👤 Ваш профиль:</b>
-           ➖➖➖➖➖➖➖➖➖➖
-           🆔 ID: <code>{get_user['user_id']}</code>
-           💰 Баланс: <code>{get_user['user_balance']}₽</code>
-           🎁 Куплено товаров: <code>{count_items}шт</code>
-           🕰 Регистрация: <code>{get_user['user_date'].split(' ')[0]} ({convert_day(how_days)})</code>
-           """)
+        <b>👤 Ваш профиль:</b>
+        ➖➖➖➖➖➖➖➖➖➖
+        🆔 ID: <code>{get_user['user_id']}</code>
+        💰 Баланс: <code>{get_user['user_balance']}₽</code>
+        🎁 Куплено товаров: <code>{count_items}шт</code>
+        🕰 Регистрация: <code>{get_user['user_date'].split(' ')[0]} ({convert_day(how_days)})</code>
+    """)
 
 
 # Открытие профиля при поиске
@@ -260,17 +262,17 @@ def open_profile_admin(user_id: Union[int, str]) -> str:
     count_items = sum([items['purchase_count'] for items in get_purchases])
 
     return ded(f"""
-           <b>👤 Профиль пользователя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a></b>
-           ➖➖➖➖➖➖➖➖➖➖
-           🆔 ID: <code>{get_user['user_id']}</code>
-           👤 Логин: <b>@{get_user['user_login']}</b>
-           Ⓜ Имя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>
-           🕰 Регистрация: <code>{get_user['user_date']} ({convert_day(how_days)})</code>
-            
-           💰 Баланс: <code>{get_user['user_balance']}₽</code>
-           💰 Всего пополнено: <code>{get_user['user_refill']}₽</code>
-           🎁 Куплено товаров: <code>{count_items}шт</code>
-           """)
+        <b>👤 Профиль пользователя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a></b>
+        ➖➖➖➖➖➖➖➖➖➖
+        🆔 ID: <code>{get_user['user_id']}</code>
+        👤 Логин: <b>@{get_user['user_login']}</b>
+        Ⓜ Имя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>
+        🕰 Регистрация: <code>{get_user['user_date']} ({convert_day(how_days)})</code>
+        
+        💰 Баланс: <code>{get_user['user_balance']}₽</code>
+        💰 Всего пополнено: <code>{get_user['user_refill']}₽</code>
+        🎁 Куплено товаров: <code>{count_items}шт</code>
+    """)
 
 
 # Статистика бота
@@ -321,29 +323,29 @@ def get_statistics() -> str:
             show_users_week += 1
 
     return ded(f"""
-    <b>📊 СТАТИСТИКА БОТА</b>
-    ➖➖➖➖➖➖➖➖➖➖
-    <b>👤 Пользователи</b>
-    ┣ Юзеров за День: <code>{show_users_day}</code>
-    ┣ Юзеров за Неделю: <code>{show_users_week}</code>
-    ┗ Юзеров за Всё время: <code>{show_users_all}</code>
-
-    <b>💰 Средства</b>
-    ┣‒ Продажи (кол-во, сумма)
-    ┣ За День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
-    ┣ За Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
-    ┣ За Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
-    ┃
-    ┣‒ Пополнения (кол-во, сумма)
-    ┣ За День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
-    ┣ За Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
-    ┣ За Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
-    ┃
-    ┣‒ Прочее
-    ┗ Средств в системе: <code>{show_users_money}₽</code>
-
-    <b>🎁 Товары</b>
-    ┣ Товаров: <code>{len(get_items)}шт</code>
-    ┣ Позиций: <code>{len(get_positions)}шт</code>
-    ┗ Категорий: <code>{len(get_categories)}шт</code>
+        <b>📊 СТАТИСТИКА БОТА</b>
+        ➖➖➖➖➖➖➖➖➖➖
+        <b>👤 Пользователи</b>
+        ┣ Юзеров за День: <code>{show_users_day}</code>
+        ┣ Юзеров за Неделю: <code>{show_users_week}</code>
+        ┗ Юзеров за Всё время: <code>{show_users_all}</code>
+    
+        <b>💰 Средства</b>
+        ┣‒ Продажи (кол-во, сумма)
+        ┣ За День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
+        ┣ За Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
+        ┣ За Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
+        ┃
+        ┣‒ Пополнения (кол-во, сумма)
+        ┣ За День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
+        ┣ За Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
+        ┣ За Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
+        ┃
+        ┣‒ Прочее
+        ┗ Средств в системе: <code>{show_users_money}₽</code>
+    
+        <b>🎁 Товары</b>
+        ┣ Товаров: <code>{len(get_items)}шт</code>
+        ┣ Позиций: <code>{len(get_positions)}шт</code>
+        ┗ Категорий: <code>{len(get_categories)}шт</code>
    """)

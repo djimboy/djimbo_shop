@@ -8,7 +8,7 @@ from tgbot.services.api_sqlite import get_settingsx
 
 # Проверка на диалог в ЛС бота
 class IsPrivate(BoundFilter):
-    async def check(self, message):
+    async def check(self, message) -> bool:
         if "id" in message:
             return message.message.chat.type == types.ChatType.PRIVATE
         else:
@@ -17,7 +17,7 @@ class IsPrivate(BoundFilter):
 
 # Проверка на админа
 class IsAdmin(BoundFilter):
-    async def check(self, message: types.Message):
+    async def check(self, message: types.Message) -> bool:
         if message.from_user.id in get_admins():
             return True
         else:
@@ -26,7 +26,7 @@ class IsAdmin(BoundFilter):
 
 # Проверка на технические работы
 class IsWork(BoundFilter):
-    async def check(self, message: types.Message):
+    async def check(self, message: types.Message) -> bool:
         get_settings = get_settingsx()
 
         if get_settings['status_work'] == "False" or message.from_user.id in get_admins():
@@ -37,7 +37,7 @@ class IsWork(BoundFilter):
 
 # Проверка на возможность пополнения
 class IsRefill(BoundFilter):
-    async def check(self, message: types.Message):
+    async def check(self, message: types.Message) -> bool:
         get_settings = get_settingsx()
 
         if get_settings['status_refill'] == "True" or message.from_user.id in get_admins():
@@ -48,7 +48,7 @@ class IsRefill(BoundFilter):
 
 # Проверка на возможность покупки товара
 class IsBuy(BoundFilter):
-    async def check(self, message: types.Message):
+    async def check(self, message: types.Message) -> bool:
         get_settings = get_settingsx()
 
         if get_settings['status_buy'] == "True" or message.from_user.id in get_admins():

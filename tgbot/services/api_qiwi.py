@@ -33,8 +33,11 @@ class QiwiAPI:
             self.token = get_paymentx()['qiwi_token']
             self.secret = get_paymentx()['qiwi_secret']
 
+        self.headers = {
+            'authorization': f'Bearer {self.token}',
+        }
+
         self.base_url = "https://edge.qiwi.com/{}/{}/persons/{}/{}"
-        self.headers = {"authorization": f"Bearer {self.token}"}
         self.nickname = get_paymentx()['qiwi_nickname']
         self.pass_check = pass_check
         self.pass_user = pass_user

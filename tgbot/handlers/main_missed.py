@@ -38,5 +38,7 @@ async def main_missed_callback(call: CallbackQuery, state: FSMContext):
 # Обработка всех неизвестных команд
 @dp.message_handler()
 async def main_missed_message(message: Message):
-    await message.answer("♦ Неизвестная команда.\n"
-                         "▶ Введите /start")
+    await message.answer(
+        "♦ Неизвестная команда.\n"
+        "♦ Введите /start",
+    )

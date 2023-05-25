@@ -2,7 +2,7 @@
 import json
 from base64 import b64decode
 from datetime import datetime, timedelta, timezone
-from typing import Tuple
+from typing import Tuple, Any
 
 from bs4 import BeautifulSoup
 
@@ -16,7 +16,10 @@ class QiwiAPIp2p:
         if not skip_key_validation:
             self.validate_privkey(secret)
 
-        self.headers = {"Content-Type": "application/json", "Authorization": f"Bearer {secret}"}
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {secret}',
+        }
         self.secret = secret
         self.dp = dp
 
@@ -90,7 +93,7 @@ class QiwiAPIp2p:
         return status
 
     # Получение Referrer прокладки для киви
-    async def get_referrer(self):
+    async def get_referrer(self) -> str:
         rSession: AsyncSession = self.dp.bot['rSession']
         session = await rSession.get_session()
 
@@ -101,7 +104,7 @@ class QiwiAPIp2p:
         return response
 
     # Сам запрос
-    async def _request(self, bill_method, bill_url, bill_json=None):
+    async def _request(self, bill_method, bill_url, bill_json=None) -> tuple[bool, Any]:
         rSession: AsyncSession = self.dp.bot['rSession']
         session = await rSession.get_session()
 

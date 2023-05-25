@@ -8,14 +8,14 @@ from tgbot.data.config import get_admins
 user_commands = [
     BotCommand("start", "♻ Перезапустить бота"),
     BotCommand("support", "☎ Поддержка"),
-    BotCommand("faq", "ℹ FAQ"),
+    BotCommand("faq", "❔ FAQ"),
 ]
 
 # Команды для админов
 admin_commands = [
     BotCommand("start", "♻ Перезапустить бота"),
     BotCommand("support", "☎ Поддержка"),
-    BotCommand("faq", "ℹ FAQ"),
+    BotCommand("faq", "❔ FAQ"),
     BotCommand("db", "📦 Получить Базу Данных"),
     BotCommand("log", "🖨 Получить логи"),
 ]

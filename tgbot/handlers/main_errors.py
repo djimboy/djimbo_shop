@@ -32,7 +32,9 @@ async def main_errors(update: Update, exception):
                     )
                     await update.callback_query.answer("❗ Категория была изменена или удалена")
                 else:
-                    await update.callback_query.message.edit_text("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
+                    await update.callback_query.message.edit_text(
+                        "<b>🎁 Увы, товары в данное время отсутствуют.</b>",
+                    )
                     await update.callback_query.answer("❗ Категория была изменена или удалена")
         elif split_data[0] in ['buy_position_open']:
             get_position = get_positionx(position_id=split_data[1])

@@ -66,9 +66,10 @@ async def on_shutdown(dp: Dispatcher):
 
 
 if __name__ == "__main__":
-    create_dbx()
+    create_dbx()  # Генерация таблиц БД
 
-    scheduler.start()
+    scheduler.start()  # Запуск шедулера
+
     dp.filters_factory.bind(IsPrivate)  # Подключение фильтра приватности
     setup_middlewares(dp)  # Подключение миддлварей
 

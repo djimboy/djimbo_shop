@@ -107,7 +107,7 @@ async def settings_support_edit(call: CallbackQuery, state: FSMContext):
 async def settings_faq_edit(call: CallbackQuery, state: FSMContext):
     await state.set_state("here_settings_faq")
     await call.message.edit_text(
-        "<b>ℹ Введите новый текст для FAQ</b>\n"
+        "<b>❔ Введите новый текст для FAQ</b>\n"
         "❕ Вы можете использовать заготовленный синтаксис и HTML разметку:\n"
         "▶ <code>{username}</code>  - логин пользоваля\n"
         "▶ <code>{user_id}</code>   - айди пользователя\n"
@@ -130,7 +130,7 @@ async def settings_faq_get(message: Message, state: FSMContext):
         await message.answer("<b>🖍 Изменение данных бота.</b>", reply_markup=settings_open_finl())
     except CantParseEntities:
         await message.answer("<b>❌ Ошибка синтаксиса HTML.</b>\n"
-                             "ℹ Введите новый текст для FAQ")
+                             "❔ Введите новый текст для FAQ")
 
 
 # Принятие нового айди для поддержки

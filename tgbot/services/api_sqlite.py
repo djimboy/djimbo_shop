@@ -2,13 +2,14 @@
 import math
 import random
 import sqlite3
+from typing import Union
 
 from tgbot.data.config import PATH_DATABASE
 from tgbot.utils.const_functions import get_unix, get_date, clear_html
 
 
 # Преобразование полученного списка в словарь
-def dict_factory(cursor, row):
+def dict_factory(cursor, row) -> dict:
     save_dict = {}
 
     for idx, col in enumerate(cursor.description):
@@ -20,7 +21,7 @@ def dict_factory(cursor, row):
 ####################################################################################################
 ##################################### ФОРМАТИРОВАНИЕ ЗАПРОСА #######################################
 # Форматирование запроса без аргументов
-def update_format(sql, parameters: dict):
+def update_format(sql, parameters: dict) -> tuple[str, list]:
     values = ", ".join([
         f"{item} = ?" for item in parameters
     ])
@@ -30,7 +31,7 @@ def update_format(sql, parameters: dict):
 
 
 # Форматирование запроса с аргументами
-def update_format_where(sql, parameters: dict):
+def update_format_where(sql, parameters: dict) -> tuple[str, list]:
     sql += " WHERE "
 
     sql += " AND ".join([
@@ -62,7 +63,7 @@ def get_userx(**kwargs):
 
 
 # Получение пользователей
-def get_usersx(**kwargs):
+def get_usersx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_users"
@@ -71,7 +72,7 @@ def get_usersx(**kwargs):
 
 
 # Получение всех пользователей
-def get_all_usersx():
+def get_all_usersx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_users"
@@ -153,7 +154,7 @@ def get_refillx(**kwargs):
 
 
 # Получение пополнений
-def get_refillsx(**kwargs):
+def get_refillsx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_refill"
@@ -162,7 +163,7 @@ def get_refillsx(**kwargs):
 
 
 # Получение всех пополнений
-def get_all_refillx():
+def get_all_refillx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_refill"
@@ -187,7 +188,7 @@ def get_categoryx(**kwargs):
 
 
 # Получение категорий
-def get_categoriesx(**kwargs):
+def get_categoriesx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_category"
@@ -196,7 +197,7 @@ def get_categoriesx(**kwargs):
 
 
 # Получение всех категорий
-def get_all_categoriesx():
+def get_all_categoriesx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_category"
@@ -250,7 +251,7 @@ def get_positionx(**kwargs):
 
 
 # Получение категорий
-def get_positionsx(**kwargs):
+def get_positionsx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_position"
@@ -259,7 +260,7 @@ def get_positionsx(**kwargs):
 
 
 # Получение всех категорий
-def get_all_positionsx():
+def get_all_positionsx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_position"
@@ -318,7 +319,7 @@ def get_itemx(**kwargs):
 
 
 # Получение товаров
-def get_itemsx(**kwargs):
+def get_itemsx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_item"
@@ -327,7 +328,7 @@ def get_itemsx(**kwargs):
 
 
 # Получение всех товаров
-def get_all_itemsx():
+def get_all_itemsx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_item"
@@ -362,7 +363,7 @@ def delete_itemx(**kwargs):
 
 
 # Покупка товаров
-def buy_itemx(get_items, get_count):
+def buy_itemx(get_items, get_count) -> tuple[list, int, int]:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         save_len, save_count, save_items = 0, 0, []
@@ -383,7 +384,8 @@ def buy_itemx(get_items, get_count):
                 )
                 con.execute(sql, parameters)
 
-                if len(select_data) >= save_len: save_len = len(select_data)
+                if len(select_data) >= save_len:
+                    save_len = len(select_data)
             else:
                 break
 
@@ -417,7 +419,7 @@ def get_purchasex(**kwargs):
 
 
 # Получение покупок
-def get_purchasesx(**kwargs):
+def get_purchasesx(**kwargs) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_purchases"
@@ -426,7 +428,7 @@ def get_purchasesx(**kwargs):
 
 
 # Получение всех покупок
-def get_all_purchasesx():
+def get_all_purchasesx() -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = "SELECT * FROM storage_purchases"
@@ -434,7 +436,7 @@ def get_all_purchasesx():
 
 
 # Последние 10 покупок
-def last_purchasesx(user_id, count):
+def last_purchasesx(user_id, count) -> list:
     with sqlite3.connect(PATH_DATABASE) as con:
         con.row_factory = dict_factory
         sql = f"SELECT * FROM storage_purchases WHERE user_id = ? ORDER BY increment DESC LIMIT {count}"
