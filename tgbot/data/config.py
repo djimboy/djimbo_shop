@@ -1,8 +1,6 @@
 # - *- coding: utf- 8 - *-
 import configparser
 
-from tgbot.utils.const_functions import ded
-
 # Токен бота
 BOT_TOKEN = configparser.ConfigParser()
 BOT_TOKEN.read("settings.ini")
@@ -40,10 +38,10 @@ def get_admins() -> list[int]:
 
 
 # УДАЛИШЬ ИЛИ ИЗМЕНИШЬ ССЫЛКИ НА ДОНАТ, КАНАЛ И ТЕМУ БОТА - КАСТРИРУЮ БЛЯТЬ <3
-BOT_DESCRIPTION = ded(f"""
-    <b>⚜ Bot Version: <code>{BOT_VERSION}</code>
-    🔗 Topic Link: <a href='https://lolz.guru/threads/1888814'>Click me</a>
-    ♻ Bot created by @djimbox
-    🍩 Donate to the author: <a href='https://qiwi.com/n/DJIMBO'>Click me</a>
-    🤖 Bot channel [NEWS | UPDATES]: <a href='https://t.me/DJIMBO_SHOP'>Click me</a></b>
-""").strip()
+BOT_DESCRIPTION = f"""
+<b>⚜ Bot Version: <code>{BOT_VERSION}</code>
+🔗 Topic Link: <a href='https://lolz.guru/threads/1888814'>Click me</a>
+♻ Bot created by @djimbox
+🍩 Donate to the author: <a href='https://qiwi.com/n/DJIMBO'>Click me</a>
+🤖 Bot channel [NEWS | UPDATES]: <a href='https://t.me/DJIMBO_SHOP'>Click me</a></b>
+""".strip()
