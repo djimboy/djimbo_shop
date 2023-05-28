@@ -2,7 +2,6 @@
 import math
 import random
 import sqlite3
-from typing import Union
 
 from tgbot.data.config import PATH_DATABASE
 from tgbot.utils.const_functions import get_unix, get_date, clear_html

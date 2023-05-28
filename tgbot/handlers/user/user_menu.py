@@ -151,7 +151,10 @@ async def user_history(call: CallbackQuery, state: FSMContext):
                 """)
             )
 
-        await call.message.answer(open_profile_user(call.from_user.id), reply_markup=profile_open_inl)
+        await call.message.answer(
+            open_profile_user(call.from_user.id),
+            reply_markup=profile_open_inl,
+        )
     else:
         await call.answer("❗ У вас отсутствуют покупки", True)
 

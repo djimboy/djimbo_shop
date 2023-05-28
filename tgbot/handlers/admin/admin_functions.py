@@ -20,8 +20,10 @@ async def functions_mail(message: Message, state: FSMContext):
     await state.finish()
 
     await state.set_state("here_mail_text")
-    await message.answer("<b>📢 Введите текст для рассылки пользователям</b>\n"
-                         "❕ Вы можете использовать HTML разметку")
+    await message.answer(
+        "<b>📢 Введите текст для рассылки пользователям</b>\n"
+        "❕ Вы можете использовать HTML разметку",
+    )
 
 
 # Поиск профиля
@@ -54,8 +56,10 @@ async def functions_profile_get(message: Message, state: FSMContext):
             if ".user" in find_user: find_user = message.text.split(" ")[1]
             if "user" in find_user: find_user = message.text.split(" ")[1]
         else:
-            return await message.answer("<b>❌ Вы не указали логин или айди пользователя.</b>\n"
-                                        "👤 Введите логин или айди пользователя.")
+            return await message.answer(
+                "<b>❌ Вы не указали логин или айди пользователя.</b>\n"
+                "👤 Введите логин или айди пользователя.",
+            )
 
     if find_user.isdigit():
         get_user = get_userx(user_id=find_user)
@@ -70,8 +74,10 @@ async def functions_profile_get(message: Message, state: FSMContext):
             reply_markup=profile_search_finl(get_user['user_id']),
         )
     else:
-        await message.answer("<b>❌ Профиль не был найден</b>\n"
-                             "👤 Введите логин или айди пользователя.")
+        await message.answer(
+            "<b>❌ Профиль не был найден</b>\n"
+            "👤 Введите логин или айди пользователя.",
+        )
 
 
 # Принятие чека для поиска
@@ -85,8 +91,10 @@ async def functions_receipt_get(message: Message, state: FSMContext):
             if ".rec" in receipt: receipt = receipt.split(" ")[1]
             if "rec" in receipt: receipt = receipt.split(" ")[1]
         else:
-            return await message.answer("<b>❌ Вы не указали номер чека.</b>\n"
-                                        "🧾 Введите номер чека")
+            return await message.answer(
+                "<b>❌ Вы не указали номер чека.</b>\n"
+                "🧾 Введите номер чека",
+            )
 
     if receipt.startswith("#"): receipt = receipt[1:]
 
@@ -132,8 +140,10 @@ async def functions_receipt_get(message: Message, state: FSMContext):
             f"🕰 Дата покупки: <code>{get_purchase['purchase_date']}</code>"
         )
     else:
-        await message.answer("<b>❌ Чек не был найден.</b>\n"
-                             "🧾 Введите номер чека")
+        await message.answer(
+            "<b>❌ Чек не был найден.</b>\n"
+            "🧾 Введите номер чека",
+        )
 
 
 ######################################## РАССЫЛКА ########################################
@@ -155,9 +165,11 @@ async def functions_mail_get(message: Message, state: FSMContext):
             disable_web_page_preview=True
         )
     except CantParseEntities:
-        await message.answer("<b>❌ Ошибка синтаксиса HTML.</b>\n"
-                             "📢 Введите текст для рассылки пользователям.\n"
-                             "❕ Вы можете использовать HTML разметку.")
+        await message.answer(
+            "<b>❌ Ошибка синтаксиса HTML.</b>\n"
+            "📢 Введите текст для рассылки пользователям.\n"
+            "❕ Вы можете использовать HTML разметку.",
+        )
 
 
 # Подтверждение отправки рассылки
@@ -213,7 +225,10 @@ async def functions_profile_refresh(call: CallbackQuery, state: FSMContext):
     await state.finish()
 
     await call.message.delete()
-    await call.message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
+    await call.message.answer(
+        open_profile_admin(user_id),
+        reply_markup=profile_search_finl(user_id),
+    )
 
 
 # Покупки пользователя
@@ -237,7 +252,10 @@ async def functions_profile_purchases(call: CallbackQuery, state: FSMContext):
                 f"🔗 Товары: <a href='{link_items}'>кликабельно</a>"
             )
 
-        await call.message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
+        await call.message.answer(
+            open_profile_admin(user_id),
+            reply_markup=profile_search_finl(user_id),
+        )
     else:
         await call.answer("❗ У пользователя отсутствуют покупки", True)
 
@@ -331,7 +349,10 @@ async def functions_profile_balance_set_get(message: Message, state: FSMContext)
         f"<b>✅ Пользователю <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a> "
         f"изменён баланс на <code>{message.text}₽</code></b>")
 
-    await message.answer(open_profile_admin(user_id), reply_markup=profile_search_finl(user_id))
+    await message.answer(
+        open_profile_admin(user_id),
+        reply_markup=profile_search_finl(user_id),
+    )
 
 
 # Отправка сообщения пользователю

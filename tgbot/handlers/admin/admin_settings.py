@@ -15,7 +15,10 @@ from tgbot.utils.misc_functions import send_admins, get_faq
 async def settings_data_edit(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🖍 Изменение данных бота.</b>", reply_markup=settings_open_finl())
+    await message.answer(
+        "<b>🖍 Изменение данных бота.</b>",
+        reply_markup=settings_open_finl(),
+    )
 
 
 # Выключатели бота
@@ -23,7 +26,10 @@ async def settings_data_edit(message: Message, state: FSMContext):
 async def settings_turn_edit(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🕹 Включение и выключение основных функций</b>", reply_markup=turn_open_finl())
+    await message.answer(
+        "<b>🕹 Включение и выключение основных функций</b>",
+        reply_markup=turn_open_finl(),
+    )
 
 
 ######################################## ВЫКЛЮЧАТЕЛИ ########################################
@@ -43,7 +49,7 @@ async def settings_turn_work(call: CallbackQuery, state: FSMContext):
     await send_admins(
         f"👤 Администратор <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>\n"
         f"{send_text}",
-        not_me=get_user['user_id']
+        not_me=get_user['user_id'],
     )
 
     await call.message.edit_reply_markup(reply_markup=turn_open_finl())
@@ -98,8 +104,10 @@ async def settings_turn_pay(call: CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(IsAdmin(), text_startswith="settings_edit_support", state="*")
 async def settings_support_edit(call: CallbackQuery, state: FSMContext):
     await state.set_state("here_settings_support")
-    await call.message.edit_text("<b>☎ Отправьте ID пользователя.</b>\n"
-                                 "❕ Вводимый ID должен быть пользователем бота.")
+    await call.message.edit_text(
+        "<b>☎ Отправьте ID пользователя.</b>\n"
+        "❕ Вводимый ID должен быть пользователем бота.",
+    )
 
 
 # Изменение FAQ
@@ -127,10 +135,15 @@ async def settings_faq_get(message: Message, state: FSMContext):
         await state.finish()
         update_settingsx(misc_faq=message.text)
 
-        await message.answer("<b>🖍 Изменение данных бота.</b>", reply_markup=settings_open_finl())
+        await message.answer(
+            "<b>🖍 Изменение данных бота.</b>",
+            reply_markup=settings_open_finl(),
+        )
     except CantParseEntities:
-        await message.answer("<b>❌ Ошибка синтаксиса HTML.</b>\n"
-                             "❔ Введите новый текст для FAQ")
+        await message.answer(
+            "<b>❌ Ошибка синтаксиса HTML.</b>\n"
+            "❔ Введите новый текст для FAQ",
+        )
 
 
 # Принятие нового айди для поддержки
@@ -144,13 +157,22 @@ async def settings_support_get(message: Message, state: FSMContext):
                 await state.finish()
                 update_settingsx(misc_support=get_user['user_id'])
 
-                await message.answer("<b>🖍 Изменение данных бота.</b>", reply_markup=settings_open_finl())
+                await message.answer(
+                    "<b>🖍 Изменение данных бота.</b>",
+                    reply_markup=settings_open_finl(),
+                )
             else:
-                await message.answer("<b>❌ У пользоваля отсутствует юзернейм.</b>\n"
-                                     "☎ Отправьте ID пользователя.")
+                await message.answer(
+                    "<b>❌ У пользоваля отсутствует юзернейм.</b>\n"
+                    "☎ Отправьте ID пользователя.",
+                )
         else:
-            await message.answer("<b>❌ Пользователь не был найден.</b>\n"
-                                 "☎ Отправьте ID пользователя.")
+            await message.answer(
+                "<b>❌ Пользователь не был найден.</b>\n"
+                "☎ Отправьте ID пользователя.",
+            )
     else:
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                             "☎ Отправьте ID пользователя.")
+        await message.answer(
+            "<b>❌ Данные были введены неверно.</b>\n"
+            "☎ Отправьте ID пользователя.",
+        )

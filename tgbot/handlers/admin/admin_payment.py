@@ -16,7 +16,10 @@ from tgbot.utils.misc.bot_filters import IsAdmin
 async def payment_systems(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🖲 Выберите способы пополнений</b>", reply_markup=payment_choice_finl())
+    await message.answer(
+        "<b>🖲 Выберите способы пополнений</b>",
+        reply_markup=payment_choice_finl(),
+    )
 
 
 # Включение/выключение самих способов пополнения
@@ -34,7 +37,8 @@ async def payment_systems_edit(call: CallbackQuery):
             else:
                 return await call.answer(
                     "❗ Приватный ключ отсутствует. Измените киви и добавьте приватный ключ для включения оплаты по Форме",
-                    True)
+                    True,
+                )
         elif way_pay == "Number":
             update_paymentx(way_number=way_status)
         elif way_pay == "Nickname":
@@ -47,7 +51,10 @@ async def payment_systems_edit(call: CallbackQuery):
     else:
         return await call.answer("❗ Добавьте киви кошелёк перед включением Способов пополнений", True)
 
-    await call.message.edit_text("<b>🖲 Выберите способы пополнений</b>", reply_markup=payment_choice_finl())
+    await call.message.edit_text(
+        "<b>🖲 Выберите способы пополнений</b>",
+        reply_markup=payment_choice_finl(),
+    )
 
 
 ###################################################################################
@@ -92,8 +99,10 @@ async def payment_qiwi_edit_login(message: Message, state: FSMContext):
             disable_web_page_preview=True
         )
     else:
-        await message.answer("<b>❌ Номер должен начинаться с + <code>(+7..., +380...)</code></b>\n"
-                             "🥝 Введите <code>номер (через +7, +380)</code> QIWI кошелька 🖍")
+        await message.answer(
+            "<b>❌ Номер должен начинаться с + <code>(+7..., +380...)</code></b>\n"
+            "🥝 Введите <code>номер (через +7, +380)</code> QIWI кошелька 🖍",
+        )
 
 
 # Принятие токена для QIWI
@@ -106,7 +115,7 @@ async def payment_qiwi_edit_token(message: Message, state: FSMContext):
         "<b>🥝 Введите <code>Приватный ключ 🖍</code></b>\n"
         "❕ Получить можно тут 👉 <a href='https://qiwi.com/p2p-admin/transfers/api'><b>Нажми на меня</b></a>\n"
         "❕ Вы можете пропустить добавление оплаты по Форме, отправив: <code>0</code>",
-        disable_web_page_preview=True
+        disable_web_page_preview=True,
     )
 
 

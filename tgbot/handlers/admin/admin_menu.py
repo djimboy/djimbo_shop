@@ -15,7 +15,10 @@ from tgbot.utils.misc_functions import get_statistics
 async def admin_payment(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🔑 Настройка платежных системы.</b>", reply_markup=payments_frep())
+    await message.answer(
+        "<b>🔑 Настройка платежных системы.</b>",
+        reply_markup=payments_frep(),
+    )
 
 
 # Настройки бота
@@ -23,7 +26,10 @@ async def admin_payment(message: Message, state: FSMContext):
 async def admin_settings(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>⚙ Основные настройки бота.</b>", reply_markup=settings_frep())
+    await message.answer(
+        "<b>⚙ Основные настройки бота.</b>",
+        reply_markup=settings_frep(),
+    )
 
 
 # Общие функции
@@ -31,7 +37,10 @@ async def admin_settings(message: Message, state: FSMContext):
 async def admin_functions(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🔆 Выберите нужную функцию.</b>", reply_markup=functions_frep(message.from_user.id))
+    await message.answer(
+        "<b>🔆 Выберите нужную функцию.</b>",
+        reply_markup=functions_frep(),
+    )
 
 
 # Управление товарами
@@ -39,7 +48,10 @@ async def admin_functions(message: Message, state: FSMContext):
 async def admin_products(message: Message, state: FSMContext):
     await state.finish()
 
-    await message.answer("<b>🎁 Редактирование товаров.</b>", reply_markup=items_frep())
+    await message.answer(
+        "<b>🎁 Редактирование товаров.</b>",
+        reply_markup=items_frep(),
+    )
 
 
 # Cтатистики бота

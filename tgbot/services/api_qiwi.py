@@ -51,7 +51,7 @@ class QiwiAPI:
                           "❗ Как можно быстрее его замените")
 
     # Обязательная проверка перед каждым запросом
-    async def pre_checker(self):
+    async def pre_checker(self) -> bool:
         if self.login != "None":
             if self.pass_add:
                 status, response = await self.check_account()

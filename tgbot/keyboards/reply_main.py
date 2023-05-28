@@ -29,7 +29,7 @@ def payments_frep() -> ReplyKeyboardMarkup:
 
 
 # Кнопки общих функций
-def functions_frep(user_id) -> ReplyKeyboardMarkup:
+def functions_frep() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 
     keyboard.row("👤 Поиск профиля 🔍", "📢 Рассылка", "🧾 Поиск чеков 🔍")

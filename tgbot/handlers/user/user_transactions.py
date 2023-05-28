@@ -52,7 +52,10 @@ async def refill_get(message: Message, state: FSMContext):
             ).bill(pay_amount, get_way)
 
             if get_message:
-                await cache_message.edit_text(get_message, reply_markup=refill_bill_finl(get_link, receipt, get_way))
+                await cache_message.edit_text(
+                    get_message,
+                    reply_markup=refill_bill_finl(get_link, receipt, get_way),
+                )
         else:
             await cache_message.edit_text(
                 f"<b>❌ Неверная сумма пополнения</b>\n"
@@ -60,8 +63,10 @@ async def refill_get(message: Message, state: FSMContext):
                 f"💰 Введите сумму для пополнения средств",
             )
     else:
-        await message.answer("<b>❌ Данные были введены неверно.</b>\n"
-                             "💰 Введите сумму для пополнения средств")
+        await message.answer(
+            "<b>❌ Данные были введены неверно.</b>\n"
+            "💰 Введите сумму для пополнения средств",
+        )
 
 
 ###################################################################################
@@ -84,8 +89,12 @@ async def refill_check_form(call: CallbackQuery):
     elif pay_status == "EXPIRED":
         await call.message.edit_text("<b>❌ Время оплаты вышло. Платёж был удалён.</b>")
     elif pay_status == "WAITING":
-        await call.answer("❗ Платёж не был найден.\n"
-                          "⌛ Попробуйте чуть позже.", True, cache_time=5)
+        await call.answer(
+            "❗ Платёж не был найден.\n"
+            "⌛ Попробуйте чуть позже.",
+            True,
+            cache_time=5,
+        )
     elif pay_status == "REJECTED":
         await call.message.edit_text("<b>❌ Счёт был отклонён.</b>")
 
@@ -121,8 +130,10 @@ async def refill_check_send(call: CallbackQuery):
 async def refill_success(call: CallbackQuery, receipt, amount, get_way):
     get_user = get_userx(user_id=call.from_user.id)
 
-    add_refillx(get_user['user_id'], get_user['user_login'], get_user['user_name'], receipt,
-                amount, receipt, get_way, get_date(), get_unix())
+    add_refillx(
+        get_user['user_id'], get_user['user_login'], get_user['user_name'], receipt,
+        amount, receipt, get_way, get_date(), get_unix(),
+    )
 
     update_userx(
         call.from_user.id,
