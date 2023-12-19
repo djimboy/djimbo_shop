@@ -185,9 +185,12 @@ fabric.properties
 # Users exceptions
 /other/
 /tgbot/data/database
-/tgbot/data/xdatabase.db
+/tgbot/data/database.db
+/tgbot/data/database.*
 /tgbot/data/xdatabase.db
 /tgbot/data/logs.log
 /settings.ini
 settings.ini
 main.sh
+database.*
+database.db

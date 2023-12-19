@@ -1,65 +1,80 @@
 # - *- coding: utf- 8 - *-
 from aiogram.types import ReplyKeyboardMarkup
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from tgbot.data.config import get_admins
+from tgbot.utils.const_functions import rkb
 
 
 # Кнопки главного меню
 def menu_frep(user_id) -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardBuilder()
 
-    keyboard.row("🎁 Купить", "👤 Профиль", "🧮 Наличие товаров")
-    keyboard.row("☎ Поддержка", "❔ FAQ")
+    keyboard.row(
+        rkb("🎁 Купить"), rkb("👤 Профиль"), rkb("🧮 Наличие товаров"),
+    ).row(
+        rkb("☎️ Поддержка"), rkb("❔ FAQ")
+    )
 
     if user_id in get_admins():
-        keyboard.row("🎁 Управление товарами", "📊 Статистика")
-        keyboard.row("⚙ Настройки", "🔆 Общие функции", "🔑 Платежные системы")
+        keyboard.row(
+            rkb("🎁 Управление товарами"), rkb("📊 Статистика"),
+        ).row(
+            rkb("⚙️ Настройки"), rkb("🔆 Общие функции"), rkb("🔑 Платежные системы"),
+        )
 
-    return keyboard
+    return keyboard.as_markup(resize_keyboard=True)
 
 
 # Кнопки платежных систем
 def payments_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardBuilder()
 
-    keyboard.row("🥝 Изменить QIWI 🖍", "🥝 Проверить QIWI ♻", "🥝 Баланс QIWI 👁")
-    keyboard.row("🔙 Главное меню", "🖲 Способы пополнений")
+    keyboard.row(
+        rkb("🔮 ЮMoney"), rkb("🥝 QIWI"),
+    ).row(
+        rkb("🔙 Главное меню"), rkb("🖲 Способы пополнений")
+    )
 
-    return keyboard
+    return keyboard.as_markup(resize_keyboard=True)
 
 
 # Кнопки общих функций
 def functions_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardBuilder()
 
-    keyboard.row("👤 Поиск профиля 🔍", "📢 Рассылка", "🧾 Поиск чеков 🔍")
-    keyboard.row("🔙 Главное меню")
+    keyboard.row(
+        rkb("🔍 Поиск"), rkb("📢 Рассылка"),
+    ).row(
+        rkb("🔙 Главное меню")
+    )
 
-    return keyboard
+    return keyboard.as_markup(resize_keyboard=True)
 
 
 # Кнопки настроек
 def settings_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardBuilder()
 
-    keyboard.row("🖍 Изменить данные", "🕹 Выключатели")
-    keyboard.row("🔙 Главное меню")
+    keyboard.row(
+        rkb("🖍 Изменить данные"), rkb("🕹 Выключатели"),
+    ).row(
+        rkb("🔙 Главное меню")
+    )
 
-    return keyboard
+    return keyboard.as_markup(resize_keyboard=True)
 
 
 # Кнопки изменения товаров
 def items_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardBuilder()
 
-    keyboard.row("🎁 Добавить товары ➕", "🎁 Удалить товары 🖍", "🎁 Удалить все товары ❌")
-    keyboard.row("📁 Создать позицию ➕", "📁 Изменить позицию 🖍", "📁 Удалить все позиции ❌")
-    keyboard.row("🗃 Создать категорию ➕", "🗃 Изменить категорию 🖍", "🗃 Удалить все категории ❌")
-    keyboard.row("🔙 Главное меню")
+    keyboard.row(
+        rkb("📁 Создать позицию ➕"), rkb("🗃 Создать категорию ➕"),
+    ).row(
+        rkb("📁 Изменить позицию 🖍"), rkb("🗃 Изменить категорию 🖍")
+    ).row(
+        rkb("🔙 Главное меню"), rkb("🎁 Добавить товары ➕"), rkb("❌ Удаление")
+    )
 
-    return keyboard
-
-
-# Завершение загрузки товаров
-finish_load_rep = ReplyKeyboardMarkup(resize_keyboard=True)
-finish_load_rep.row("📥 Закончить загрузку товаров")
+    return keyboard.as_markup(resize_keyboard=True)

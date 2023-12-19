@@ -1,141 +1,141 @@
 # - *- coding: utf- 8 - *-
 import asyncio
 import json
+from datetime import datetime
 from typing import Union
 
-from aiogram import Dispatcher
-from bs4 import BeautifulSoup
+from aiogram import Bot
+from aiogram.types import FSInputFile
 
-from tgbot.data.config import get_admins, BOT_VERSION, BOT_DESCRIPTION, PATH_DATABASE
-from tgbot.data.loader import bot
-from tgbot.keyboards.reply_main import menu_frep
-from tgbot.services.api_session import AsyncSession
-from tgbot.services.api_sqlite import (get_settingsx, update_settingsx, get_userx, get_purchasesx, get_all_positionsx,
-                                       get_all_categoriesx, get_all_purchasesx, get_all_refillx,
-                                       get_all_usersx, get_all_itemsx,
-                                       get_itemsx, get_positionx, get_categoryx)
-from tgbot.utils.const_functions import get_unix, convert_day, get_date, ded
+from tgbot.data.config import get_admins, BOT_VERSION, PATH_DATABASE, get_desc
+from tgbot.database.db_category import Categoryx
+from tgbot.database.db_item import Itemx
+from tgbot.database.db_position import Positionx, PositionModel
+from tgbot.database.db_settings import Settingsx
+from tgbot.database.db_users import Userx
+from tgbot.utils.const_functions import get_unix, get_date, ded, send_admins
+from tgbot.utils.misc.bot_models import ARS
+from tgbot.utils.text_functions import get_statistics
 
 
 # Уведомление и проверка обновления при запуске бота
-async def startup_notify(dp: Dispatcher, rSession: AsyncSession):
+async def startup_notify(bot: Bot, arSession: ARS):
     if len(get_admins()) >= 1:
         await send_admins(
+            bot,
             ded(f"""
                 <b>✅ Бот был успешно запущен</b>
                 ➖➖➖➖➖➖➖➖➖➖
-                {BOT_DESCRIPTION}
+                {get_desc()}
                 ➖➖➖➖➖➖➖➖➖➖
                 <code>❗ Данное сообщение видят только администраторы бота.</code>
             """),
-            markup="default",
         )
-        await check_update(rSession)
+
+        await check_update(bot, arSession)
 
 
-# Рассылка сообщения всем администраторам
-async def send_admins(message, markup=None, not_me=0):
-    for admin in get_admins():
-        if markup == "default": markup = menu_frep(admin)
+# Автоматическая очистка ежедневной статистики после 00:00:15
+async def update_profit_day(bot: Bot):
+    await send_admins(bot, get_statistics())
 
-        try:
-            if str(admin) != str(not_me):
-                await bot.send_message(admin, message, reply_markup=markup, disable_web_page_preview=True)
-        except:
-            pass
+    Settingsx.update(misc_profit_day=get_unix())
 
 
-# Автоматическая очистка ежедневной статистики после 00:00
-async def update_profit_day():
-    await send_admins(get_statistics())
-
-    update_settingsx(misc_profit_day=get_unix())
-
-
-# Автоматическая очистка еженедельной статистики в понедельник 00:01
+# Автоматическая очистка еженедельной статистики в понедельник 00:00:10
 async def update_profit_week():
-    update_settingsx(misc_profit_week=get_unix())
+    Settingsx.update(misc_profit_week=get_unix())
+
+
+# Автоматическое обновление счётчика каждый месяц первого числа в 00:00:05
+async def update_profit_month():
+    Settingsx.update(misc_profit_month=get_unix())
+
+
+# Проверка на перенесение БД из старого бота в нового или указание токена нового бота
+async def check_bot_username(bot: Bot):
+    get_login = Settingsx.get()
+    get_bot = await bot.get_me()
+
+    if get_bot.username != get_login.misc_bot:
+        Settingsx.update(misc_bot=get_bot.username)
 
 
 # Автобэкапы БД для админов
-async def autobackup_admin():
+async def autobackup_admin(bot: Bot):
     for admin in get_admins():
-        with open(PATH_DATABASE, "rb") as document:
-            try:
-                await bot.send_document(
-                    admin,
-                    document,
-                    caption=f"<b>📦 AUTOBACKUP</b>\n"
-                            f"🕰 <code>{get_date()}</code>",
-                )
-            except:
-                pass
+        try:
+            await bot.send_document(
+                admin,
+                FSInputFile(PATH_DATABASE),
+                caption=f"<b>📦 #BACKUP | <code>{get_date(full=False)}</code></b>",
+                disable_notification=True,
+            )
+        except:
+            ...
 
 
 # Автоматическая проверка обновления каждые 24 часа
-async def check_update(rSession: AsyncSession):
-    session = await rSession.get_session()
+async def check_update(bot: Bot, arSession: ARS):
+    session = await arSession.get_session()
 
     try:
-        response = await session.get("https://sites.google.com/view/check-update-autoshop/main-page", ssl=False)
-        soup_parse = BeautifulSoup(await response.read(), "html.parser")
-        get_bot_update = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^^^")
+        response = await session.get("https://djimbo.dev/autoshop_update.json", ssl=False)
+        response_data = json.loads((await response.read()).decode())
 
-        if float(get_bot_update[0]) > float(BOT_VERSION):
-            if "*****" in get_bot_update[2]:
-                get_bot_update[2] = get_bot_update[2].replace("*****", "\n")
-
+        if float(response_data['version']) > float(BOT_VERSION):
             await send_admins(
-                f"<b>❇ Вышло обновление: <a href='{get_bot_update[1]}'>Скачать</a></b>\n"
-                f"➖➖➖➖➖➖➖➖➖➖\n"
-                f"{get_bot_update[2]}\n"
-                f"➖➖➖➖➖➖➖➖➖➖\n"
-                f"<code>❗ Данное сообщение видят только администраторы бота.</code>",
+                bot,
+                ded(f"""
+                    <b>❇️ Вышло обновление: <a href='{response_data['download']}'>Скачать</a></b>
+                    ➖➖➖➖➖➖➖➖➖➖
+                    {response_data['text']}
+                    ➖➖➖➖➖➖➖➖➖➖
+                    <code>❗ Данное сообщение видят только администраторы бота.</code>
+                """),
             )
     except Exception as ex:
         print(f"myError check update: {ex}")
 
 
-# Расссылка админам об критических ошибках и обновлениях
-async def check_mail(rSession: AsyncSession):
-    session = await rSession.get_session()
+# Расссылка админам о критических ошибках и обновлениях
+async def check_mail(bot: Bot, arSession: ARS):
+    session = await arSession.get_session()
 
     try:
-        response = await session.get("https://sites.google.com/view/check-mail-autoshop/main-page", ssl=False)
-        soup_parse = BeautifulSoup(await response.read(), "html.parser")
-        response = soup_parse.select("p[class$='CDt4Ke zfr3Q']")[0].text.split("^^^^^")
+        response = await session.get("https://djimbo.dev/autoshop_mail.json", ssl=False)
+        response_data = json.loads((await response.read()).decode())
 
-        if response[0] == "True":
-            if "*****" in response[1]:
-                response[1] = response[1].replace("*****", "\n")
-
+        if response_data['status']:
             await send_admins(
-                f"{response[1]}\n"
-                f"➖➖➖➖➖➖➖➖➖➖\n"
-                f"<code>❗ Данное сообщение видят только администраторы бота.</code>",
+                bot,
+                ded(f"""
+                    {response_data['text']}
+                    ➖➖➖➖➖➖➖➖➖➖
+                    <code>❗ Данное сообщение видят только администраторы бота.</code>
+                """),
             )
     except Exception as ex:
         print(f"myError check mail: {ex}")
 
 
-# Получение faq
-def get_faq(user_id: Union[int, str], send_message: str) -> str:
-    get_user = get_userx(user_id=user_id)
+# Вставка тэгов юзера в текст
+def insert_tags(user_id: Union[int, str], text: str) -> str:
+    get_user = Userx.get(user_id=user_id)
 
-    if "{user_id}" in send_message:
-        send_message = send_message.replace("{user_id}", f"<b>{get_user['user_id']}</b>")
-    if "{username}" in send_message:
-        send_message = send_message.replace("{username}", f"<b>{get_user['user_login']}</b>")
-    if "{firstname}" in send_message:
-        send_message = send_message.replace("{firstname}", f"<b>{get_user['user_name']}</b>")
+    if "{user_id}" in text:
+        text = text.replace("{user_id}", f"<b>{get_user.user_id}</b>")
+    if "{username}" in text:
+        text = text.replace("{username}", f"<b>{get_user.user_login}</b>")
+    if "{firstname}" in text:
+        text = text.replace("{firstname}", f"<b>{get_user.user_name}</b>")
 
-    return send_message
+    return text
 
 
 # Загрузка текста на текстовый хостинг
-async def upload_text(dp, get_text) -> str:
-    rSession: AsyncSession = dp.bot['rSession']
-    session = await rSession.get_session()
+async def upload_text(arSession: ARS, text: str) -> str:
+    session = await arSession.get_session()
 
     spare_pass = False
     await asyncio.sleep(0.5)
@@ -143,7 +143,7 @@ async def upload_text(dp, get_text) -> str:
     try:
         response = await session.post(
             "http://pastie.org/pastes/create",
-            data={"language": "plaintext", "content": get_text},
+            data={'language': 'plaintext', 'content': text},
         )
 
         get_link = response.url
@@ -154,7 +154,7 @@ async def upload_text(dp, get_text) -> str:
     if spare_pass:
         response = await session.post(
             "https://www.friendpaste.com",
-            json={"language": "text", "title": "", "snippet": get_text},
+            json={'language': 'text', 'title': '', 'snippet': text},
         )
 
         get_link = json.loads((await response.read()).decode())['url']
@@ -163,12 +163,12 @@ async def upload_text(dp, get_text) -> str:
 
 
 # Загрузка изображения на хостинг телеграфа
-async def upload_photo(rSession: AsyncSession, this_photo):
-    session = await rSession.get_session()
+async def upload_photo(arSession: ARS, this_photo) -> str:
+    session = await arSession.get_session()
 
     send_data = {
-        "name": "file",
-        "value": this_photo,
+        'name': 'file',
+        'value': this_photo,
     }
 
     async with session.post("https://telegra.ph/upload", data=send_data, ssl=False) as response:
@@ -177,175 +177,68 @@ async def upload_photo(rSession: AsyncSession, this_photo):
     return "http://telegra.ph" + img_src[0]['src']
 
 
-# Проверка на перенесение БД из старого бота в нового или указание токена нового бота
-async def check_bot_data():
-    get_login = get_settingsx()['misc_bot']
-    get_bot = await bot.get_me()
+# Наличие товаров
+def get_items_available() -> list[str]:
+    get_categories = Categoryx.get_all()
+    save_items = []
 
-    if get_login not in [get_bot.username, "None"]:
-        update_settingsx(misc_bot=get_bot.username)
+    for category in get_categories:
+        get_positions = Positionx.gets(category_id=category.category_id)
 
+        if len(get_positions) >= 1:
+            cache_items = [f'<b>➖➖➖ {category.category_name} ➖➖➖</b>']
 
-# Получить информацию о позиции для админа
-def get_position_admin(position_id) -> tuple[str, Union[None, str]]:
-    get_settings = get_settingsx()
-    get_items = get_itemsx(position_id=position_id)
-    get_position = get_positionx(position_id=position_id)
-    get_purchases = get_purchasesx(purchase_position_id=position_id)
-    get_category = get_categoryx(category_id=get_position['category_id'])
+            for position in get_positions:
+                if len(cache_items) < 30:
+                    get_items = Itemx.gets(position_id=position.position_id)
 
-    show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0
-    show_profit_count_all, show_profit_count_day, show_profit_count_week = 0, 0, 0
-    text_description = "<code>Отсутствует ❌</code>"
-    photo_text = "<code>Отсутствует ❌</code>"
-    get_photo = None
+                    if len(get_items) >= 1:
+                        cache_items.append(
+                            f"{position.position_name} | {position.position_price}₽ | В наличии {len(get_items)} шт",
+                        )
+                else:
+                    save_items.append("\n".join(cache_items))
+                    cache_items = [f'<b>➖➖➖ {category.category_name} ➖➖➖</b>']
 
-    if len(get_position['position_photo']) >= 5:
-        photo_text = "<code>Присутствует ✅</code>"
-        get_photo = get_position['position_photo']
+            if len(cache_items) > 1:
+                save_items.append("\n".join(cache_items))
 
-    if get_position['position_description'] != "0":
-        text_description = f"\n{get_position['position_description']}"
-
-    for purchase in get_purchases:
-        show_profit_amount_all += purchase['purchase_price']
-        show_profit_count_all += purchase['purchase_count']
-
-        if purchase['purchase_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_profit_amount_day += purchase['purchase_price']
-            show_profit_count_day += purchase['purchase_count']
-        if purchase['purchase_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_profit_amount_week += purchase['purchase_price']
-            show_profit_count_week += purchase['purchase_count']
-
-    get_message = ded(f"""
-        <b>📁 Позиция: <code>{get_position['position_name']}</code></b>
-        ➖➖➖➖➖➖➖➖➖➖
-        🗃 Категория: <code>{get_category['category_name']}</code>
-        💰 Стоимость: <code>{get_position['position_price']}₽</code>
-        📦 Количество: <code>{len(get_items)}шт</code>
-        📸 Изображение: {photo_text}
-        📜 Описание: {text_description}
-        
-        💸 Продаж за День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
-        💸 Продаж за Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
-        💸 Продаж за Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
-    """)
-
-    return get_message, get_photo
+    return save_items
 
 
-# Открытие своего профиля
-def open_profile_user(user_id: Union[int, str]) -> str:
-    get_purchases = get_purchasesx(user_id=user_id)
-    get_user = get_userx(user_id=user_id)
+# Получение позиций с товарами
+def get_positions_items(category_id: Union[str, int]) -> list[PositionModel]:
+    get_settings = Settingsx.get()
 
-    how_days = int(get_unix() - get_user['user_unix']) // 60 // 60 // 24
-    count_items = sum([items['purchase_count'] for items in get_purchases])
+    get_positions = Positionx.gets(category_id=category_id)
 
-    return ded(f"""
-        <b>👤 Ваш профиль:</b>
-        ➖➖➖➖➖➖➖➖➖➖
-        🆔 ID: <code>{get_user['user_id']}</code>
-        💰 Баланс: <code>{get_user['user_balance']}₽</code>
-        🎁 Куплено товаров: <code>{count_items}шт</code>
-        🕰 Регистрация: <code>{get_user['user_date'].split(' ')[0]} ({convert_day(how_days)})</code>
-    """)
+    save_positions = []
 
+    if get_settings.misc_item_hide == "True":
+        for position in get_positions:
+            get_items = Itemx.gets(position_id=position.position_id)
 
-# Открытие профиля при поиске
-def open_profile_admin(user_id: Union[int, str]) -> str:
-    get_purchases = get_purchasesx(user_id=user_id)
-    get_user = get_userx(user_id=user_id)
+            if len(get_items) >= 1:
+                save_positions.append(position)
+    else:
+        save_positions = get_positions
 
-    how_days = int(get_unix() - get_user['user_unix']) // 60 // 60 // 24
-    count_items = sum([items['purchase_count'] for items in get_purchases])
-
-    return ded(f"""
-        <b>👤 Профиль пользователя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a></b>
-        ➖➖➖➖➖➖➖➖➖➖
-        🆔 ID: <code>{get_user['user_id']}</code>
-        👤 Логин: <b>@{get_user['user_login']}</b>
-        Ⓜ Имя: <a href='tg://user?id={get_user['user_id']}'>{get_user['user_name']}</a>
-        🕰 Регистрация: <code>{get_user['user_date']} ({convert_day(how_days)})</code>
-        
-        💰 Баланс: <code>{get_user['user_balance']}₽</code>
-        💰 Всего пополнено: <code>{get_user['user_refill']}₽</code>
-        🎁 Куплено товаров: <code>{count_items}шт</code>
-    """)
+    return save_positions
 
 
-# Статистика бота
-def get_statistics() -> str:
-    show_refill_amount_all, show_refill_amount_day, show_refill_amount_week = 0, 0, 0
-    show_refill_count_all, show_refill_count_day, show_refill_count_week = 0, 0, 0
-    show_profit_amount_all, show_profit_amount_day, show_profit_amount_week = 0, 0, 0
-    show_profit_count_all, show_profit_count_day, show_profit_count_week = 0, 0, 0
-    show_users_all, show_users_day, show_users_week, show_users_money = 0, 0, 0, 0
+# Автонастройка UNIX времени в БД
+async def autosettings_unix():
+    now_day = datetime.now().day
+    now_week = datetime.now().weekday()
+    now_month = datetime.now().month
+    now_year = datetime.now().year
 
-    get_categories = get_all_categoriesx()
-    get_positions = get_all_positionsx()
-    get_purchases = get_all_purchasesx()
-    get_refill = get_all_refillx()
-    get_settings = get_settingsx()
-    get_items = get_all_itemsx()
-    get_users = get_all_usersx()
+    unix_day = int(datetime.strptime(f"{now_day}.{now_month}.{now_year} 0:0:0", "%d.%m.%Y %H:%M:%S").timestamp())
+    unix_week = unix_day - (now_week * 86400)
+    unix_month = int(datetime.strptime(f"1.{now_month}.{now_year} 0:0:0", "%d.%m.%Y %H:%M:%S").timestamp())
 
-    for purchase in get_purchases:
-        show_profit_amount_all += purchase['purchase_price']
-        show_profit_count_all += purchase['purchase_count']
-
-        if purchase['purchase_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_profit_amount_day += purchase['purchase_price']
-            show_profit_count_day += purchase['purchase_count']
-        if purchase['purchase_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_profit_amount_week += purchase['purchase_price']
-            show_profit_count_week += purchase['purchase_count']
-
-    for refill in get_refill:
-        show_refill_amount_all += refill['refill_amount']
-        show_refill_count_all += 1
-
-        if refill['refill_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_refill_amount_day += refill['refill_amount']
-            show_refill_count_day += 1
-        if refill['refill_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_refill_amount_week += refill['refill_amount']
-            show_refill_count_week += 1
-
-    for user in get_users:
-        show_users_money += user['user_balance']
-        show_users_all += 1
-
-        if user['user_unix'] - get_settings['misc_profit_day'] >= 0:
-            show_users_day += 1
-        if user['user_unix'] - get_settings['misc_profit_week'] >= 0:
-            show_users_week += 1
-
-    return ded(f"""
-        <b>📊 СТАТИСТИКА БОТА</b>
-        ➖➖➖➖➖➖➖➖➖➖
-        <b>👤 Пользователи</b>
-        ┣ Юзеров за День: <code>{show_users_day}</code>
-        ┣ Юзеров за Неделю: <code>{show_users_week}</code>
-        ┗ Юзеров за Всё время: <code>{show_users_all}</code>
-    
-        <b>💰 Средства</b>
-        ┣‒ Продажи (кол-во, сумма)
-        ┣ За День: <code>{show_profit_count_day}шт</code> - <code>{show_profit_amount_day}₽</code>
-        ┣ За Неделю: <code>{show_profit_count_week}шт</code> - <code>{show_profit_amount_week}₽</code>
-        ┣ За Всё время: <code>{show_profit_count_all}шт</code> - <code>{show_profit_amount_all}₽</code>
-        ┃
-        ┣‒ Пополнения (кол-во, сумма)
-        ┣ За День: <code>{show_refill_count_day}шт</code> - <code>{show_refill_amount_day}₽</code>
-        ┣ За Неделю: <code>{show_refill_count_week}шт</code> - <code>{show_refill_amount_week}₽</code>
-        ┣ За Всё время: <code>{show_refill_count_all}шт</code> - <code>{show_refill_amount_all}₽</code>
-        ┃
-        ┣‒ Прочее
-        ┗ Средств в системе: <code>{show_users_money}₽</code>
-    
-        <b>🎁 Товары</b>
-        ┣ Товаров: <code>{len(get_items)}шт</code>
-        ┣ Позиций: <code>{len(get_positions)}шт</code>
-        ┗ Категорий: <code>{len(get_categories)}шт</code>
-   """)
+    Settingsx.update(
+        misc_profit_day=unix_day,
+        misc_profit_week=unix_week,
+        misc_profit_month=unix_month,
+    )

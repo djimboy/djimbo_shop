@@ -1,9 +1,11 @@
 # - *- coding: utf- 8 - *-
-import logging as bot_logger
+import logging
 
 import colorlog
 
 from tgbot.data.config import PATH_LOGS
+
+bot_logger = logging
 
 # Формат логгирования
 log_formatter_file = bot_logger.Formatter("%(levelname)s | %(asctime)s | %(filename)s:%(lineno)d | %(message)s")
@@ -20,7 +22,7 @@ file_handler.setLevel(bot_logger.INFO)
 # Логгирование в консоль
 console_handler = bot_logger.StreamHandler()
 console_handler.setFormatter(log_formatter_console)
-console_handler.setLevel(bot_logger.CRITICAL)
+console_handler.setLevel(bot_logger.INFO)
 
 # Подключение настроек логгирования
 bot_logger.basicConfig(

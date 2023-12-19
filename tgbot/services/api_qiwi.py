@@ -1,14 +1,14 @@
 # - *- coding: utf- 8 - *-
 import json
-import time
+from typing import Union
 
+from aiogram import Bot
+from aiogram.types import Message, CallbackQuery
 from aiohttp import ClientConnectorCertificateError
 
-from tgbot.keyboards.inline_main import close_inl
-from tgbot.services.api_qiwip2p import QiwiAPIp2p
-from tgbot.services.api_session import AsyncSession
-from tgbot.services.api_sqlite import update_paymentx, get_paymentx
-from tgbot.utils.const_functions import ded
+from tgbot.database.db_payments import Paymentsx
+from tgbot.utils.const_functions import ded, send_errors, gen_id
+from tgbot.utils.misc.bot_models import ARS
 from tgbot.utils.misc_functions import send_admins
 
 
@@ -16,363 +16,265 @@ from tgbot.utils.misc_functions import send_admins
 class QiwiAPI:
     def __init__(
             self,
-            dp,
-            login=None,
-            token=None,
-            secret=None,
-            pass_add=False,
-            pass_check=False,
-            pass_user=False,
+            bot: Bot,
+            arSession: ARS,
+            update: Union[Message, CallbackQuery] = None,
+            login: str = None,
+            token: str = None,
+            skipping_error: bool = False,
     ):
         if login is not None:
             self.login = login
             self.token = token
-            self.secret = secret
         else:
-            self.login = get_paymentx()['qiwi_login']
-            self.token = get_paymentx()['qiwi_token']
-            self.secret = get_paymentx()['qiwi_secret']
+            get_payment = Paymentsx.get()
+
+            self.login = get_payment.qiwi_login
+            self.token = get_payment.qiwi_token
 
         self.headers = {
             'authorization': f'Bearer {self.token}',
         }
 
-        self.base_url = "https://edge.qiwi.com/{}/{}/persons/{}/{}"
-        self.nickname = get_paymentx()['qiwi_nickname']
-        self.pass_check = pass_check
-        self.pass_user = pass_user
-        self.pass_add = pass_add
-        self.dp = dp
+        self.bot = bot
+        self.arSession = arSession
+        self.update = update
+        self.skipping_error = skipping_error
 
-    # Рассылка админам о нерабочем киви
-    @staticmethod
-    async def error_wallet():
-        await send_admins("<b>🥝 Qiwi кошелёк недоступен ❌</b>\n"
-                          "❗ Как можно быстрее его замените")
+    # Рассылка админам о нерабочем кошельке
+    async def error_wallet_admin(self, error_code: str = "Unknown"):
+        if not self.skipping_error:
+            await send_admins(
+                self.bot,
+                f"<b>🥝 QIWI недоступен. Как можно быстрее его замените</b>\n"
+                f"❗️ Error: <code>{error_code}</code>"
+            )
 
-    # Обязательная проверка перед каждым запросом
-    async def pre_checker(self) -> bool:
-        if self.login != "None":
-            if self.pass_add:
-                status, response = await self.check_account()
-            else:
-                status, response, code = await self.check_logpass()
-
-            if self.pass_add:
-                if status:
-                    update_paymentx(
-                        qiwi_login=self.login,
-                        qiwi_token=self.token,
-                        qiwi_secret=self.secret
-                    )
-
-                await self.dp.edit_text(response)
-            elif self.pass_check:
-                if status:
-                    if self.secret == "None":
-                        text_secret = "Отсутствует"
-                    else:
-                        text_secret = self.secret
-
-                    status_limit = await self.check_limits()
-
-                    if status_limit:
-                        await self.dp.answer(
-                            f"<b>🥝 Qiwi кошелёк полностью функционирует ✅</b>\n"
-                            f"◾ Номер: <code>{self.login}</code>\n"
-                            f"◾ Токен: <code>{self.token}</code>\n"
-                            f"◾ Приватный ключ: <code>{text_secret}</code>",
-                            reply_markup=close_inl,
-                        )
-                    else:
-                        await self.dp.answer(
-                            f"<b>🥝 Qiwi кошелёк полностью функционирует ✅</b>\n"
-                            f"◾ Номер: <code>{self.login}</code>\n"
-                            f"◾ Токен: <code>{self.token}</code>\n"
-                            f"◾ Приватный ключ: <code>{text_secret}</code>\n"
-                            f"❗ На аккаунте имеются ограничения на исходящие платежи.",
-                            reply_markup=close_inl,
-                        )
-                else:
-                    await self.error_wallet()
-            elif self.pass_user:
-                if not status:
-                    await self.dp.edit_text(
-                        "<b>❗ Извиняемся за доставленные неудобства, пополнение временно недоступно.\n"
-                        "⌛ Попробуйте чуть позже.</b>")
-                    await self.error_wallet()
-                    return False
-            elif not status:
-                if not self.pass_add:
-                    await self.error_wallet()
-                    return False
-            return True
-        else:
-            if self.pass_user:
-                await self.dp.edit_text(
+    # Уведомление пользователям о неполадках с пополнением
+    async def error_wallet_user(self):
+        if self.update is not None and not self.skipping_error:
+            if isinstance(self.update, Message):
+                await self.update.edit_text(
                     "<b>❗ Извиняемся за доставленные неудобства, пополнение временно недоступно.\n"
-                    "⌛ Попробуйте чуть позже.</b>")
-            await self.error_wallet()
-            return False
+                    "⌛ Попробуйте чуть позже.</b>"
+                )
+            elif isinstance(self.update, CallbackQuery):
+                await self.update.answer(
+                    "❗ Извиняемся за доставленные неудобства, пополнение временно недоступно.\n"
+                    "⌛ Попробуйте чуть позже."
+                )
+            else:
+                await send_errors(self.bot, 4934355)
 
     # Проверка баланса
-    async def balance(self):
-        response = await self.pre_checker()
-        if response:
-            status, response, code = await self._request(
-                "funding-sources",
-                "v2",
-                "accounts",
-            )
+    async def balance(self) -> str:
+        url = f"https://edge.qiwi.com/funding-sources/v2/persons/{self.login}/accounts"
 
+        status, response, code = await self._request("GET", url)
+
+        if status:
             save_balance = []
+
             for balance in response['accounts']:
                 if "qw_wallet_usd" == balance['alias']:
-                    save_balance.append(f"🇺🇸 Долларов: <code>{balance['balance']['amount']}$</code>")
+                    save_balance.append(f"🇺🇸 Баланс в Долларах: <code>{balance['balance']['amount']}$</code>")
 
                 if "qw_wallet_rub" == balance['alias']:
-                    save_balance.append(f"🇷🇺 Рублей: <code>{balance['balance']['amount']}₽</code>")
+                    save_balance.append(f"🇷🇺 Баланс в Рублях: <code>{balance['balance']['amount']}₽</code>")
 
                 if "qw_wallet_eur" == balance['alias']:
-                    save_balance.append(f"🇪🇺 Евро: <code>{balance['balance']['amount']}€</code>")
+                    save_balance.append(f"🇪🇺 Баланс в Евро: <code>{balance['balance']['amount']}€</code>")
 
                 if "qw_wallet_kzt" == balance['alias']:
-                    save_balance.append(f"🇰🇿 Тенге: <code>{balance['balance']['amount']}₸</code>")
+                    save_balance.append(f"🇰🇿 Баланс в Тенге: <code>{balance['balance']['amount']}₸</code>")
 
             save_balance = "\n".join(save_balance)
-            await self.dp.answer(
-                f"<b>🥝 Баланс кошелька <code>{self.login}</code> составляет:</b>\n"
-                f"{save_balance}",
-                reply_markup=close_inl,
-            )
 
-    # Получение никнейма аккаунта
-    async def get_nickname(self):
-        response = await self.pre_checker()
-        if response:
-            status, response, code = await self._request(
-                "qw-nicknames",
-                "v1",
-                "nickname",
-            )
-
-            if response['nickname'] is None:
-                return False, "❗ На аккаунте отсутствует QIWI Никнейм. Установите его в настройках своего кошелька."
-            else:
-                return True, response['nickname']
-
-        return False, ""
+            return ded(f"""
+                <b>🥝 Баланс кошелька QIWI</b>
+                ➖➖➖➖➖➖➖➖➖➖
+                ▪️ Кошелёк: <code>{self.login}</code>
+                {save_balance}
+            """)
+        else:
+            return ded(f"""
+                <b>🥝 Не удалось получить баланс QIWI кошелька ❌</b>
+                ❗️ Error 4377125: <code>{response}</code>
+            """)
 
     # Проверка лимитов у аккаунта
-    async def check_limits(self):
-        status_limit, response_limit, code_limit = await self._request(
-            "person-profile",
-            "v1",
-            f"status/restrictions",
-            without=True,
-        )
+    async def check_limits(self) -> bool:
+        url = f"https://edge.qiwi.com/person-profile/v1/persons/{self.login}/status/restrictions"
 
-        if len(response_limit) == 0:
-            return True
-        else:
+        status, response, code, = await self._request("GET", url)
+
+        if response is not None and len(response) == 0:
             return False
-
-    # Проверка аккаунта (логпаса и п2п)
-    async def check_account(self):
-        status_history, response_history, code_history = await self.check_logpass()
-        status_balance, response_balance, code_balance = await self._request(
-            "funding-sources",
-            "v2",
-            "accounts"
-        )
-
-        status_limit = await self.check_limits()
-
-        if status_history and status_balance:
-            if self.secret != "None":
-                status_secret = await self.check_secret()
-                if status_secret:
-                    return True, "<b>🥝 QIWI кошелёк был успешно изменён ✅</b>"
-                else:
-                    return_message = ded(f"""
-                        <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
-                        ▶ Код ошибки: <code>Неверный приватный ключ</code>
-                        ❕ Указывайте ПРИВАТНЫЙ КЛЮЧ, а не публичный.
-                        Приватный ключ заканчивается на =
-                    """)
-            else:
-                if status_limit:
-                    return True, "<b>🥝 QIWI кошелёк был успешно изменён ✅</b>"
-                else:
-                    return True, "<b>🥝 QIWI кошелёк был успешно изменён ✅</b>\n" \
-                                 "❗ На аккаунте имеются ограничения на исходящие платежи."
         else:
-            if 400 in [code_history, code_balance]:
+            return True
+
+    # Проверка кошелька
+    async def check(self) -> tuple[bool, str]:
+        url = "https://edge.qiwi.com/person-profile/v1/profile/current"
+
+        status, response, code = await self._request("GET", url)
+
+        if status:
+            status_limit = await self.check_limits()
+
+            # Наличие лимитов
+            if status_limit:
+                text_limit = "Присутствуют"
+            else:
+                text_limit = "Отсутствуют"
+
+            # Уровень идентификации
+            for account in response['contractInfo']['identificationInfo']:
+                if account['bankAlias'] == "QIWI":
+                    if account['identificationLevel'] == "ANONYMOUS":
+                        text_identification = "Без идентификации"
+                    elif account['identificationLevel'] == "SIMPLE":
+                        text_identification = "Упрощенная идентификация"
+                    elif account['identificationLevel'] == "VERIFIED":
+                        text_identification = "Упрощенная идентификация"
+                    elif account['identificationLevel'] == "FULL":
+                        text_identification = "Полная идентификации"
+                    else:
+                        text_identification = account['identificationLevel']
+
+            # СМС оповещения
+            if response['contractInfo']['smsNotification']['enabled']:
+                text_notification = "Включены"
+            else:
+                text_notification = "Отключены"
+
+            return True, ded(f"""
+                <b>🥝 QIWI кошелёк полностью функционирует ✅</b>
+                ➖➖➖➖➖➖➖➖➖➖
+                ▪️ Кошелёк: <code>{self.login}</code>
+                ▪️ Токен: <code>{self.token}</code>
+                ▪️ Лимиты: <code>{text_limit}</code>
+                ▪️ Идентификация: <code>{text_identification}</code>
+                ▪️ СМС оповещения: <code>{text_notification}</code>
+                ▪️ Почта: <code>{response['authInfo']['boundEmail']}</code>
+                ▪️ Регистрация аккаунта: <code>{response['authInfo']['registrationDate']}</code>
+            """)
+        else:
+            if code == 400:
+                return_message = "Номер телефона указан в неверном формате"
+            elif code == 401:
+                return_message = "Неверный токен или истек срок действия токена API"
+            elif code == 403:
+                return_message = "Нет прав на данный запрос (недостаточно разрешений у токена API)"
+            elif code == "CERTIFICATE_VERIFY_FAILED":
                 return_message = ded(f"""
-                    <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
-                    ▶ Код ошибки: <code>Номер телефона указан в неверном формате</code>
-                """)
-            elif 401 in [code_history, code_balance]:
-                return_message = ded(f"""
-                    <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
-                    ▶ Код ошибки: <code>Неверный токен или истек срок действия токена API</code>
-                """)
-            elif 403 in [code_history, code_balance]:
-                return_message = ded(f"""
-                    <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
-                    ▶ <code>Ошибка: Нет прав на данный запрос (недостаточно разрешений у токена API)</code>
-                """)
-            elif "CERTIFICATE_VERIFY_FAILED" == code_history:
-                return_message = ded(f"""
-                    <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>
-                    ▶ Код ошибки: <code>CERTIFICATE_VERIFY_FAILED certificate verify failed: self signed certificate in certificate chain</code>
-                                 ❗ Ваш сервер/дедик/устройство блокирует запросы к QIWI. Отключите антивирус или другие блокирующие ПО.
+                    CERTIFICATE_VERIFY_FAILED certificate verify failed: self signed certificate in certificate chain
+                    Ваш сервер/дедик/устройство блокируют запросы к QIWI. Отключите антивирус или другие блокирующие ПО.
                 """)
             else:
-                return_message = ded(f"""
-                    <b>🥝 Введённые QIWI данные не прошли проверку ❌</b>\n
-                    ▶ Код ошибки: <code>{code_history}/{code_balance}</code>
-                """)
+                return_message = code
+
+        return_message = ded(f"""
+            <b>🥝 QIWI данные не прошли проверку ❌</b>
+            ▶️ Код ошибки: <code>{return_message}</code>
+        """)
 
         return False, return_message
 
-    # Проверка логпаса киви
-    async def check_logpass(self):
-        status, response, code = await self._request(
-            "payment-history",
-            "v2",
-            "payments",
-            {"rows": 1, "operation": "IN"},
-        )
+    # Изменение аккаунта
+    async def edit(self) -> tuple[bool, str]:
+        status, response = await self.check()
 
         if status:
-            if "data" in response:
-                return True, response, code
-            else:
-                return False, None, code
-        else:
-            return False, None, code
+            status_limit = await self.check_limits()
 
-    # Проверка п2п ключа
-    async def check_secret(self):
-        try:
-            qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
-            bill_id, bill_url = await qiwi_p2p.bill(3, lifetime=1)
-            status = await qiwi_p2p.reject(bill_id=bill_id)
-            return True
-        except:
-            return False
+            if status_limit:
+                text_limit = "❗️ На аккаунте имеются ограничения"
+            else:
+                text_limit = "❕️ Аккаунт не имеет никаких ограничений"
+
+            return True, ded(f"""
+                <b>🥝 QIWI кошелёк был успешно изменён ✅</b>
+                {text_limit}
+            """)
+        else:
+            return False, ""
 
     # Генерация платежа
-    async def bill(self, get_amount, get_way):
-        response = await self.pre_checker()
-        if response:
-            bill_receipt = str(int(time.time() * 100))
+    async def bill(self, pay_amount: float) -> tuple[str, str, int]:
+        bill_receipt = gen_id()
 
-            if get_way == "Form":
-                qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
-                bill_id, bill_url = await qiwi_p2p.bill(get_amount, bill_id=bill_receipt, lifetime=60)
+        bill_url = f"https://qiwi.com/payment/form/99?extra%5B%27account%27%5D={self.login}&amountInteger={pay_amount}&amountFraction=0&extra%5B%27comment%27%5D={bill_receipt}&currency=643&blocked%5B0%5D=sum&blocked%5B1%5D=comment&blocked%5B2%5D=account"
 
-                bill_message = ded(f"""
-                    <b>💰 Пополнение баланса</b>
-                    ➖➖➖➖➖➖➖➖➖➖
-                    🥝 Для пополнения баланса, нажмите на кнопку ниже 
-                    <code>Перейти к оплате</code> и оплатите выставленный вам счёт
-                    ❗ У вас имеется 60 минут на оплату счета.
-                    💰 Сумма пополнения: <code>{get_amount}₽</code>
-                    ➖➖➖➖➖➖➖➖➖➖
-                    🔄 После оплаты, нажмите на <code>Проверить оплату</code>
-               """)
-            elif get_way == "Number":
-                bill_url = f"https://qiwi.com/payment/form/99?extra%5B%27account%27%5D={self.login}&amountInteger={get_amount}&amountFraction=0&extra%5B%27comment%27%5D={bill_receipt}&currency=643&blocked%5B0%5D=sum&blocked%5B1%5D=comment&blocked%5B2%5D=account"
+        bill_message = ded(f"""
+            <b>💰 Пополнение баланса</b>
+            ➖➖➖➖➖➖➖➖➖➖
+            ▪️ Для пополнения баланса, нажмите на кнопку ниже 
+            <code>Перейти к оплате</code> и оплатите выставленный вам счёт
+            ▪️ QIWI кошелёк: <code>{self.login}</code>
+            ▪️ Комментарий: <code>{bill_receipt}</code>
+            ▪️ Сумма пополнения: <code>{pay_amount}₽</code>
+            ➖➖➖➖➖➖➖➖➖➖
+            ❗️ После оплаты, нажмите на <code>Проверить оплату</code>
+        """)
 
-                bill_message = ded(f"""
-                    <b>💰 Пополнение баланса</b>
-                    ➖➖➖➖➖➖➖➖➖➖
-                    🥝 Для пополнения баланса, нажмите на кнопку ниже 
-                    <code>Перейти к оплате</code> и оплатите выставленный вам счёт
-                    📞 QIWI кошелёк: <code>{self.login}</code>
-                    🏷 Комментарий: <code>{bill_receipt}</code>
-                    💰 Сумма пополнения: <code>{get_amount}₽</code>
-                    ➖➖➖➖➖➖➖➖➖➖
-                    🔄 После оплаты, нажмите на <code>Проверить оплату</code>
-                """)
-            elif get_way == "Nickname":
-                bill_url = f"https://qiwi.com/payment/form/99999?amountInteger={get_amount}&amountFraction=0&currency=643&extra%5B%27comment%27%5D={bill_receipt}&extra%5B%27account%27%5D={self.nickname}&blocked%5B0%5D=comment&blocked%5B1%5D=account&blocked%5B2%5D=sum&0%5Bextra%5B%27accountType%27%5D%5D=nickname"
+        return bill_message, bill_url, bill_receipt
 
-                bill_message = ded(f"""
-                <b>💰 Пополнение баланса</b>
-                ➖➖➖➖➖➖➖➖➖➖
-                🥝 Для пополнения баланса, нажмите на кнопку ниже 
-                <code>Перейти к оплате</code> и оплатите выставленный вам счёт
-                ❗ Не забудьте указать <u>КОММЕНТАРИЙ</u> к платежу
-                Ⓜ QIWI Никнейм: <code>{self.nickname}</code>
-                🏷 Комментарий: <code>{bill_receipt}</code>
-                💰 Сумма пополнения: <code>{get_amount}₽</code>
-                ➖➖➖➖➖➖➖➖➖➖
-                🔄 После оплаты, нажмите на <code>Проверить оплату</code>
-                """)
+    # Проверка платежа
+    async def bill_check(self, receipt: Union[str, int]) -> tuple[int, float]:
+        url = f"https://edge.qiwi.com/payment-history/v2/persons/{self.login[1:]}/payments"
 
-            return bill_message, bill_url, bill_receipt
+        parameters = {
+            'rows': 50,
+        }
 
-        return False, False, False
+        status, response, code = await self._request("GET", url, parameters)
 
-    # Проверка платежа по форме
-    async def check_form(self, receipt):
-        qiwi_p2p = QiwiAPIp2p(self.dp, self.secret)
-        bill_status, bill_amount = await qiwi_p2p.check(receipt)
+        pay_status = 1
+        pay_amount = 0
 
-        return bill_status, bill_amount
-
-    # Проверка платежа по переводу
-    async def check_send(self, receipt):
-        response = await self.pre_checker()
-        if response:
-            status, response, code = await self._request(
-                "payment-history",
-                "v2",
-                "payments",
-                {"rows": 30, "operation": "IN"},
-            )
-
-            pay_status = False
-            pay_amount = 0
+        if status:
+            pay_status = 2
 
             for check_pay in response['data']:
                 if str(receipt) == str(check_pay['comment']):
                     if "643" == str(check_pay['sum']['currency']):
-                        pay_status = True
                         pay_amount = int(float(check_pay['sum']['amount']))
+                        pay_status = 0
                     else:
-                        return_message = 1
+                        pay_status = 3
+
                     break
 
-            if pay_status:
-                return_message = 3
-            else:
-                return_message = 2
+        return pay_status, pay_amount
 
-            return return_message, pay_amount
-
-        return 4, False
-
-    # Сам запрос
-    async def _request(self, action, version, get_way, params=None, without=False):
-        login = self.login
-
-        if without:
-            if str(login).startswith("+"):
-                login = login[1:]
-
-        url = self.base_url.format(action, version, login, get_way)
-
-        rSession: AsyncSession = self.dp.bot['rSession']
-        session = await rSession.get_session()
+    # Генерация запроса
+    async def _request(
+            self,
+            method: str,
+            url: str,
+            params: dict = None,
+    ) -> tuple[bool, any, int]:
+        session = await self.arSession.get_session()
 
         try:
             response = await session.get(url, params=params, headers=self.headers, ssl=False)
-            return True, json.loads((await response.read()).decode()), response.status
+            response_data = json.loads((await response.read()).decode())
+
+            if response.status == 200:
+                return True, response_data, 200
+            else:
+                await self.error_wallet_user()
+                await self.error_wallet_admin(f"{response.status} - {str(response_data)}")
+
+                return False, response_data, response.status
         except ClientConnectorCertificateError:
-            return False, None, "CERTIFICATE_VERIFY_FAILED"
-        except:
-            return False, None, response.status
+            await self.error_wallet_user()
+            await self.error_wallet_admin("CERTIFICATE_VERIFY_FAILED")
+
+            return False, "CERTIFICATE_VERIFY_FAILED", response.status
+        except Exception as ex:
+            await self.error_wallet_user()
+            await self.error_wallet_admin(str(ex))
+
+            return False, str(ex), response.status

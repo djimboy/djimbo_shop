@@ -1,15 +1,20 @@
 # - *- coding: utf- 8 - *-
 import configparser
 
-# Токен бота
-BOT_TOKEN = configparser.ConfigParser()
-BOT_TOKEN.read("settings.ini")
-BOT_TOKEN = BOT_TOKEN['settings']['token'].strip().replace(' ', '')
-BOT_TIMEZONE = "Europe/Moscow"  # Временная зона бота
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+BOT_CONFIG = configparser.ConfigParser()
+BOT_CONFIG.read("settings.ini")
+
+# Образы и конфиги
+BOT_TOKEN = BOT_CONFIG['settings']['bot_token'].strip().replace(' ', '')  # Токен бота
+BOT_TIMEZONE = "Europe/Moscow"  # Временная зона бота
+BOT_SCHEDULER = AsyncIOScheduler(timezone=BOT_TIMEZONE)  # Образ шедулера
+BOT_VERSION = 4.0  # Версия бота
+
+# Пути к файлам
 PATH_DATABASE = "tgbot/data/database.db"  # Путь к БД
 PATH_LOGS = "tgbot/data/logs.log"  # Путь к Логам
-BOT_VERSION = "3.4"  # Версия бота
 
 
 # Получение администраторов бота
@@ -37,11 +42,16 @@ def get_admins() -> list[int]:
     return admins
 
 
-# УДАЛИШЬ ИЛИ ИЗМЕНИШЬ ССЫЛКИ НА ДОНАТ, КАНАЛ И ТЕМУ БОТА - КАСТРИРУЮ БЛЯТЬ <3
-BOT_DESCRIPTION = f"""
-<b>⚜ Bot Version: <code>{BOT_VERSION}</code>
-🔗 Topic Link: <a href='https://lolz.guru/threads/1888814'>Click me</a>
-♻ Bot created by @djimbox
-🍩 Donate to the author: <a href='https://qiwi.com/n/DJIMBO'>Click me</a>
-🤖 Bot channel [NEWS | UPDATES]: <a href='https://t.me/DJIMBO_SHOP'>Click me</a></b>
-""".strip()
+# Получение описания
+def get_desc() -> str:
+    from tgbot.utils.const_functions import ded
+
+    # УДАЛИШЬ ИЛИ ИЗМЕНИШЬ ССЫЛКИ НА ДОНАТ, КАНАЛ И ТЕМУ БОТА - КАСТРИРУЮ НАХУЙ <3
+
+    return ded(f"""
+        <b>♻️ Bot Version: <code>{BOT_VERSION}</code>
+        👑 Bot created by @djimbox
+        🍩 Donate to the author: <a href='https://yoomoney.ru/to/410012580032553'>Click me</a>
+        🤖 Bot channel [NEWS | UPDATES]: <a href='https://t.me/DJIMBO_SHOP'>Click me</a>
+        🔗 Topic Link: <a href='https://lolz.guru/threads/1888814'>Click me</a></b>
+    """).strip()
