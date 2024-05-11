@@ -1,4 +1,5 @@
 # - *- coding: utf- 8 - *-
+import random
 import time
 import uuid
 from datetime import datetime
@@ -163,11 +164,12 @@ def convert_day(day: int) -> str:
 
 
 # Генерация уникального айди
-def gen_id() -> int:
+def gen_id(len_id: int = 16) -> int:
     mac_address = uuid.getnode()
-    time_unix = int(str(time.time_ns())[:16])
+    time_unix = int(str(time.time_ns())[:len_id])
+    random_int = int(''.join(random.choices('0123456789', k=len_id)))
 
-    return mac_address + time_unix
+    return mac_address + time_unix + random_int
 
 
 # Конвертация unix в дату и даты в unix
@@ -200,7 +202,7 @@ def convert_date(from_time, full=True, second=True) -> Union[str, int]:
             else:
                 x_year, x_month, x_day = cache_date[2], cache_date[1], cache_date[0]
 
-            x_hour, x_minute, x_second = cache_time[0], cache_time[2], cache_time[2]
+            x_hour, x_minute, x_second = cache_time[0], cache_time[1], cache_time[2]
 
             from_time = f"{x_day}.{x_month}.{x_year} {x_hour}:{x_minute}:{x_second}"
         else:
@@ -221,9 +223,21 @@ def convert_date(from_time, full=True, second=True) -> Union[str, int]:
     return to_time
 
 
+# Проверка на булевый тип
+def is_bool(value: Union[bool, str, int]) -> bool:
+    value = str(value).lower()
+
+    if value in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif value in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f"invalid truth value {value}")
+
+
 ##################################### ЧИСЛА ####################################
 # Преобразование длинных вещественных чисел в читаемый вид
-def snum(amount, remains=0) -> str:
+def snum(amount: float, remains=0) -> str:
     format_str = "{:." + str(remains) + "f}"
     str_amount = format_str.format(float(amount))
 
@@ -243,7 +257,7 @@ def snum(amount, remains=0) -> str:
 
 
 # Конвертация числа в вещественное
-def to_number(get_number, remains=2) -> Union[int, float]:
+def to_number(get_number: Union[str, int, float], remains: int = 2) -> Union[int, float]:
     if "," in str(get_number):
         get_number = str(get_number).replace(",", ".")
 
@@ -259,7 +273,7 @@ def to_number(get_number, remains=2) -> Union[int, float]:
 
         get_number = round(float(get_number), remains)
 
-    str_number = snum(get_number)
+    str_number = snum(get_number, remains)
     if "." in str_number:
         if str_number.split(".")[1] == "0":
             get_number = int(get_number)
@@ -272,7 +286,7 @@ def to_number(get_number, remains=2) -> Union[int, float]:
 
 
 # Проверка числа на вещественное
-def is_number(get_number) -> bool:
+def is_number(get_number: Union[str, int, float]) -> bool:
     if str(get_number).isdigit():
         return True
     else:

@@ -11,20 +11,20 @@ from tgbot.utils.const_functions import ded, get_unix
 
 # Модель таблицы
 class PurchasesModel(BaseModel):
-    increment: int
-    user_id: int
-    user_balance_before: float
-    user_balance_after: float
-    purchase_receipt: Union[str, int]
-    purchase_data: str
-    purchase_count: int
-    purchase_price: float
-    purchase_price_one: float
-    purchase_position_id: int
-    purchase_position_name: str
-    purchase_category_id: int
-    purchase_category_name: str
-    purchase_unix: int
+    increment: int  # Инкремент
+    user_id: int  # Айди покупателя
+    user_balance_before: float  # Баланс покупателя до покупки
+    user_balance_after: float  # Баланс покупателя после покупки
+    purchase_receipt: Union[str, int]  # Чек покупки
+    purchase_data: str  # Купленные данные
+    purchase_count: int  # Количество купленных позиций
+    purchase_price: float  # Сумма покупки
+    purchase_price_one: float  # Цена одной позиции
+    purchase_position_id: int  # Айди позиции
+    purchase_position_name: str  # Название позиции
+    purchase_category_id: int  # Айди категории
+    purchase_category_name: str  # Название категории
+    purchase_unix: int  # Время покупки в Unix
 
 
 # Работа с категориями

@@ -33,7 +33,7 @@ async def user_buy_category_swipe(call: CallbackQuery, bot: Bot, state: FSM, arS
 # Открытие категории с выбором позиции для покупки товара
 @router.callback_query(F.data.startswith("buy_category_open:"))
 async def user_buy_category_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     get_category = Categoryx.get(category_id=category_id)
@@ -61,7 +61,7 @@ async def user_buy_category_open(call: CallbackQuery, bot: Bot, state: FSM, arSe
 # Страницы выбора позиции для покупки товара
 @router.callback_query(F.data.startswith("buy_position_swipe:"))
 async def user_buy_position_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     get_category = Categoryx.get(category_id=category_id)
@@ -76,7 +76,7 @@ async def user_buy_position_swipe(call: CallbackQuery, bot: Bot, state: FSM, arS
 # Открытие позиции для покупки
 @router.callback_query(F.data.startswith("buy_position_open:"))
 async def user_buy_position_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
+    position_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await state.clear()
@@ -89,7 +89,7 @@ async def user_buy_position_open(call: CallbackQuery, bot: Bot, state: FSM, arSe
 # Выбор количества товаров для покупки
 @router.callback_query(F.data.startswith("buy_item_open:"))
 async def user_buy_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
+    position_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     get_position = Positionx.get(position_id=position_id)

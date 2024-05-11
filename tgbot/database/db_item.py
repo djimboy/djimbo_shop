@@ -11,12 +11,13 @@ from tgbot.utils.const_functions import ded, clear_list, gen_id, get_unix, clear
 
 # Модель таблицы
 class ItemModel(BaseModel):
-    user_id: int
-    category_id: int
-    position_id: int
-    item_id: int
-    item_unix: int
-    item_data: str
+    increment: int  # Инкремент
+    user_id: int  # Айди пользователя, добавившего товар
+    category_id: int  # Айди категории товара
+    position_id: int  # Айди позиции товара
+    item_id: int  # Айди товара
+    item_unix: int  # Время добавления товара в UNIX
+    item_data: str  # Данные товара
 
 
 # Работа с категориями
@@ -39,7 +40,7 @@ class Itemx:
             item_datas = clear_list(item_datas)
 
             for item_data in item_datas:
-                item_id = gen_id()
+                item_id = gen_id(20)
                 item_data = clear_html(item_data.strip())
 
                 con.execute(

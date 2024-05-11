@@ -131,7 +131,7 @@ async def prod_category_add_name_get(message: Message, bot: Bot, state: FSM, arS
 ################################################################################
 ############################### ИЗМЕНЕНИЕ КАТЕГОРИИ ############################
 # Страница выбора категорий для редактирования
-@router.callback_query(F.data.startswith("catategory_edit_swipe:"))
+@router.callback_query(F.data.startswith("category_edit_swipe:"))
 async def prod_category_edit_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     remover = int(call.data.split(":")[1])
 
@@ -144,7 +144,7 @@ async def prod_category_edit_swipe(call: CallbackQuery, bot: Bot, state: FSM, ar
 # Выбор текущей категории для редактирования
 @router.callback_query(F.data.startswith("category_edit_open:"))
 async def prod_category_edit_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await state.clear()
@@ -157,7 +157,7 @@ async def prod_category_edit_open(call: CallbackQuery, bot: Bot, state: FSM, arS
 # Изменение названия категории
 @router.callback_query(F.data.startswith("category_edit_name:"))
 async def prod_category_edit_name(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await state.update_data(here_category_id=category_id)
@@ -194,7 +194,7 @@ async def prod_category_edit_name_get(message: Message, bot: Bot, state: FSM, ar
 # Окно с уточнением удалить категорию
 @router.callback_query(F.data.startswith("category_edit_delete:"))
 async def prod_category_edit_delete(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await call.message.edit_text(
@@ -206,7 +206,7 @@ async def prod_category_edit_delete(call: CallbackQuery, bot: Bot, state: FSM, a
 # Отмена удаления категории
 @router.callback_query(F.data.startswith("category_edit_delete_confirm:"))
 async def prod_category_edit_delete_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     Categoryx.delete(category_id=category_id)
@@ -242,7 +242,7 @@ async def prod_position_add_swipe(call: CallbackQuery, bot: Bot, state: FSM, arS
 # Выбор категории для создания позиции
 @router.callback_query(F.data.startswith("position_add_open:"))
 async def prod_position_add_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
 
     await state.update_data(here_category_id=category_id)
     await state.set_state("here_position_name")
@@ -373,7 +373,7 @@ async def prod_position_edit_category_swipe(call: CallbackQuery, bot: Bot, state
 # Выбор категории с нужной позицией
 @router.callback_query(F.data.startswith("position_edit_category_open:"))
 async def prod_position_edit_category_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
 
     get_category = Categoryx.get(category_id=category_id)
     get_positions = Positionx.gets(category_id=category_id)
@@ -390,7 +390,7 @@ async def prod_position_edit_category_open(call: CallbackQuery, bot: Bot, state:
 # Перемещение по страницам позиций для редактирования позиции
 @router.callback_query(F.data.startswith("position_edit_swipe:"))
 async def prod_position_edit_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await del_message(call.message)
@@ -404,8 +404,8 @@ async def prod_position_edit_swipe(call: CallbackQuery, bot: Bot, state: FSM, ar
 # Выбор позиции для редактирования
 @router.callback_query(F.data.startswith("position_edit_open:"))
 async def prod_position_edit_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await state.clear()
@@ -418,8 +418,8 @@ async def prod_position_edit_open(call: CallbackQuery, bot: Bot, state: FSM, arS
 # Изменение названия позиции
 @router.callback_query(F.data.startswith("position_edit_name:"))
 async def prod_position_edit_name(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await state.update_data(here_position_id=position_id)
@@ -460,8 +460,8 @@ async def prod_position_edit_name_get(message: Message, bot: Bot, state: FSM, ar
 # Изменение цены позиции
 @router.callback_query(F.data.startswith("position_edit_price:"))
 async def prod_position_edit_price(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await state.update_data(here_position_id=position_id)
@@ -489,14 +489,14 @@ async def prod_position_edit_price_get(message: Message, bot: Bot, state: FSM, a
     if not is_number(message.text):
         await message.answer(
             "<b>❌ Данные были введены неверно.</b>\n"
-            "📁 Введите цену для позиции",
+            "📁 Введите новую цену для позиции",
             reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
         )
 
     if to_number(message.text) > 10_000_000 or to_number(message.text) < 0:
         await message.answer(
             "<b>❌ Цена не может быть меньше 0₽ или больше 10 000 000₽.</b>\n"
-            "📁 Введите цену для позиции",
+            "📁 Введите новую цену для позиции",
             reply_markup=position_edit_cancel_finl(position_id, category_id, remover),
         )
 
@@ -509,8 +509,8 @@ async def prod_position_edit_price_get(message: Message, bot: Bot, state: FSM, a
 # Изменение описания позиции
 @router.callback_query(F.data.startswith("position_edit_desc:"))
 async def prod_position_edit_desc(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await state.update_data(here_position_id=position_id)
@@ -571,8 +571,8 @@ async def prod_position_edit_desc_get(message: Message, bot: Bot, state: FSM, ar
 # Изменение изображения позиции
 @router.callback_query(F.data.startswith("position_edit_photo:"))
 async def prod_position_edit_photo(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await state.update_data(here_position_id=position_id)
@@ -614,8 +614,8 @@ async def prod_position_edit_photo_get(message: Message, bot: Bot, state: FSM, a
 # Выгрузка товаров
 @router.callback_query(F.data.startswith("position_edit_items:"))
 async def prod_position_edit_items(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     get_position = Positionx.get(position_id=position_id)
@@ -638,8 +638,8 @@ async def prod_position_edit_items(call: CallbackQuery, bot: Bot, state: FSM, ar
 # Удаление позиции
 @router.callback_query(F.data.startswith("position_edit_delete:"))
 async def prod_position_edit_delete(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await del_message(call.message)
@@ -653,8 +653,8 @@ async def prod_position_edit_delete(call: CallbackQuery, bot: Bot, state: FSM, a
 # Подтверждение удаления позиции
 @router.callback_query(F.data.startswith("position_edit_delete_confirm:"))
 async def prod_position_edit_delete_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     Itemx.delete(position_id=position_id)
@@ -674,8 +674,8 @@ async def prod_position_edit_delete_confirm(call: CallbackQuery, bot: Bot, state
 # Очистка позиции
 @router.callback_query(F.data.startswith("position_edit_clear:"))
 async def prod_position_edit_clear(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     await del_message(call.message)
@@ -689,8 +689,8 @@ async def prod_position_edit_clear(call: CallbackQuery, bot: Bot, state: FSM, ar
 # Согласие очистики позиции
 @router.callback_query(F.data.startswith("position_edit_clear_confirm:"))
 async def prod_position_edit_clear_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     Itemx.delete(position_id=position_id)
@@ -705,7 +705,7 @@ async def prod_position_edit_clear_confirm(call: CallbackQuery, bot: Bot, state:
 # Перемещение по страницам категорий для добавления товаров
 @router.callback_query(F.data.startswith("item_add_category_swipe:"))
 async def prod_item_add_category_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[1])
 
     await call.message.edit_text(
@@ -717,7 +717,7 @@ async def prod_item_add_category_swipe(call: CallbackQuery, bot: Bot, state: FSM
 # Выбор категории с нужной позицией
 @router.callback_query(F.data.startswith("item_add_category_open:"))
 async def prod_item_add_category_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     get_category = Categoryx.get(category_id=category_id)
@@ -737,7 +737,7 @@ async def prod_item_add_category_open(call: CallbackQuery, bot: Bot, state: FSM,
 # Перемещение по страницам позиций для добавления товаров
 @router.callback_query(F.data.startswith("item_add_position_swipe:"))
 async def prod_item_add_position_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    category_id = call.data.split(":")[1]
+    category_id = int(call.data.split(":")[1])
     remover = int(call.data.split(":")[2])
 
     await call.message.edit_text(
@@ -749,8 +749,8 @@ async def prod_item_add_position_swipe(call: CallbackQuery, bot: Bot, state: FSM
 # Выбор позиции для добавления товаров
 @router.callback_query(F.data.startswith("item_add_position_open:"), flags={'rate': 0})
 async def prod_item_add_position_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
 
     await state.update_data(here_add_item_category_id=category_id)
     await state.update_data(here_add_item_position_id=position_id)
@@ -776,7 +776,7 @@ async def prod_item_add_position_open(call: CallbackQuery, bot: Bot, state: FSM,
 # Завершение загрузки товаров
 @router.callback_query(F.data.startswith('item_add_position_finish:'), flags={'rate': 0})
 async def prod_item_add_finish(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
+    position_id = int(call.data.split(":")[1])
 
     try:
         count_items = (await state.get_data())['here_add_item_count']
@@ -831,8 +831,8 @@ async def prod_item_add_get(message: Message, bot: Bot, state: FSM, arSession: A
 # Страницы удаления товаров
 @router.callback_query(F.data.startswith("item_delete_swipe:"))
 async def prod_item_delete_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    position_id = call.data.split(":")[1]
-    category_id = call.data.split(":")[2]
+    position_id = int(call.data.split(":")[1])
+    category_id = int(call.data.split(":")[2])
     remover = int(call.data.split(":")[3])
 
     get_items = Itemx.gets(position_id=position_id)

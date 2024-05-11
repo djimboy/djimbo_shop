@@ -16,7 +16,7 @@ from tgbot.utils.misc_functions import get_positions_items
 ################################################################################
 ################################ ПОКУПКИ ТОВАРОВ ###############################
 # Страницы категорий при покупке товара
-def prod_item_category_swipe_fp(remover) -> InlineKeyboardMarkup:
+def prod_item_category_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
@@ -93,7 +93,7 @@ def prod_item_category_swipe_fp(remover) -> InlineKeyboardMarkup:
 
 
 # Страницы позиций для покупки товаров
-def prod_item_position_swipe_fp(remover, category_id) -> InlineKeyboardMarkup:
+def prod_item_position_swipe_fp(remover: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_positions = get_positions_items(category_id)

@@ -15,7 +15,7 @@ from tgbot.utils.const_functions import ikb
 ################################################################################
 ############################## ИЗМЕНЕНИЕ КАТЕГОРИИ #############################
 # Cтраницы выбора категории для изменения
-def category_edit_swipe_fp(remover) -> InlineKeyboardMarkup:
+def category_edit_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
@@ -41,51 +41,51 @@ def category_edit_swipe_fp(remover) -> InlineKeyboardMarkup:
         if len(get_categories) > 20:
             keyboard.row(
                 ikb(f"1/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"catategory_edit_swipe:{remover + 10}"),
-                ikb("⏩", data=f"catategory_edit_swipe:{remover_page}"),
+                ikb("➡️", data=f"category_edit_swipe:{remover + 10}"),
+                ikb("⏩", data=f"category_edit_swipe:{remover_page}"),
             )
         else:
             keyboard.row(
                 ikb(f"1/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"catategory_edit_swipe:{remover + 10}")
+                ikb("➡️", data=f"category_edit_swipe:{remover + 10}")
             )
     elif remover + 10 >= len(get_categories):
         if len(get_categories) > 20:
             keyboard.row(
-                ikb("⏪", data=f"catategory_edit_swipe:0"),
-                ikb("⬅️", data=f"catategory_edit_swipe:{remover - 10}"),
+                ikb("⏪", data=f"category_edit_swipe:0"),
+                ikb("⬅️", data=f"category_edit_swipe:{remover - 10}"),
                 ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
             )
         else:
             keyboard.row(
-                ikb("⬅️", data=f"catategory_edit_swipe:{remover - 10}"),
+                ikb("⬅️", data=f"category_edit_swipe:{remover - 10}"),
                 ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="...")
             )
     else:
         if len(get_categories) > 20:
             if remover >= 20:
                 keyboard.row(
-                    ikb("⏪", data=f"catategory_edit_swipe:0"),
-                    ikb("⬅️", data=f"catategory_edit_swipe:{remover - 10}"),
+                    ikb("⏪", data=f"category_edit_swipe:0"),
+                    ikb("⬅️", data=f"category_edit_swipe:{remover - 10}"),
                     ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                    ikb("➡️", data=f"catategory_edit_swipe:{remover + 10}"),
+                    ikb("➡️", data=f"category_edit_swipe:{remover + 10}"),
                 )
             else:
                 keyboard.row(
-                    ikb("⬅️", data=f"catategory_edit_swipe:{remover - 10}"),
+                    ikb("⬅️", data=f"category_edit_swipe:{remover - 10}"),
                     ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                    ikb("➡️", data=f"catategory_edit_swipe:{remover + 10}"),
+                    ikb("➡️", data=f"category_edit_swipe:{remover + 10}"),
                 )
 
             if remover_page - 20 > remover:
                 keyboard.add(
-                    ikb("⏩", data=f"catategory_edit_swipe:{remover_page}"),
+                    ikb("⏩", data=f"category_edit_swipe:{remover_page}"),
                 )
         else:
             keyboard.row(
-                ikb("⬅️", data=f"catategory_edit_swipe:{remover - 10}"),
+                ikb("⬅️", data=f"category_edit_swipe:{remover - 10}"),
                 ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"catategory_edit_swipe:{remover + 10}"),
+                ikb("➡️", data=f"category_edit_swipe:{remover + 10}"),
             )
 
     return keyboard.as_markup()
@@ -94,7 +94,7 @@ def category_edit_swipe_fp(remover) -> InlineKeyboardMarkup:
 ################################################################################
 ################################ СОЗДАНИЕ ПОЗИЦИИ ##############################
 # Страницы выбора категории для позиции
-def position_add_swipe_fp(remover) -> InlineKeyboardMarkup:
+def position_add_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
@@ -173,7 +173,7 @@ def position_add_swipe_fp(remover) -> InlineKeyboardMarkup:
 ################################################################################
 ############################### ИЗМЕНЕНИЕ ПОЗИЦИИ ##############################
 # Cтраницы категорий для изменения позиции
-def position_edit_category_swipe_fp(remover) -> InlineKeyboardMarkup:
+def position_edit_category_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
@@ -250,7 +250,7 @@ def position_edit_category_swipe_fp(remover) -> InlineKeyboardMarkup:
 
 
 # Cтраницы выбора позиции для изменения
-def position_edit_swipe_fp(remover, category_id) -> InlineKeyboardMarkup:
+def position_edit_swipe_fp(remover: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_positions = Positionx.gets(category_id=category_id)
@@ -333,7 +333,7 @@ def position_edit_swipe_fp(remover, category_id) -> InlineKeyboardMarkup:
 ################################################################################
 ############################### ДОБАВЛЕНИЕ ТОВАРОВ #############################
 # Страницы категорий для добавления товаров
-def item_add_category_swipe_fp(remover) -> InlineKeyboardMarkup:
+def item_add_category_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
@@ -410,7 +410,7 @@ def item_add_category_swipe_fp(remover) -> InlineKeyboardMarkup:
 
 
 # Страницы позиций для добавления товаров
-def item_add_position_swipe_fp(remover, category_id) -> InlineKeyboardMarkup:
+def item_add_position_swipe_fp(remover: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_positions = Positionx.gets(category_id=category_id)
@@ -493,7 +493,7 @@ def item_add_position_swipe_fp(remover, category_id) -> InlineKeyboardMarkup:
 ################################################################################
 ################################ УДАЛЕНИЕ ТОВАРОВ ##############################
 # Страницы товаров для удаления
-def item_delete_swipe_fp(remover, position_id, category_id) -> InlineKeyboardMarkup:
+def item_delete_swipe_fp(remover: int, position_id: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_items = Itemx.gets(position_id=position_id)

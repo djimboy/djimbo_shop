@@ -165,7 +165,7 @@ async def functions_mail_make(bot: Bot, text: str, call: CallbackQuery):
 # Обновление профиля пользователя
 @router.callback_query(F.data.startswith("admin_user_refresh:"))
 async def functions_profile_refresh(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    user_id = call.data.split(":")[1]
+    user_id = int(call.data.split(":")[1])
 
     get_user = Userx.get(user_id=user_id)
 
@@ -178,7 +178,7 @@ async def functions_profile_refresh(call: CallbackQuery, bot: Bot, state: FSM, a
 # Покупки пользователя
 @router.callback_query(F.data.startswith("admin_user_purchases:"))
 async def functions_profile_purchases(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    user_id = call.data.split(":")[1]
+    user_id = int(call.data.split(":")[1])
 
     get_user = Userx.get(user_id=user_id)
     get_purchases = Purchasesx.gets(user_id=call.from_user.id)
@@ -210,7 +210,7 @@ async def functions_profile_purchases(call: CallbackQuery, bot: Bot, state: FSM,
 # Выдача баланса пользователю
 @router.callback_query(F.data.startswith("admin_user_balance_add:"))
 async def functions_profile_balance_add(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    user_id = call.data.split(":")[1]
+    user_id = int(call.data.split(":")[1])
 
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_add")
@@ -233,7 +233,9 @@ async def functions_profile_balance_add_get(message: Message, bot: Bot, state: F
             reply_markup=profile_search_return_finl(user_id),
         )
 
-    if to_number(message.text) <= 0 or to_number(message.text) > 1_000_000_000:
+    get_amount = to_number(message.text)
+
+    if get_amount <= 0 or get_amount > 1_000_000_000:
         return await message.answer(
             "<b>❌ Сумма выдачи не может быть меньше 1 и больше 1 000 000 000</b>\n"
             "💰 Введите сумму для выдачи баланса",
@@ -245,8 +247,8 @@ async def functions_profile_balance_add_get(message: Message, bot: Bot, state: F
     get_user = Userx.get(user_id=user_id)
     Userx.update(
         user_id,
-        user_balance=round(get_user.user_balance + to_number(message.text), 2),
-        user_give=round(get_user.user_give + to_number(message.text), 2),
+        user_balance=round(get_user.user_balance + get_amount, 2),
+        user_give=round(get_user.user_give + get_amount, 2),
     )
 
     try:
@@ -259,7 +261,7 @@ async def functions_profile_balance_add_get(message: Message, bot: Bot, state: F
 
     await message.answer(
         f"👤 Пользователь: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a>\n"
-        f"💰 Баланс выдан на <code>{message.text}₽</code>"
+        f"💰 Выдача баланса. <code>{message.text}₽</code> -> <code>{round(get_user.user_give + get_amount, 2)}₽</code>"
     )
 
     get_user = Userx.get(user_id=user_id)
@@ -269,7 +271,7 @@ async def functions_profile_balance_add_get(message: Message, bot: Bot, state: F
 # Изменение баланса пользователю
 @router.callback_query(F.data.startswith("admin_user_balance_set:"))
 async def functions_profile_balance_set(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    user_id = call.data.split(":")[1]
+    user_id = int(call.data.split(":")[1])
 
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_set")
@@ -292,7 +294,9 @@ async def functions_profile_balance_set_get(message: Message, bot: Bot, state: F
             reply_markup=profile_search_return_finl(user_id),
         )
 
-    if to_number(message.text) < -1_000_000_000 or to_number(message.text) > 1_000_000_000:
+    get_amount = to_number(message.text)
+
+    if get_amount < -1_000_000_000 or get_amount > 1_000_000_000:
         return await message.answer(
             "<b>❌ Сумма изменения не может быть больше или меньше (-)1 000 000 000</b>\n"
             "💰 Введите сумму для изменения баланса",
@@ -303,20 +307,20 @@ async def functions_profile_balance_set_get(message: Message, bot: Bot, state: F
 
     get_user = Userx.get(user_id=user_id)
 
-    if to_number(message.text) > get_user.user_balance:
-        user_give = get_user.user_give + to_number(message.text)
+    if get_amount > get_user.user_balance:
+        user_give = get_user.user_give + get_amount
     else:
         user_give = get_user.user_give
 
     Userx.update(
         user_id,
-        user_balance=to_number(message.text),
+        user_balance=get_amount,
         user_give=user_give,
     )
 
     await message.answer(
         f"👤 Пользователь: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a>\n"
-        f"💰 Баланс изменён на <code>{message.text}₽</code>"
+        f"💰 Выдача баланса. <code>{message.text}₽</code> -> <code>{get_amount}₽</code>"
     )
 
     get_user = Userx.get(user_id=user_id)
@@ -326,7 +330,7 @@ async def functions_profile_balance_set_get(message: Message, bot: Bot, state: F
 # Отправка сообщения пользователю
 @router.callback_query(F.data.startswith("admin_user_message:"))
 async def functions_profile_user_message(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    user_id = call.data.split(":")[1]
+    user_id = int(call.data.split(":")[1])
 
     await state.update_data(here_profile=user_id)
     await state.set_state("here_profile_message")

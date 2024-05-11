@@ -220,14 +220,14 @@ class YoomoneyAPI:
         return bill_message, bill_link, bill_receipt
 
     # Проверка платежа
-    async def bill_check(self, receipt: Union[str, int] = None, records: int = 1) -> tuple[int, float]:
+    async def bill_check(self, bill_receipt: Union[str, int] = None, records: int = 1) -> tuple[int, float]:
         data = {
             'type': 'deposition',
             'details': 'true',
         }
 
-        if receipt is not None:
-            data['label'] = receipt
+        if bill_receipt is not None:
+            data['label'] = bill_receipt
         if records is not None:
             data['records'] = records
 

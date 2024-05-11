@@ -57,6 +57,7 @@ async def user_available(message: Message, bot: Bot, state: FSM, arSession: ARS)
     else:
         await message.answer("<b>🎁 Увы, товары в данное время отсутствуют.</b>")
 
+
 # Открытие FAQ
 @router.message(F.text.in_(('❔ FAQ', '/faq')))
 async def user_faq(message: Message, bot: Bot, state: FSM, arSession: ARS):

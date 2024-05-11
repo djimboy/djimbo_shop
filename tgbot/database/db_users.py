@@ -10,14 +10,14 @@ from tgbot.utils.const_functions import get_unix, ded
 
 # Модель таблицы
 class UserModel(BaseModel):
-    increment: int
-    user_id: int
-    user_login: str
-    user_name: str
-    user_balance: float
-    user_refill: float
-    user_give: float
-    user_unix: int
+    increment: int  # Инкремент
+    user_id: int  # Айди пользователя
+    user_login: str  # Юзернейм пользователя
+    user_name: str  # Имя пользователя
+    user_balance: float  # Баланс пользователя
+    user_refill: float  # Сумма пополнений пользователя
+    user_give: float  # Сумма выданных средств пользователю
+    user_unix: int  # Время регистрации пользователя в UNIX
 
 
 # Работа с юзером

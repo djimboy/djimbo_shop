@@ -43,7 +43,7 @@ def create_dbx():
         con.row_factory = dict_factory
 
         ############################################################
-        # Создание таблицы с хранением - пользователей
+        # Создание таблицы с хранением - Пользователей
         if len(con.execute("PRAGMA table_info(storage_users)").fetchall()) == 8:
             print("DB was found(1/8)")
         else:
@@ -63,7 +63,7 @@ def create_dbx():
             )
             print("DB was not found(1/8) | Creating...")
 
-        # Создание таблицы с хранением - настроек
+        # Создание таблицы с хранением - Настроек
         if len(con.execute("PRAGMA table_info(storage_settings)").fetchall()) == 10:
             print("DB was found(2/8)")
         else:
@@ -116,7 +116,7 @@ def create_dbx():
             print("DB was not found(2/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - данных платежных систем
+        # Создание таблицы с хранением - Данных платежных систем
         if len(con.execute("PRAGMA table_info(storage_payment)").fetchall()) == 5:
             print("DB was found(3/8)")
         else:
@@ -154,7 +154,7 @@ def create_dbx():
             print("DB was not found(3/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - пополнений пользователей
+        # Создание таблицы с хранением - Пополнений пользователей
         if len(con.execute("PRAGMA table_info(storage_refill)").fetchall()) == 7:
             print("DB was found(4/8)")
         else:
@@ -174,7 +174,7 @@ def create_dbx():
             print("DB was not found(4/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - категорий
+        # Создание таблицы с хранением - Категорий
         if len(con.execute("PRAGMA table_info(storage_category)").fetchall()) == 4:
             print("DB was found(5/8)")
         else:
@@ -191,7 +191,7 @@ def create_dbx():
             print("DB was not found(5/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - позиций
+        # Создание таблицы с хранением - Позиций
         if len(con.execute("PRAGMA table_info(storage_position)").fetchall()) == 8:
             print("DB was found(6/8)")
         else:
@@ -212,7 +212,7 @@ def create_dbx():
             print("DB was not found(6/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - товаров
+        # Создание таблицы с хранением - Товаров
         if len(con.execute("PRAGMA table_info(storage_item)").fetchall()) == 7:
             print("DB was found(7/8)")
         else:
@@ -232,7 +232,7 @@ def create_dbx():
             print("DB was not found(7/8) | Creating...")
 
         ############################################################
-        # Создание таблицы с хранением - покупок
+        # Создание таблицы с хранением - Покупок
         if len(con.execute("PRAGMA table_info(storage_purchases)").fetchall()) == 14:
             print("DB was found(8/8)")
         else:

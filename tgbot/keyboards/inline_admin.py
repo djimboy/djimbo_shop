@@ -33,7 +33,7 @@ def mail_confirm_finl() -> InlineKeyboardMarkup:
 
 
 # Поиск профиля пользователя
-def profile_search_finl(user_id) -> InlineKeyboardMarkup:
+def profile_search_finl(user_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -50,7 +50,7 @@ def profile_search_finl(user_id) -> InlineKeyboardMarkup:
 
 
 # Возвращение к профилю пользователя
-def profile_search_return_finl(user_id) -> InlineKeyboardMarkup:
+def profile_search_return_finl(user_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(

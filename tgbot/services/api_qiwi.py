@@ -221,7 +221,7 @@ class QiwiAPI:
         return bill_message, bill_url, bill_receipt
 
     # Проверка платежа
-    async def bill_check(self, receipt: Union[str, int]) -> tuple[int, float]:
+    async def bill_check(self, bill_receipt: Union[str, int]) -> tuple[int, float]:
         url = f"https://edge.qiwi.com/payment-history/v2/persons/{self.login[1:]}/payments"
 
         parameters = {
@@ -237,7 +237,7 @@ class QiwiAPI:
             pay_status = 2
 
             for check_pay in response['data']:
-                if str(receipt) == str(check_pay['comment']):
+                if str(bill_receipt) == str(check_pay['comment']):
                     if "643" == str(check_pay['sum']['currency']):
                         pay_amount = int(float(check_pay['sum']['amount']))
                         pay_status = 0

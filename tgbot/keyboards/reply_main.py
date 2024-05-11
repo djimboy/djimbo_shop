@@ -7,13 +7,13 @@ from tgbot.utils.const_functions import rkb
 
 
 # Кнопки главного меню
-def menu_frep(user_id) -> ReplyKeyboardMarkup:
+def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardBuilder()
 
     keyboard.row(
         rkb("🎁 Купить"), rkb("👤 Профиль"), rkb("🧮 Наличие товаров"),
     ).row(
-        rkb("☎️ Поддержка"), rkb("❔ FAQ")
+        rkb("☎️ Поддержка"), rkb("❔ FAQ"),
     )
 
     if user_id in get_admins():
@@ -33,7 +33,7 @@ def payments_frep() -> ReplyKeyboardMarkup:
     keyboard.row(
         rkb("🔮 ЮMoney"), rkb("🥝 QIWI"),
     ).row(
-        rkb("🔙 Главное меню"), rkb("🖲 Способы пополнений")
+        rkb("🔙 Главное меню"), rkb("🖲 Способы пополнений"),
     )
 
     return keyboard.as_markup(resize_keyboard=True)
@@ -46,7 +46,7 @@ def functions_frep() -> ReplyKeyboardMarkup:
     keyboard.row(
         rkb("🔍 Поиск"), rkb("📢 Рассылка"),
     ).row(
-        rkb("🔙 Главное меню")
+        rkb("🔙 Главное меню"),
     )
 
     return keyboard.as_markup(resize_keyboard=True)
@@ -59,7 +59,7 @@ def settings_frep() -> ReplyKeyboardMarkup:
     keyboard.row(
         rkb("🖍 Изменить данные"), rkb("🕹 Выключатели"),
     ).row(
-        rkb("🔙 Главное меню")
+        rkb("🔙 Главное меню"),
     )
 
     return keyboard.as_markup(resize_keyboard=True)
@@ -72,9 +72,9 @@ def items_frep() -> ReplyKeyboardMarkup:
     keyboard.row(
         rkb("📁 Создать позицию ➕"), rkb("🗃 Создать категорию ➕"),
     ).row(
-        rkb("📁 Изменить позицию 🖍"), rkb("🗃 Изменить категорию 🖍")
+        rkb("📁 Изменить позицию 🖍"), rkb("🗃 Изменить категорию 🖍"),
     ).row(
-        rkb("🔙 Главное меню"), rkb("🎁 Добавить товары ➕"), rkb("❌ Удаление")
+        rkb("🔙 Главное меню"), rkb("🎁 Добавить товары ➕"), rkb("❌ Удаление"),
     )
 
     return keyboard.as_markup(resize_keyboard=True)

@@ -10,14 +10,14 @@ from tgbot.utils.const_functions import ded, get_unix
 
 # Модель таблицы
 class PositionModel(BaseModel):
-    increment: int
-    category_id: int
-    position_id: int
-    position_name: str
-    position_price: float
-    position_desc: str
-    position_photo: str
-    position_unix: int
+    increment: int  # Инкремент
+    category_id: int  # Айди категории позиции
+    position_id: int  # Айди позиции
+    position_name: str  # Название позиции
+    position_price: float  # Цена позиции
+    position_desc: str  # Описание позиции
+    position_photo: str  # Фото позиции
+    position_unix: int  # Время создания позиции в UNIX
 
 
 # Работа с категориями

@@ -9,11 +9,11 @@ from tgbot.database.db_helper import dict_factory, update_format
 
 # Модель таблицы
 class PaymentModel(BaseModel):
-    qiwi_login: str
-    qiwi_token: str
-    yoomoney_token: str
-    way_qiwi: str
-    way_yoomoney: str
+    qiwi_login: str  # Киви номер
+    qiwi_token: str  # Киви токен
+    yoomoney_token: str  # Юмани токен
+    way_qiwi: str  # Статус работы киви
+    way_yoomoney: str  # Статус работы юмани
 
 
 # Работа с платежными системами

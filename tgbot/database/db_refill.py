@@ -11,13 +11,13 @@ from tgbot.utils.const_functions import get_unix, ded
 
 # Модель таблицы
 class RefillModel(BaseModel):
-    increment: int
-    user_id: int
-    refill_comment: str
-    refill_amount: float
-    refill_receipt: Union[str, int]
-    refill_method: str
-    refill_unix: int
+    increment: int  # Инкремент
+    user_id: int  # Айди пользователя
+    refill_comment: str  # Комментарий пополнения
+    refill_amount: float  # Сумма пополнения
+    refill_receipt: Union[str, int]  # Чек пополнения
+    refill_method: str  # Метод пополнения
+    refill_unix: int  # Время пополнения в UNIX
 
 
 # Работа с пополнениями

@@ -17,7 +17,7 @@ async def main_missed_callback_close(call: CallbackQuery, bot: Bot, state: FSM, 
 # Колбэк с обработкой кнопки
 @router.callback_query(F.data == "...")
 async def main_missed_callback_answer(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
-    await call.answer(cache_time=60)
+    await call.answer(cache_time=30)
 
 
 # Обработка всех колбэков которые потеряли стейты после перезапуска скрипта

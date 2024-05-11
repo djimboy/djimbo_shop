@@ -10,10 +10,10 @@ from tgbot.utils.const_functions import ded, get_unix
 
 # Модель таблицы
 class CategoryModel(BaseModel):
-    increment: int
-    category_id: int
-    category_name: str
-    category_unix: int
+    increment: int  # Инкремент
+    category_id: int  # Айди категории
+    category_name: str  # Название категории
+    category_unix: int  # Время создания категории в UNIX
 
 
 # Работа с категориями

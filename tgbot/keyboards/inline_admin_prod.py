@@ -1,6 +1,4 @@
 # - *- coding: utf- 8 - *-
-from typing import Union
-
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -9,14 +7,14 @@ from tgbot.utils.const_functions import ikb
 
 ################################### КАТЕГОРИИ ##################################
 # Изменение категории
-def category_edit_open_finl(category_id, remover) -> InlineKeyboardMarkup:
+def category_edit_open_finl(category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
         ikb("▪️ Изм. Название", data=f"category_edit_name:{category_id}:{remover}"),
         ikb("▪️ Добавить позицию", data=f"position_add_open:{category_id}"),
     ).row(
-        ikb("🔙 Вернуться", data=f"catategory_edit_swipe:{remover}"),
+        ikb("🔙 Вернуться", data=f"category_edit_swipe:{remover}"),
         ikb("▪️ Удалить", data=f"category_edit_delete:{category_id}:{remover}")
     )
 
@@ -24,7 +22,7 @@ def category_edit_open_finl(category_id, remover) -> InlineKeyboardMarkup:
 
 
 # Подтверждение удаления категории
-def category_edit_delete_finl(category_id, remover) -> InlineKeyboardMarkup:
+def category_edit_delete_finl(category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -36,7 +34,7 @@ def category_edit_delete_finl(category_id, remover) -> InlineKeyboardMarkup:
 
 
 # Отмена изменения категории и возвращение
-def category_edit_cancel_finl(category_id, remover) -> InlineKeyboardMarkup:
+def category_edit_cancel_finl(category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -48,12 +46,12 @@ def category_edit_cancel_finl(category_id, remover) -> InlineKeyboardMarkup:
 
 #################################### ПОЗИЦИИ ###################################
 # Кнопки при открытии позиции для изменения
-def position_edit_open_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
+def position_edit_open_finl(position_id: int, category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
         ikb("▪️ Изм. Название", data=f"position_edit_name:{position_id}:{category_id}:{remover}"),
-        ikb("▪️ Изм. цену", data=f"position_edit_price:{position_id}:{category_id}:{remover}"),
+        ikb("▪️ Изм. Цену", data=f"position_edit_price:{position_id}:{category_id}:{remover}"),
     ).row(
         ikb("▪️ Изм. Описание", data=f"position_edit_desc:{position_id}:{category_id}:{remover}"),
         ikb("▪️ Изм. Фото", data=f"position_edit_photo:{position_id}:{category_id}:{remover}"),
@@ -74,7 +72,7 @@ def position_edit_open_finl(position_id, category_id, remover) -> InlineKeyboard
 
 
 # Подтверждение удаления позиции
-def position_edit_delete_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
+def position_edit_delete_finl(position_id: int, category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -86,7 +84,7 @@ def position_edit_delete_finl(position_id, category_id, remover) -> InlineKeyboa
 
 
 # Подтверждение очистики позиции
-def position_edit_clear_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
+def position_edit_clear_finl(position_id: int, category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -98,7 +96,7 @@ def position_edit_clear_finl(position_id, category_id, remover) -> InlineKeyboar
 
 
 # Отмена изменения позиции и возвращение
-def position_edit_cancel_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
+def position_edit_cancel_finl(position_id: int, category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -110,7 +108,7 @@ def position_edit_cancel_finl(position_id, category_id, remover) -> InlineKeyboa
 
 ##################################### ТОВАРЫ ###################################
 # Отмена изменения позиции и возвращение
-def item_add_finish_finl(position_id: Union[int, str]) -> InlineKeyboardMarkup:
+def item_add_finish_finl(position_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -121,7 +119,7 @@ def item_add_finish_finl(position_id: Union[int, str]) -> InlineKeyboardMarkup:
 
 
 # Удаление товара
-def item_delete_finl(item_id, position_id, category_id) -> InlineKeyboardMarkup:
+def item_delete_finl(item_id: int, position_id: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(

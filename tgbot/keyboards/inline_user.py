@@ -52,13 +52,13 @@ def refill_method_finl() -> Union[InlineKeyboardMarkup, None]:
 
 
 # Проверка платежа
-def refill_bill_finl(pay_link: str, pay_receipt: Union[str, int], pay_way: str) -> InlineKeyboardMarkup:
+def refill_bill_finl(pay_link: str, pay_receipt: Union[str, int], pay_method: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
         ikb("🌀 Перейти к оплате", url=pay_link),
     ).row(
-        ikb("🔄 Проверить оплату", data=f"Pay:{pay_way}:{pay_receipt}"),
+        ikb("🔄 Проверить оплату", data=f"Pay:{pay_method}:{pay_receipt}"),
     )
 
     return keyboard.as_markup()
@@ -67,7 +67,7 @@ def refill_bill_finl(pay_link: str, pay_receipt: Union[str, int], pay_way: str) 
 ################################################################################
 #################################### ТОВАРЫ ####################################
 # Открытие позиции для просмотра
-def products_open_finl(position_id, category_id, remover) -> InlineKeyboardMarkup:
+def products_open_finl(position_id: int, category_id: int, remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -80,7 +80,7 @@ def products_open_finl(position_id, category_id, remover) -> InlineKeyboardMarku
 
 
 # Подтверждение покупки товара
-def products_confirm_finl(position_id, category_id, get_count) -> InlineKeyboardMarkup:
+def products_confirm_finl(position_id: int, category_id: int, get_count: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
@@ -92,7 +92,7 @@ def products_confirm_finl(position_id, category_id, get_count) -> InlineKeyboard
 
 
 # Возврат к позиции при отмене ввода
-def products_return_finl(position_id, category_id) -> InlineKeyboardMarkup:
+def products_return_finl(position_id: int, category_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.row(

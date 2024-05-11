@@ -6,6 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from tgbot.database.db_settings import Settingsx
 from tgbot.database.db_users import Userx
 from tgbot.keyboards.inline_admin import turn_open_finl, settings_open_finl
+from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc_functions import send_admins, insert_tags
 
@@ -124,11 +125,13 @@ async def settings_faq_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession
 
     await state.set_state("here_settings_faq")
     await call.message.edit_text(
-        "<b>❔ Введите новый текст для FAQ</b>\n"
-        "❕ Вы можете использовать заготовленный синтаксис и HTML разметку:\n"
-        "▶️ <code>{username}</code>  - логин пользоваля\n"
-        "▶️ <code>{user_id}</code>   - айди пользователя\n"
-        "▶️ <code>{firstname}</code> - имя пользователя",
+        ded("""
+            <b>❔ Введите новый текст для FAQ</b>
+            ❕ Вы можете использовать заготовленный синтаксис и HTML разметку:
+            ▪️ <code>{username}</code>  - логин пользоваля
+            ▪️ <code>{user_id}</code>   - айди пользователя
+            ▪️ <code>{firstname}</code> - имя пользователя
+        """)
     )
 
 
