@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, Message
 from tgbot.database.db_position import Positionx
 from tgbot.database.db_purchases import Purchasesx
 from tgbot.database.db_users import Userx
-from tgbot.keyboards.inline_user import products_confirm_finl, products_return_finl
+from tgbot.keyboards.inline_user_prod import products_confirm_finl, products_return_finl
 from tgbot.keyboards.inline_user_page import *
 from tgbot.keyboards.reply_main import menu_frep
 from tgbot.utils.const_functions import split_messages, get_unix, ded, del_message, convert_date, gen_id
@@ -25,7 +25,7 @@ async def user_buy_category_swipe(call: CallbackQuery, bot: Bot, state: FSM, arS
     remover = int(call.data.split(":")[1])
 
     await call.message.edit_text(
-        "<b>🎁 Выберите нужный вам товар:</b>",
+        "<b>🎁 Выберите нужный вам товар</b>",
         reply_markup=prod_item_category_swipe_fp(remover),
     )
 

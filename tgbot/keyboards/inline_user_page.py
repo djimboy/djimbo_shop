@@ -1,11 +1,11 @@
 # - *- coding: utf- 8 - *-
-import math
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from tgbot.database.db_category import Categoryx
 from tgbot.database.db_item import Itemx
+from tgbot.keyboards.inline_helper import build_pagination_finl
 from tgbot.utils.const_functions import ikb
 from tgbot.utils.misc_functions import get_positions_items
 
@@ -20,74 +20,20 @@ def prod_item_category_swipe_fp(remover: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     get_categories = Categoryx.get_all()
-    if 10 - (len(get_categories) % 10) != 10:
-        remover_page = len(get_categories) + (10 - (len(get_categories) % 10))
-    else:
-        remover_page = len(get_categories)
 
-    if remover >= len(get_categories): remover -= 10
-
-    for count, a in enumerate(range(remover, len(get_categories))):
+    for count, select in enumerate(range(remover, len(get_categories))):
         if count < 10:
+            category = get_categories[select]
+
             keyboard.row(
                 ikb(
-                    get_categories[a].category_name,
-                    data=f"buy_category_open:{get_categories[a].category_id}:0",
+                    category.category_name,
+                    data=f"buy_category_open:{category.category_id}:0",
                 )
             )
 
-    if len(get_categories) <= 10:
-        ...
-    elif len(get_categories) > 10 and remover < 10:
-        if len(get_categories) > 20:
-            keyboard.row(
-                ikb(f"1/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_category_swipe:{remover + 10}"),
-                ikb("⏩", data=f"buy_category_swipe:{remover_page}"),
-            )
-        else:
-            keyboard.row(
-                ikb(f"1/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_category_swipe:{remover + 10}"),
-            )
-    elif remover + 10 >= len(get_categories):
-        if len(get_categories) > 20:
-            keyboard.row(
-                ikb("⏪", data=f"buy_category_swipe:0"),
-                ikb("⬅️", data=f"buy_category_swipe:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-            )
-        else:
-            keyboard.row(
-                ikb("⬅️", data=f"buy_category_swipe:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-            )
-    else:
-        if len(get_categories) > 20:
-            if remover >= 20:
-                keyboard.row(
-                    ikb("⏪", data=f"buy_category_swipe:0"),
-                    ikb("⬅️", data=f"buy_category_swipe:{remover - 10}"),
-                    ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                    ikb("➡️", data=f"buy_category_swipe:{remover + 10}"),
-                )
-            else:
-                keyboard.row(
-                    ikb("⬅️", data=f"buy_category_swipe:{remover - 10}"),
-                    ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                    ikb("➡️", data=f"buy_category_swipe:{remover + 10}"),
-                )
-
-            if remover_page - 20 > remover:
-                keyboard.add(
-                    ikb("⏩", data=f"buy_category_swipe:{remover_page}"),
-                )
-        else:
-            keyboard.row(
-                ikb("⬅️", data=f"buy_category_swipe:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_categories) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_category_swipe:{remover + 10}"),
-            )
+    buildp_kb = build_pagination_finl(get_categories, f"buy_category_swipe", remover)
+    keyboard.row(*buildp_kb)
 
     return keyboard.as_markup()
 
@@ -97,76 +43,21 @@ def prod_item_position_swipe_fp(remover: int, category_id: int) -> InlineKeyboar
     keyboard = InlineKeyboardBuilder()
 
     get_positions = get_positions_items(category_id)
-    if 10 - (len(get_positions) % 10) != 10:
-        remover_page = len(get_positions) + (10 - (len(get_positions) % 10))
-    else:
-        remover_page = len(get_positions)
 
-    if remover >= len(get_positions): remover -= 10
-
-    for count, a in enumerate(range(remover, len(get_positions))):
+    for count, select in enumerate(range(remover, len(get_positions))):
         if count < 10:
-            get_items = Itemx.gets(position_id=get_positions[a].position_id)
+            position = get_positions[select]
+            get_items = Itemx.gets(position_id=get_positions[select].position_id)
 
             keyboard.row(
                 ikb(
-                    f"{get_positions[a].position_name} | {get_positions[a].position_price}₽ | {len(get_items)} шт",
-                    data=f"buy_position_open:{get_positions[a].position_id}:{remover}",
+                    f"{position.position_name} | {position.position_price}₽ | {len(get_items)} шт",
+                    data=f"buy_position_open:{position.position_id}:{remover}",
                 )
             )
 
-    if len(get_positions) <= 10:
-        ...
-    elif len(get_positions) > 10 and remover < 10:
-        if len(get_positions) > 20:
-            keyboard.row(
-                ikb(f"1/{math.ceil(len(get_positions) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_position_swipe:{category_id}:{remover + 10}"),
-                ikb("⏩", data=f"buy_position_swipe:{category_id}:{remover_page}"),
-            )
-        else:
-            keyboard.row(
-                ikb(f"1/{math.ceil(len(get_positions) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_position_swipe:{category_id}:{remover + 10}"),
-            )
-    elif remover + 10 >= len(get_positions):
-        if len(get_positions) > 20:
-            keyboard.row(
-                ikb("⏪", data=f"buy_position_swipe:{category_id}:0"),
-                ikb("⬅️", data=f"buy_position_swipe:{category_id}:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_positions) / 10)}", data="..."),
-            )
-        else:
-            keyboard.row(
-                ikb("⬅️", data=f"buy_position_swipe:{category_id}:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_positions) / 10)}", data="..."),
-            )
-    else:
-        if len(get_positions) > 20:
-            if remover >= 20:
-                keyboard.row(
-                    ikb("⏪", data=f"buy_position_swipe:{category_id}:0"),
-                    ikb("⬅️", data=f"buy_position_swipe:{category_id}:{remover - 10}"),
-                    ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_positions) / 10)}", data="..."),
-                    ikb("➡️", data=f"buy_position_swipe:{category_id}:{remover + 10}"),
-                )
-            else:
-                keyboard.row(
-                    ikb("⬅️", data=f"buy_position_swipe:{category_id}:{remover - 10}"),
-                    ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_positions) / 10)}", data="..."),
-                    ikb("➡️", data=f"buy_position_swipe:{category_id}:{remover + 10}"),
-                )
-
-            if remover_page - 20 > remover:
-                keyboard.add(
-                    ikb("⏩", data=f"buy_position_swipe:{category_id}:{remover_page}"),
-                )
-        else:
-            keyboard.row(
-                ikb("⬅️", data=f"buy_position_swipe:{category_id}:{remover - 10}"),
-                ikb(f"{str(remover + 10)[:-1]}/{math.ceil(len(get_positions) / 10)}", data="..."),
-                ikb("➡️", data=f"buy_position_swipe:{category_id}:{remover + 10}"),
-            )
+    buildp_kb = build_pagination_finl(get_positions, f"buy_position_swipe:{category_id}", remover)
+    keyboard.row(*buildp_kb)
 
     keyboard.row(ikb("🔙 Вернуться", data=f"buy_category_swipe:0"))
 

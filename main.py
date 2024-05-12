@@ -5,6 +5,7 @@ import sys
 
 import colorama
 from aiogram import Dispatcher, Bot
+from aiogram.client.default import DefaultBotProperties
 
 from tgbot.data.config import get_admins, BOT_TOKEN, BOT_SCHEDULER
 from tgbot.database.db_helper import create_dbx
@@ -36,7 +37,12 @@ async def main():
     BOT_SCHEDULER.start()  # Запуск Шедулера
     dp = Dispatcher()  # Образ Диспетчера
     arSession = AsyncRequestSession()  # Пул асинхронной сессии запросов
-    bot = Bot(token=BOT_TOKEN, parse_mode="HTML")  # Образ Бота
+    bot = Bot(  # Образ Бота
+        token=BOT_TOKEN,
+        default=DefaultBotProperties(
+            parse_mode="HTML",
+        ),
+    )
 
     register_all_middlwares(dp)  # Регистрация всех мидлварей
     register_all_routers(dp)  # Регистрация всех роутеров
@@ -57,13 +63,14 @@ async def main():
 
         if len(get_admins()) == 0: print("***** ENTER ADMIN ID IN settings.ini *****")
 
-        await bot.delete_webhook()
-        await bot.get_updates(offset=-1)
+        await bot.delete_webhook()  # Удаление вебхуков, если они имеются
+        await bot.get_updates(offset=-1)  # Сброс пендинг апдейтов
 
+        # Запуск бота (поллинга)
         await dp.start_polling(
             bot,
-            allowed_updates=dp.resolve_used_update_types(),
             arSession=arSession,
+            allowed_updates=dp.resolve_used_update_types(),
         )
     finally:
         await arSession.close()
@@ -71,7 +78,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    create_dbx()  # Генерация БД и таблиц
+    create_dbx()  # Генерация Базы Данных и Таблиц
 
     try:
         asyncio.run(main())

@@ -15,7 +15,8 @@ from tgbot.database.db_settings import Settingsx
 from tgbot.database.db_users import Userx, UserModel
 from tgbot.keyboards.inline_admin import profile_search_finl
 from tgbot.keyboards.inline_admin_prod import position_edit_open_finl, category_edit_open_finl, item_delete_finl
-from tgbot.keyboards.inline_user import products_open_finl, user_profile_finl
+from tgbot.keyboards.inline_user import user_profile_finl
+from tgbot.keyboards.inline_user_prod import products_open_finl
 from tgbot.utils.const_functions import ded, get_unix, convert_day, convert_date
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.utils.misc.bot_models import ARS
@@ -60,7 +61,7 @@ async def position_open_user(bot: Bot, user_id: int, position_id: Union[str, int
         text_desc = ""
 
     send_text = ded(f"""
-        <b>🎁 Покупка товара:</b>
+        <b>🎁 Покупка товара</b>
         ➖➖➖➖➖➖➖➖➖➖
         ▪️ Название: <code>{get_position.position_name}</code>
         ▪️ Категория: <code>{get_category.category_name}</code>

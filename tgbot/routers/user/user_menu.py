@@ -27,7 +27,7 @@ async def user_shop(message: Message, bot: Bot, state: FSM, arSession: ARS):
 
     if len(get_categories) >= 1:
         await message.answer(
-            "<b>🎁 Выберите нужный вам товар:</b>",
+            "<b>🎁 Выберите нужный вам товар</b>",
             reply_markup=prod_item_category_swipe_fp(0),
         )
     else:

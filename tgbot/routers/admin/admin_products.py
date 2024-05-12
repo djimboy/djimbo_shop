@@ -110,7 +110,7 @@ async def prod_removes(message: Message, bot: Bot, state: FSM, arSession: ARS):
 
 
 ################################################################################
-############################### СОЗДАНИЕ КАТЕГОРИЙ #############################
+############################### СОЗДАНИЕ КАТЕГОРИИ #############################
 # Принятие названия категории для её создания
 @router.message(F.text, StateFilter('here_category_name'))
 async def prod_category_add_name_get(message: Message, bot: Bot, state: FSM, arSession: ARS):
@@ -626,7 +626,7 @@ async def prod_position_edit_items(call: CallbackQuery, bot: Bot, state: FSM, ar
         save_items = await upload_text(arSession, save_items)
 
         await call.message.answer(
-            f"<b>📥 Все товары позиции: <code>{get_position.position_name}</code>\n"
+            f"<b>🎁 Все товары позиции: <code>{get_position.position_name}</code>\n"
             f"🔗 Ссылка: <a href='{save_items}'>кликабельно</a></b>",
             reply_markup=close_finl(),
         )
@@ -681,7 +681,7 @@ async def prod_position_edit_clear(call: CallbackQuery, bot: Bot, state: FSM, ar
     await del_message(call.message)
 
     await call.message.answer(
-        "<b>📁 Вы хотите удалить все товары позиции?</b>",
+        "<b>📁 Вы хотите удалить все товары в позиции?</b>",
         reply_markup=position_edit_clear_finl(position_id, category_id, remover),
     )
 
@@ -761,7 +761,7 @@ async def prod_item_add_position_open(call: CallbackQuery, bot: Bot, state: FSM,
 
     await call.message.answer(
         ded(f"""
-            <b>📤 Отправьте данные товаров.</b>
+            <b>🎁 Отправляйте данные товаров.</b>
             ❗ Товары разделяются одной пустой строчкой. Пример:
             <code>Данные товара...
 
@@ -787,8 +787,8 @@ async def prod_item_add_finish(call: CallbackQuery, bot: Bot, state: FSM, arSess
 
     await call.message.edit_reply_markup()
     await call.message.answer(
-        "<b>📥 Загрузка товаров была успешно завершена ✅\n"
-        f"🎁 Загружено товаров: <code>{count_items}шт</code></b>",
+        "<b>🎁 Загрузка товаров была успешно завершена ✅\n"
+        f"❕ Загружено товаров: <code>{count_items}шт</code></b>",
     )
 
     await position_open_admin(bot, call.from_user.id, position_id)
@@ -821,7 +821,7 @@ async def prod_item_add_get(message: Message, bot: Bot, state: FSM, arSession: A
     )
 
     await cache_message.edit_text(
-        f"<b>📥 Товары в кол-ве <u>{count_add}шт</u> были успешно добавлены ✅</b>",
+        f"<b>🎁 Товары в кол-ве <u>{count_add}шт</u> были успешно добавлены ✅</b>",
         reply_markup=item_add_finish_finl(position_id),
     )
 
@@ -838,15 +838,15 @@ async def prod_item_delete_swipe(call: CallbackQuery, bot: Bot, state: FSM, arSe
     get_items = Itemx.gets(position_id=position_id)
     get_position = Positionx.get(position_id=position_id)
 
-    await del_message(call.message)
-
     if len(get_items) >= 1:
+        await del_message(call.message)
+
         await call.message.answer(
             "<b>🎁 Выберите товар для удаления</b>",
             reply_markup=item_delete_swipe_fp(remover, position_id, category_id),
         )
     else:
-        await call.answer(f"🎁 Товары в позиции {get_position.position_name} отсутствуют")
+        await call.answer(f"🎁 Товары в позиции {get_position.position_name} отсутствуют", True)
 
 
 # Удаление товара
