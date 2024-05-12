@@ -40,7 +40,7 @@ class Itemx:
             item_datas = clear_list(item_datas)
 
             for item_data in item_datas:
-                item_id = gen_id(20)
+                item_id = gen_id(18)
                 item_data = clear_html(item_data.strip())
 
                 con.execute(
