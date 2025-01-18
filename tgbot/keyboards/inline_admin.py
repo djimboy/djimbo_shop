@@ -87,6 +87,8 @@ def payment_yoomoney_finl() -> InlineKeyboardMarkup:
         ikb("⁠", data="..."),
     ).row(
         status_kb,
+    ).row(
+        ikb("Назад", data="inline_payment_systems")
     )
 
     return keyboard.as_markup()
@@ -118,6 +120,41 @@ def payment_cryptobot_finl() -> InlineKeyboardMarkup:
         ikb("⁠", data="..."),
     ).row(
         status_kb,
+    ).row(
+        ikb("Назад", data="inline_payment_systems")
+    )
+
+    return keyboard.as_markup()
+
+
+# Управление - Cryptocloud
+def payment_cryptocloud_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    get_payments = Paymentsx.get()
+
+    if get_payments.cryptocloud_token == "None":
+        assets_symbol = "➖"
+    else:
+        assets_symbol = "➕"
+
+    if get_payments.status_cryptocloud == "True":
+        status_kb = ikb(f"{assets_symbol} | Статус: Включено ✅", data="payment_cryptocloud_status:False")
+    else:
+        status_kb = ikb(f"{assets_symbol} | Статус: Выключено ❌", data="payment_cryptocloud_status:True")
+
+    keyboard.row(
+        ikb("Информация ♻️", data="payment_cryptocloud_check"),
+    ).row(
+        ikb("Баланс 💰", data="payment_cryptocloud_balance"),
+    ).row(
+        ikb("Изменить 🖍", data="payment_cryptocloud_edit"),
+    ).row(
+        ikb("⁠", data="..."),
+    ).row(
+        status_kb,
+    ).row(
+        ikb("Назад", data="inline_payment_systems")
     )
 
     return keyboard.as_markup()
@@ -171,6 +208,8 @@ def settings_finl() -> InlineKeyboardMarkup:
         ikb("🎁 Позиции без товаров", data="..."), hide_position_kb,
     ).row(
         ikb("🖼 Дискорд Webhook", url="https://teletype.in/@djimbox/djimboshop-discord"), discord_webhook_kb,
+    ).row(
+        ikb("Назад", data="inline_settings")
     )
 
     return keyboard.as_markup()
@@ -199,6 +238,27 @@ def settings_status_finl() -> InlineKeyboardMarkup:
         ikb("💰 Пополнения", data="..."), status_refill_kb,
     ).row(
         ikb("🎁 Покупки", data="..."), status_buy_kb,
+    ).row(
+        ikb("Назад", data="inline_settings")
+    )
+
+    return keyboard.as_markup()
+
+
+def back_to_settings() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(
+        ikb("Назал", data="inline_settings")
+    )
+
+    return keyboard.as_markup()
+
+def back_to_payment_settings() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(
+        ikb("Назад", data="inline_payment_systems")
     )
 
     return keyboard.as_markup()

@@ -4,7 +4,7 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 
 from tgbot.database import Settingsx, Userx
-from tgbot.keyboards.inline_admin import settings_status_finl, settings_finl
+from tgbot.keyboards.inline_admin import settings_status_finl, settings_finl, back_to_settings
 from tgbot.services.api_discord import DiscordDJ, DiscordAPI
 from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
@@ -14,22 +14,22 @@ router = Router(name=__name__)
 
 
 # Изменение данных
-@router.message(F.text == "🖍 Изменить данные")
-async def settings_data_edit(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_change_data")
+async def settings_data_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🖍 Изменение данных бота</b>",
         reply_markup=settings_finl(),
     )
 
 
 # Выключатели бота
-@router.message(F.text == "🕹 Выключатели")
-async def settings_status_edit(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_enablers")
+async def settings_status_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🕹 Включение и выключение основных функций</b>",
         reply_markup=settings_status_finl(),
     )
@@ -125,7 +125,8 @@ async def settings_faq_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession
             ▪️ <code>{username}</code>  - логин пользоваля
             ▪️ <code>{user_id}</code>   - айди пользователя
             ▪️ <code>{firstname}</code> - имя пользователя
-        """)
+        """),
+        reply_markup=back_to_settings()
     )
 
 
@@ -138,6 +139,7 @@ async def settings_support_edit(call: CallbackQuery, bot: Bot, state: FSM, arSes
     await call.message.edit_text(
         "<b>☎️ Отправьте юзернейм для поддержки</b>\n"
         "❕ Юзернейм пользователя/бота/канала/чата",
+        reply_markup=back_to_settings()
     )
 
 
@@ -186,7 +188,8 @@ async def settings_discord_edit(call: CallbackQuery, bot: Bot, state: FSM, arSes
             ❕ Для удаления вебхука введите <code>0</code>
             ❕ Вы можете использовать публичный вебхук, но ответственность за его использование лежит только на вас
             ▪️ Публичный вебхук: <code>{get_discord_public_webhook}</code>
-        """)
+        """),
+        reply_markup=back_to_settings()
     )
 
 
@@ -203,6 +206,7 @@ async def settings_faq_get(message: Message, bot: Bot, state: FSM, arSession: AR
         return await message.answer(
             "<b>❌ Ошибка синтаксиса HTML</b>\n"
             "❔ Введите новый текст для FAQ",
+            reply_markup=back_to_settings()
         )
 
     await state.clear()
@@ -289,5 +293,6 @@ async def settings_discord_get(message: Message, bot: Bot, state: FSM, arSession
             ❕ Для удаления вебхука введите <code>0</code>
             ❕ Вы можете использовать публичный вебхук, но ответственность за его использование лежит только на вас
             ▪️ Публичный вебхук: <code>{get_discord_public_webhook}</code>
-        """)
+        """),
+        reply_markup=back_to_settings()
     )

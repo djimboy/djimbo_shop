@@ -1,80 +1,96 @@
 # - *- coding: utf- 8 - *-
 from aiogram.types import ReplyKeyboardMarkup
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from tgbot.data.config import get_admins
-from tgbot.utils.const_functions import rkb
+from tgbot.utils.const_functions import rkb, ikb
 
 
 # Кнопки главного меню
 def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
-        rkb("🎁 Купить"), rkb("👤 Профиль"), rkb("🧮 Наличие товаров"),
+        ikb("🎁 Купить", data="inline_buy")
     ).row(
-        rkb("☎️ Поддержка"), rkb("❔ FAQ"),
+        ikb("👤 Профиль", data="inline_profile")
+    ).row(
+        ikb("🧮 Наличие товаров", data="inline_product_availability")
+    ).row(
+        ikb("☎️ Поддержка", data="inline_support")
+    ).row(
+        ikb("❔ FAQ", data="inline_faq")
     )
 
     if user_id in get_admins():
         keyboard.row(
-            rkb("🎁 Управление товарами"), rkb("📊 Статистика"),
+            ikb("🎁 Управление товарами", data="inline_goods_management")
         ).row(
-            rkb("⚙️ Настройки"), rkb("🔆 Общие функции"), rkb("🔑 Платежные системы"),
+            ikb("📊 Статистика", data="inline_stats")
+        ).row(
+            ikb("🔆 Общие функции", data="inline_general_functions")
+        ).row(
+            ikb("🔑 Платежные системы", data="inline_payment_systems")
+        ).row(
+            ikb("⚙️ Настройки", data="inline_settings")
         )
 
-    return keyboard.as_markup(resize_keyboard=True)
+    return keyboard.as_markup()
 
 
 # Кнопки платежных систем
 def payments_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
-        rkb("🔷 CryptoBot"), rkb("🔮 ЮMoney"),
+        ikb("₿ Cryptocloud", data="inline_payment_cryptocloud"), 
     ).row(
-        rkb("🔙 Главное меню"),
+        ikb("🔷 CryptoBot", data="inline_payment_cryptobot"), 
+    ).row(
+        ikb("🔮 ЮMoney", data="inline_payment_yoomoney"),
+    ).row(
+        ikb("🔙 Главное меню", data="inline_main_menu"),
     )
 
-    return keyboard.as_markup(resize_keyboard=True)
+    return keyboard.as_markup()
 
 
 # Кнопки общих функций
 def functions_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
-        rkb("🔍 Поиск"), rkb("📢 Рассылка"),
+        ikb("🔍 Поиск", data="inline_search"), ikb("📢 Рассылка", data="inline_mass_dm"),
     ).row(
-        rkb("🔙 Главное меню"),
+        ikb("🔙 Главное меню", data="inline_main_menu"),
     )
 
-    return keyboard.as_markup(resize_keyboard=True)
+    return keyboard.as_markup()
 
 
 # Кнопки настроек
 def settings_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
-        rkb("🖍 Изменить данные"), rkb("🕹 Выключатели"),
+        ikb("🖍 Изменить данные", data="inline_change_data"), ikb("🕹 Выключатели", data="inline_enablers"),
     ).row(
-        rkb("🔙 Главное меню"),
+        ikb("🔙 Главное меню", data="inline_main_menu"),
     )
 
-    return keyboard.as_markup(resize_keyboard=True)
+    return keyboard.as_markup()
 
 
 # Кнопки изменения товаров
 def items_frep() -> ReplyKeyboardMarkup:
-    keyboard = ReplyKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
 
     keyboard.row(
-        rkb("📁 Создать позицию ➕"), rkb("🗃 Создать категорию ➕"),
+        ikb("📁 Создать позицию ➕", data="inline_create_position"), ikb("🗃 Создать категорию ➕", data="inline_create_category"),
     ).row(
-        rkb("📁 Изменить позицию 🖍"), rkb("🗃 Изменить категорию 🖍"),
+        ikb("📁 Изменить позицию 🖍", data="inline_change_position"), ikb("🗃 Изменить категорию 🖍", data="inline_change_category"),
     ).row(
-        rkb("🔙 Главное меню"), rkb("🎁 Добавить товары ➕"), rkb("❌ Удаление"),
+        ikb("🔙 Главное меню", data="inline_main_menu"), ikb("🎁 Добавить товары ➕", data="inline_add_goods"), ikb("❌ Удаление", data="inline_delete_items"),
     )
 
-    return keyboard.as_markup(resize_keyboard=True)
+    return keyboard.as_markup()

@@ -9,6 +9,7 @@ from tgbot.database import Paymentsx, Refillx, Userx
 from tgbot.keyboards.inline_user import refill_bill_finl, refill_method_finl
 from tgbot.services.api_cryptobot import CryptobotAPI
 from tgbot.services.api_yoomoney import YoomoneyAPI
+from tgbot.services.api_cryptocloud import CryptocloudAPI
 from tgbot.utils.const_functions import is_number, to_number, gen_id, ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc_functions import send_admins
@@ -23,7 +24,7 @@ router = Router(name=__name__)
 async def refill_method(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     get_payment = Paymentsx.get()
 
-    if get_payment.status_cryptobot == "False" and get_payment.status_yoomoney == "False":
+    if get_payment.status_cryptobot == "False" and get_payment.status_yoomoney == "False" and get_payment.status_cryptocloud == "False":
         return await call.answer("❗️ Пополнения временно недоступны", True)
 
     await call.message.edit_text(
@@ -83,6 +84,14 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
     elif pay_method == "Yoomoney":
         bill_message, bill_link, bill_receipt = await (
             YoomoneyAPI(
+                bot=bot,
+                arSession=arSession,
+                update=cache_message
+            )
+        ).bill(pay_amount)
+    elif pay_method == "Cryptocloud":
+        bill_message, bill_link, bill_receipt = await (
+            CryptocloudAPI(
                 bot=bot,
                 arSession=arSession,
                 update=cache_message
@@ -181,6 +190,47 @@ async def refill_check_cryptobot(call: CallbackQuery, bot: Bot, state: FSM, arSe
         await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", True, cache_time=5)
 
 
+# Проверка оплаты - Cryptobot
+@router.callback_query(F.data.startswith('Pay:Cryptocloud'))
+async def refill_check_cryptocloud(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    pay_method = call.data.split(":")[1]
+    pay_comment = call.data.split(":")[2]
+
+    pay_status, pay_amount = await (
+        CryptocloudAPI(
+            bot=bot,
+            arSession=arSession,
+            update=call,
+        )
+    ).bill_check(pay_comment)
+
+    print(pay_status)
+
+    if pay_status == 0:
+        get_refill = Refillx.get(refill_comment=pay_comment)
+
+        if get_refill is None:
+            await refill_success(
+                bot=bot,
+                call=call,
+                pay_method=pay_method,
+                pay_amount=pay_amount,
+                pay_comment=pay_comment,
+            )
+        else:
+            await call.answer("❗ Ваше пополнение уже зачислено.", True, cache_time=60)
+            await call.message.edit_reply_markup()
+    elif pay_status == 1:
+        await call.answer("❗️ Не удалось проверить платёж. Попробуйте позже", True, cache_time=30)
+    elif pay_status == 2:
+        await call.answer("❗️ Оплата не была найдена. Попробуйте позже", True, cache_time=5)
+    elif pay_status == 3:
+        await call.answer("❗️ Счет был отменен", True, cache_time=5)
+        await call.message.edit_reply_markup()
+    else:
+        await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", True, cache_time=5)
+
+
 ################################################################################
 #################################### ПРОЧЕЕ ####################################
 # Зачисление средств
@@ -203,6 +253,8 @@ async def refill_success(
         text_method = "ЮMoney"
     elif pay_method == "Cryptobot":
         text_method = "CryptoBot"
+    elif pay_method == "Cryptocloud":
+        text_method = "Cryptocloud"
     else:
         text_method = f"Unknown - {pay_method}"
 

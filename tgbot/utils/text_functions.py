@@ -4,7 +4,7 @@ from typing import Union
 
 import pytz
 from aiogram import Bot
-from aiogram.types import LinkPreviewOptions
+from aiogram.types import LinkPreviewOptions, CallbackQuery
 from aiogram.utils.markdown import hide_link
 
 from tgbot.data.config import BOT_TIMEZONE
@@ -21,7 +21,7 @@ from tgbot.utils.misc.bot_models import ARS
 ################################################################################
 ################################# ПОЛЬЗОВАТЕЛЬ #################################
 # Открытие профиля пользователем
-async def open_profile_user(bot: Bot, user_id: Union[int, str]):
+async def open_profile_user(call: CallbackQuery, user_id: Union[int, str]):
     get_purchases = Purchasesx.gets(user_id=user_id)
     get_user = Userx.get(user_id=user_id)
 
@@ -38,8 +38,7 @@ async def open_profile_user(bot: Bot, user_id: Union[int, str]):
         🕰 Регистрация: <code>{convert_date(get_user.user_unix, False, False)} ({convert_day(how_days)})</code>
     """)
 
-    await bot.send_message(
-        chat_id=user_id,
+    await call.message.edit_text(
         text=send_text,
         reply_markup=user_profile_finl(),
     )

@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 
 from tgbot.data.config import BOT_VERSION, get_desc
 from tgbot.database import Purchasesx, Settingsx
-from tgbot.keyboards.inline_user import user_support_finl
+from tgbot.keyboards.inline_user import user_support_finl, back_to_main_menu_keyboard
 from tgbot.keyboards.inline_user_page import *
 from tgbot.utils.const_functions import ded, del_message, convert_date
 from tgbot.utils.misc.bot_models import FSM, ARS
@@ -18,105 +18,89 @@ router = Router(name=__name__)
 
 
 # Открытие товаров
-@router.message(F.text == "🎁 Купить")
-async def user_shop(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_buy")
+async def user_shop(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_categories = get_categories_items()
 
     if len(get_categories) >= 1:
-        await message.answer(
-            "<b>🎁 Выберите нужный вам товар</b>",
+        await call.message.edit_text(
+            "<b>🎁 Выберите нужную вам категорию</b>",
             reply_markup=prod_item_category_swipe_fp(0),
         )
     else:
-        await message.answer("<b>🎁 Увы, товары в данное время отсутствуют</b>")
+        await call.answer(
+            "Нет доступных категорий",
+            True
+        )
 
 
 # Открытие профиля
-@router.message(F.text == "👤 Профиль")
-async def user_profile(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_profile")
+async def user_profile(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await open_profile_user(bot, message.from_user.id)
+    await open_profile_user(call, call.from_user.id)
 
 
 # Проверка товаров в наличии
-@router.message(F.text == "🧮 Наличие товаров")
-async def user_available(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_product_availability")
+async def user_available(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     items_available = get_items_available()
 
     if len(items_available) >= 1:
-        await message.answer(
+        await call.message.edit_text(
             items_available[0],
             reply_markup=prod_available_swipe_fp(0, len(items_available)),
         )
     else:
-        await message.answer("<b>🎁 Увы, товары в данное время отсутствуют</b>")
+        await call.answer("🎁 Увы, товары в данное время отсутствуют", True)
 
 
 # Открытие FAQ
-@router.message(F.text.in_(('❔ FAQ', '/faq')))
-async def user_faq(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_faq")
+async def user_faq(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_settings = Settingsx.get()
 
     if get_settings.misc_faq == "None":
-        return await message.answer(
+        return await call.answer(
             ded(f"""
                 ❔ Текст FAQ не указан. Измените его в настройках бота.
-                ➖➖➖➖➖➖➖➖➖➖
-                {get_desc()}
             """),
-            disable_web_page_preview=True,
+            True
         )
 
-    await message.answer(
-        insert_tags(message.from_user.id, get_settings.misc_faq),
+    await call.message.edit_text(
+        insert_tags(call.from_user.id, get_settings.misc_faq),
         disable_web_page_preview=True,
+        reply_markup=back_to_main_menu_keyboard()
     )
 
 
 # Открытие сообщения с ссылкой на поддержку
-@router.message(F.text.in_(('☎️ Поддержка', '/support')))
-async def user_support(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_support")
+async def user_support(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_settings = Settingsx.get()
 
     if get_settings.misc_support == "None":
-        return await message.answer(
+        return await call.answer(
             ded(f"""
                 ☎️ Контакты поддержки не указаны. Измените их в настройках бота.
-                ➖➖➖➖➖➖➖➖➖➖
-                {get_desc()}
             """),
-            disable_web_page_preview=True,
+            True
         )
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>☎️ Нажмите кнопку ниже для связи с Администратором</b>",
         reply_markup=user_support_finl(get_settings.misc_support),
     )
-
-
-# Получение версии бота
-@router.message(Command(commands=['version']))
-async def admin_version(message: Message, bot: Bot, state: FSM, arSession: ARS):
-    await state.clear()
-
-    await message.answer(f"<b>❇️ Текущая версия бота: <code>{BOT_VERSION}</code></b>")
-
-
-# Получение информации о боте
-@router.message(Command(commands=['dj_desc']))
-async def admin_desc(message: Message, bot: Bot, state: FSM, arSession: ARS):
-    await state.clear()
-
-    await message.answer(get_desc(), disable_web_page_preview=True)
 
 
 ################################################################################

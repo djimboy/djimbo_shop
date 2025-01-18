@@ -4,11 +4,12 @@ import os
 import aiofiles
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, CallbackQuery
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from tgbot.data.config import PATH_LOGS, PATH_DATABASE
 from tgbot.keyboards.reply_main import payments_frep, settings_frep, functions_frep, items_frep
+from tgbot.keyboards.inline_user import back_to_main_menu_keyboard
 from tgbot.utils.const_functions import get_date
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc_functions import get_statistics
@@ -17,55 +18,58 @@ router = Router(name=__name__)
 
 
 # Платежные системы
-@router.message(F.text == "🔑 Платежные системы")
-async def admin_payments(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_payment_systems")
+async def admin_payments(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🔑 Настройка платежных системы</b>",
         reply_markup=payments_frep(),
     )
 
 
 # Настройки бота
-@router.message(F.text == "⚙️ Настройки")
-async def admin_settings(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_settings")
+async def admin_settings(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>⚙️ Основные настройки бота</b>",
         reply_markup=settings_frep(),
     )
 
 
 # Общие функции
-@router.message(F.text == "🔆 Общие функции")
-async def admin_functions(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_general_functions")
+async def admin_functions(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🔆 Общие функции бота</b>",
         reply_markup=functions_frep(),
     )
 
 
 # Управление товарами
-@router.message(F.text == "🎁 Управление товарами")
-async def admin_products(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_goods_management")
+async def admin_products(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🎁 Редактирование товаров</b>",
         reply_markup=items_frep(),
     )
 
 
 # Cтатистики бота
-@router.message(F.text == "📊 Статистика")
-async def admin_statistics(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_stats")
+async def admin_statistics(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(get_statistics())
+    await call.message.edit_text(
+        get_statistics(),
+        reply_markup=back_to_main_menu_keyboard()
+    )
 
 
 # Получение БД

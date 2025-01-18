@@ -24,84 +24,84 @@ router = Router(name=__name__)
 
 
 # Создание новой категории
-@router.message(F.text == "🗃 Создать категорию ➕")
-async def prod_category_add(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_create_category")
+async def prod_category_add(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     await state.set_state("here_category_name")
-    await message.answer("<b>🗃 Введите название для категории</b>")
+    await call.message.edit_text("<b>🗃 Введите название для категории</b>")
 
 
 # Выбор категории для редактирования
-@router.message(F.text == "🗃 Изменить категорию 🖍")
-async def prod_category_edit(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_change_category")
+async def prod_category_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_categories = Categoryx.get_all()
 
     if len(get_categories) >= 1:
-        await message.answer(
+        await call.message.edit_text(
             "<b>🗃 Выберите категорию для изменения 🖍</b>",
             reply_markup=category_edit_swipe_fp(0),
         )
     else:
-        await message.answer("<b>❌ Отсутствуют категории для изменения категорий</b>")
+        await call.answer("❌ Отсутствуют категории для изменения категорий", True)
 
 
 # Создание новой позиции
-@router.message(F.text == "📁 Создать позицию ➕")
-async def prod_position_add(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_create_position")
+async def prod_position_add(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_categories = Categoryx.get_all()
 
     if len(get_categories) >= 1:
-        await message.answer(
+        await call.message.edit_text(
             "<b>📁 Выберите категорию для позиции ➕</b>",
             reply_markup=position_add_swipe_fp(0),
         )
     else:
-        await message.answer("<b>❌ Отсутствуют категории для создания позиции</b>")
+        await call.answer("❌ Отсутствуют категории для создания позиции", True)
 
 
 # Выбор позиции для редактирования
-@router.message(F.text == "📁 Изменить позицию 🖍")
-async def prod_position_edit(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_change_position")
+async def prod_position_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_categories = Categoryx.get_all()
 
     if len(get_categories) >= 1:
-        await message.answer(
+        await call.message.edit_text(
             "<b>📁 Выберите позицию для изменения 🖍</b>",
             reply_markup=position_edit_category_swipe_fp(0),
         )
     else:
-        await message.answer("<b>❌ Отсутствуют категории для изменения позиций</b>")
+        await call.answer("❌ Отсутствуют категории для изменения позиций", True)
 
 
 # Страницы товаров для добавления
-@router.message(F.text == "🎁 Добавить товары ➕")
-async def prod_item_add(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_add_goods")
+async def prod_item_add(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     get_categories = Categoryx.get_all()
 
     if len(get_categories) >= 1:
-        await message.answer(
+        await call.message.edit_text(
             "<b>🎁 Выберите позицию для товаров ➕</b>",
             reply_markup=item_add_category_swipe_fp(0),
         )
     else:
-        await message.answer("<b>❌ Отсутствуют позиции для добавления товара</b>")
+        await call.answer("❌ Отсутствуют позиции для добавления товара", True)
 
 
 # Удаление категорий, позиций или товаров
-@router.message(F.text == "❌ Удаление")
-async def prod_removes(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_delete_items")
+async def prod_removes(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🎁 Выберите раздел который хотите удалить ❌</b>\n",
         reply_markup=products_removes_finl(),
     )

@@ -16,21 +16,21 @@ router = Router(name=__name__)
 
 
 # Поиск чеков и профилей
-@router.message(F.text == "🔍 Поиск")
-async def functions_find(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_search")
+async def functions_find(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     await state.set_state("here_find")
-    await message.answer("<b>🔍 Отправьте айди/логин пользователя или номер чека</b>")
+    await call.message.edit_text("<b>🔍 Отправьте айди/логин пользователя или номер чека</b>")
 
 
 # Рассылка
-@router.message(F.text == "📢 Рассылка")
-async def functions_mail(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_mass_dm")
+async def functions_mail(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
     await state.set_state("here_mail_message")
-    await message.answer(
+    await call.message.edit_text(
         "<b>📢 Отправьте пост для рассылки пользователям</b>\n"
         "❕ Поддерживаются посты с любыми медиафайлами",
     )

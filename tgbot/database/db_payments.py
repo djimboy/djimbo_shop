@@ -11,8 +11,11 @@ from tgbot.database.db_helper import dict_factory, update_format
 class PaymentsModel(BaseModel):
     cryptobot_token: str  # Криптобот токен
     yoomoney_token: str  # Юмани токен
+    cryptocloud_token: str  # Cryptocloud токен
+    cryptocloud_shop_id: str  # Cryptocloud shopid
     status_cryptobot: str  # Статус работы криптобота
     status_yoomoney: str  # Статус работы юмани
+    status_cryptocloud: str # Статус работу cryptocloud
 
 
 # Работа с платежными системами

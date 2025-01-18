@@ -17,6 +17,8 @@ def user_profile_finl() -> InlineKeyboardMarkup:
     keyboard.row(
         ikb("💰 Пополнить", data="user_refill"),
         ikb("🎁 Мои покупки", data="user_purchases"),
+    ).row(
+        ikb("🔙 Главное меню", data="inline_main_menu"),
     )
 
     return keyboard.as_markup()
@@ -41,6 +43,8 @@ def refill_method_finl() -> InlineKeyboardMarkup:
 
     get_payments = Paymentsx.get()
 
+    if get_payments.status_cryptocloud == "True":
+        keyboard.row(ikb("₿ Cryptocloud", data="user_refill_method:Cryptocloud"))
     if get_payments.status_cryptobot == "True":
         keyboard.row(ikb("🔷 CryptoBot", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
@@ -70,11 +74,24 @@ def refill_method_buy_finl() -> InlineKeyboardMarkup:
 
     get_payments = Paymentsx.get()
 
+    if get_payments.status_cryptocloud == "True":
+        keyboard.row(ikb("₿ Cryptocloud", data="user_refill_method:Cryptocloud"))
     if get_payments.status_cryptobot == "True":
         keyboard.row(ikb("🔷 CryptoBot", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
         keyboard.row(ikb("🔮 ЮMoney", data="user_refill_method:Yoomoney"))
 
     keyboard.row(ikb("❌ Закрыть", data="close_this"))
+
+    return keyboard.as_markup()
+
+
+# Кнопки платежных систем
+def back_to_main_menu_keyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(
+        ikb("🔙 Главное меню", data="inline_main_menu"),
+    )
 
     return keyboard.as_markup()

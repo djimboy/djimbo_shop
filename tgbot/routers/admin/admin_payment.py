@@ -4,9 +4,10 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 
 from tgbot.database import Paymentsx
-from tgbot.keyboards.inline_admin import payment_yoomoney_finl, close_finl, payment_cryptobot_finl
+from tgbot.keyboards.inline_admin import payment_yoomoney_finl, close_finl, payment_cryptobot_finl, payment_cryptocloud_finl, back_to_payment_settings
 from tgbot.services.api_cryptobot import CryptobotAPI
 from tgbot.services.api_yoomoney import YoomoneyAPI
+from tgbot.services.api_cryptocloud import CryptocloudAPI
 from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 
@@ -14,24 +15,137 @@ router = Router(name=__name__)
 
 
 # Управление - CryptoBot
-@router.message(F.text == "🔷 CryptoBot")
-async def payment_cryptobot_open(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_payment_cryptocloud")
+async def payment_cryptobot_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
+        "<b>₿ Управление - Cryptocloud</b>",
+        reply_markup=payment_cryptocloud_finl(),
+    )
+
+# Управление - CryptoBot
+@router.callback_query(F.data == "inline_payment_cryptobot")
+async def payment_cryptobot_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    await state.clear()
+
+    await call.message.edit_text(
         "<b>🔷 Управление - CryptoBot</b>",
         reply_markup=payment_cryptobot_finl(),
     )
 
 
 # Управление - ЮMoney
-@router.message(F.text == "🔮 ЮMoney")
-async def payment_yoomoney_open(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(F.data == "inline_payment_yoomoney")
+async def payment_yoomoney_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer(
+    await call.message.edit_text(
         "<b>🔮 Управление - ЮMoney</b>",
         reply_markup=payment_yoomoney_finl(),
+    )
+
+
+##################################################################################
+#################################### CRYPTOCLOUD #################################
+# Баланс - CryptoBot
+@router.callback_query(F.data == "payment_cryptocloud_balance")
+async def payment_cryptobot_balance(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    response = await CryptocloudAPI(
+        bot=bot,
+        arSession=arSession,
+        update=call,
+        skipping_error=True,
+    ).balance()
+
+    await call.message.answer(
+        response,
+        reply_markup=close_finl(),
+    )
+
+
+# Информация - CryptoBot
+@router.callback_query(F.data == "payment_cryptocloud_check")
+async def payment_cryptocloud_check(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    status, response = await CryptocloudAPI(
+        bot=bot,
+        arSession=arSession,
+        update=call,
+        skipping_error=True,
+    ).check()
+
+    await call.message.answer(
+        response,
+        reply_markup=close_finl(),
+    )
+
+# Изменение - Cryptocloud
+@router.callback_query(F.data == "payment_cryptocloud_edit")
+async def payment_cryptobot_edit(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    await state.set_state("here_cryptocloud_token")
+    await call.message.edit_text(
+        ded(f"""
+            <b>₿ Отправьте токен Cryptocloud</b>
+        """)
+    )
+
+# Выключатель - Cryptocloud
+@router.callback_query(F.data.startswith("payment_cryptocloud_status:"))
+async def payment_cryptocloud_status(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    get_status = call.data.split(":")[1]
+
+    get_payments = Paymentsx.get()
+
+    if get_status == "True" and get_payments.cryptocloud_token == "None":
+        return await call.answer("❌ Токен данной платежной системы не был добавлен", True)
+
+    Paymentsx.update(status_cryptocloud=get_status)
+
+    await call.message.edit_text(
+        "<b>₿ Управление - Cryptocloud</b>",
+        reply_markup=payment_cryptocloud_finl(),
+    )
+
+############################# ПРИНЯТИЕ CRYPTOCLOUD ###############################
+# Принятие токена Cryptocloud
+@router.message(StateFilter("here_cryptocloud_token"))
+async def payment_cryptocloud_set_token(message: Message, bot: Bot, state: FSM, arSession: ARS):
+    await state.clear()
+
+    await state.update_data(cryptocloud_token=message.text)
+
+    await state.set_state("here_cryptocloud_shop_id")
+    await message.answer("<b>₿ Отправьте Shop ID Cryptocloud</b>")
+
+
+@router.message(StateFilter("here_cryptocloud_shop_id"))
+async def payment_cryptocloud_set_shop_id(message: Message, bot: Bot, state: FSM, arSession: ARS):
+    state_data = await state.get_data()
+    cryptocloud_token = state_data.get("cryptocloud_token")
+
+    await state.clear()
+
+    await state.set_state("here_cryptocloud_shop_id")
+    cache_message = await message.answer("<b>₿ Проверка введённых Cryptocloud данных... 🔄</b>")
+
+    status, response = await CryptocloudAPI(
+        bot=bot,
+        arSession=arSession,
+        update=message,
+        skipping_error=True,
+        token=cryptocloud_token,
+        shop_id=message.text
+    ).check()
+
+    if status:
+        Paymentsx.update(cryptocloud_token=cryptocloud_token, cryptocloud_shop_id=message.text)
+        await cache_message.edit_text("<b>₿ Cryptocloud был успешно привязан ✅</b>")
+    else:
+        await cache_message.edit_text("<b>₿ Не удалось привязать Cryptocloud ❌</b>")
+
+    await message.answer(
+        "<b>₿ Управление - Cryptocloud</b>",
+        reply_markup=payment_cryptocloud_finl(),
     )
 
 

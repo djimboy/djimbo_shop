@@ -63,12 +63,12 @@ async def filter_work_callback(call: CallbackQuery, bot: Bot, state: FSM, arSess
 ################################################################################
 ################################# СТАТУС ПОКУПОК ###############################
 # Фильтр на доступность покупок - сообщение
-@router.message(IsBuy(), F.text == "🎁 Купить")
-@router.message(IsBuy(), StateFilter('here_item_count'))
-async def filter_buy_message(message: Message, bot: Bot, state: FSM, arSession: ARS):
+@router.callback_query(IsBuy(), F.data == "inline_buy")
+@router.message(IsBuy(), StateFilter('here_item_count')) #... Изучить
+async def filter_buy_message(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
 
-    await message.answer("<b>⛔ Покупки временно отключены</b>")
+    await call.message.edit_text("<b>⛔ Покупки временно отключены</b>")
 
 
 # Фильтр на доступность покупок - колбэк
@@ -111,6 +111,19 @@ async def main_start(message: Message, bot: Bot, state: FSM, arSession: ARS):
             🔸 Введите /start
         """),
         reply_markup=menu_frep(message.from_user.id),
+    )
+
+@router.callback_query(F.data == "inline_main_menu")
+async def main_callback(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    await state.clear()
+
+    await call.message.edit_text(
+        ded("""
+            🔸 Бот готов к использованию.
+            🔸 Если не появились вспомогательные кнопки
+            🔸 Введите /start
+        """),
+        reply_markup=menu_frep(call.from_user.id),
     )
 
 

@@ -32,6 +32,9 @@ def prod_item_category_swipe_fp(remover: int) -> InlineKeyboardMarkup:
 
     buildp_kb = build_pagination_finl(get_categories, f"buy_category_swipe", remover)
     keyboard.row(*buildp_kb)
+    keyboard.row(
+        ikb("🔙 Назад", data="inline_main_menu")
+    )
 
     return keyboard.as_markup()
 
@@ -94,5 +97,18 @@ def prod_available_swipe_fp(remover_now: int, remover_max: int) -> InlineKeyboar
             )
 
         keyboard.adjust(5)
+
+        keyboard.row(
+            ikb("🔙 Главное меню", data="inline_main_menu"),
+        )
+
+    return keyboard.as_markup()
+
+def back_to_main_menu_keyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(
+        ikb("🔙 Главное меню", data="inline_main_menu"),
+    )
 
     return keyboard.as_markup()
